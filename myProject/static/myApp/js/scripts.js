@@ -18,9 +18,9 @@ function getUsers() {
     });
 }
 // Call the getUsers function when the window loads
-window.onload = getUsers; 
+window.onload = getUsers;
 
-function julie(){
+function julieTest3(){
     
 }
 
