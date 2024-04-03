@@ -25,5 +25,9 @@ function julieTest3(){
 }
 
 function wntng(){
+
+}
+
+function wntng2(){
     
 }
