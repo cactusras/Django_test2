@@ -23,3 +23,7 @@ window.onload = getUsers;
 function julieTest3(){
     
 }
+
+function wntng(){
+    
+}
