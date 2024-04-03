@@ -23,3 +23,7 @@ window.onload = getUsers;
 function julie(){
     
 }
+
+function wntng(){
+    
+}
