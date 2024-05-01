@@ -31,3 +31,7 @@ function julieTest3(){
 function wntng(){
 
 }
+
+function Linyi2(){
+    
+}
