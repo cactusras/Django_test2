@@ -1,52 +1,45 @@
 from django.db import models
-
-# Create your models here.
+from datetime import timedelta
+from datetime import time
 
 class Clinic(models.Model):
-    ClinicID = models.CharField(max_length=200, primary_key=True)
-    ClinicName = models.CharField(max_length=200)
-    Address = models.CharField(max_length=200)
-    Phone = models.CharField(max_length=200)
-    Info = models.CharField(max_length=200)
+    name = models.CharField(max_length=100)
+    license_number = models.CharField(max_length=50, unique=True)
+    phone_number = models.CharField(max_length=15)
+    address = models.TextField()
+    introduction = models.TextField(blank=True, null=True)
+    photo = models.ImageField(upload_to='clinics/')
+    email = models.EmailField(unique=True)
 
     def __str__(self):
-        return self.ClinicName
+        return self.name
     
 class Doctor(models.Model):
-    License = models.CharField(max_length=200, primary_key=True)
-    Name = models.CharField(max_length=200)
-    Degree = models.CharField(max_length=200)
-    Experience = models.CharField(max_length=200)
-    Phone = models.CharField(max_length=200)
-    Time_table = models.DateTimeField()
-    Photo = models.ImageField(upload_to='doctor_photos/', default='')
-
-class Hiring(models.Model):
-    ClinicID = models.ForeignKey(
-        Clinic,
-        on_delete = models.SET_NULL,
-        null = True,
-        related_name='clinic_hiring'
-    )
-    DoctorLicense = models.ForeignKey(
-        Doctor,
-        on_delete = models.SET_NULL,
-        null = True,
-        related_name='doctor_hiring'
-    )
-    Time_table = models.DateTimeField()
+    name = models.CharField(max_length=100)
+    email = models.EmailField(unique=True)
+    phone_number = models.CharField(max_length=15)
+    photo = models.ImageField(upload_to='doctors/')
+    degree = models.CharField(max_length=100)
+   
     
+    def __str__(self):
+        return self.name
+
 class Expertise(models.Model):
-    Expertise_ID=models.AutoField(primary_key=True)
-    Treating_Time = models.TimeField()
-    Expertise_Name = models.CharField(max_length=200)
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    time = models.TimeField(default=time(hour=1))
+
+    def __str__(self):
+        return self.name
+
 
 class Doc_Expertise(models.Model):
-    Doctor_License = models.ForeignKey(
+    DocID = models.ForeignKey(
         Doctor,
         on_delete = models.SET_NULL,
         null = True,
-        related_name='doctor_license_exp'
+        related_name='doctorID_exp'
     )
     Expertise_ID = models.ForeignKey(
         Expertise,
@@ -55,87 +48,92 @@ class Doc_Expertise(models.Model):
         related_name='doctor_exp_license'
     )
 
-class Client(models.Model):
-    Client_email =  models.CharField(max_length=200, primary_key=True)
-    Gender = models.CharField(max_length=5)
-    Phone = models.CharField(max_length=200)
-    Name = models.CharField(max_length=200)
-    Occupation = models.CharField(max_length=200)
-    Birth = models.DateField()
-    Checking_Notification = models.BooleanField()
+
     
-class Waiting(models.Model):
-    Client_email = models.ForeignKey(
-        Client,
-        on_delete = models.SET_NULL,
-        null = True,
-        related_name='waiting_client'
-    )
-    Doctor_License = models.ForeignKey(
-        Doctor,
-        on_delete = models.SET_NULL,
-        null = True,
-        related_name='waiting_reservation_doc'
-    )
-    Clinic_ID= models.ForeignKey(
-        Clinic,
-        on_delete = models.SET_NULL,
-        null = True,
-        related_name='waiting_reservation_clinic'
-    )
-    Exp_ID= models.ForeignKey(
-        Expertise,
-        on_delete = models.SET_NULL,
-        null = True,
-        related_name='waiting_reservation_Exp'
-    )
-    Time = models.DateTimeField()
-    Status = models.BooleanField()
-    
-    
+class Hiring(models.Model):
+    clinic = models.ForeignKey(Clinic, related_name='hirings', on_delete=models.CASCADE)
+    doctor = models.ForeignKey(Doctor, related_name='hirings', on_delete=models.CASCADE)
+    #start_date = models.DateField()
+    #end_date = models.DateField(blank=True, null=True)
+    #working_hours = models.CharField(max_length=100)  # Example: '9AM-5PM'
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['clinic', 'doctor'], name='unique_clinic_doctor')
+        ]
+
+    def __str__(self):
+        return f"{self.doctor.name} at {self.clinic.name}"
+
 class Reservation(models.Model):
-    Client_email = models.ForeignKey(
-        Client,
-        on_delete = models.SET_NULL,
-        null = True,
-        related_name='rsv_client'
-    )
-    Doctor_License = models.ForeignKey(
-        Doctor,
-        on_delete = models.SET_NULL,
-        null = True,
-        related_name='reservation_doc'
-    )
-    Clinic_ID= models.ForeignKey(
-        Clinic,
-        on_delete = models.SET_NULL,
-        null = True,
-        related_name='reservation_clinic'
-    )
-    Exp_ID= models.ForeignKey(
-        Expertise,
-        on_delete = models.SET_NULL,
-        null = True,
-        related_name='eservation_Exp'
-    )
-    Time = models.DateTimeField()
+    Client = models.ForeignKey('Client', related_name='reservations', on_delete=models.CASCADE)
+    WorkingHour = models.ForeignKey('WorkingHour', related_name='reservations', on_delete=models.CASCADE)
+    expertise = models.ForeignKey('Expertise', related_name='reservations', on_delete=models.CASCADE)
+    time_start = models.DateTimeField()
+    time_end = models.DateTimeField()
+    #check_in = models.BooleanField(default=False)
     STATUS_CHOICES = (
         (0, 'reserved'),
         (1, 'checkin failed'),
         (2, 'checkin successed'),
         (3, 'in treatment'),
-        (3, 'finish')
+        (4, 'finish')
     )
+    
     Status = models.IntegerField(choices=STATUS_CHOICES, default=0)
+    
+
+    def __str__(self):
+        return f"{self.client.name} reservation for {self.hiring}"
+
+class Waiting(models.Model):
+    Client = models.ForeignKey('Client', related_name='waitings', on_delete=models.CASCADE)
+    hiring = models.ForeignKey('Hiring', related_name='waitings', on_delete=models.CASCADE)
+    expertise = models.ForeignKey('Expertise', related_name='waitings', on_delete=models.CASCADE)
+    time_start = models.DateTimeField()
+    time_end = models.DateTimeField()
+    status = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.client.name} waiting for {self.hiring}"
+
+class Client(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField(unique=True)
+    phone_number = models.CharField(max_length=15)
+    address = models.TextField()
+    birth_date = models.DateField()
+    gender = models.CharField(max_length=10)
+    occupation = models.CharField(max_length=100)
+    notify = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+    
+class WorkingHour(models.Model):
+    DAY_CHOICES = [
+        (1, 'Monday'),
+        (2, 'Tuesday'),
+        (3, 'Wednesday'),
+        (4, 'Thursday'),
+        (5, 'Friday'),
+        (6, 'Saturday'),
+        (7, 'Sunday')
+    ]
+
+    hiring = models.ForeignKey('Hiring', related_name='working_hours', on_delete=models.CASCADE)
+    day_of_week = models.IntegerField(choices=DAY_CHOICES)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+
+    class Meta:
+        unique_together = ('hiring', 'day_of_week', 'start_time', 'end_time')
+        ordering = ['day_of_week', 'start_time']
+
+    def __str__(self):
+        day_name = dict(self.DAY_CHOICES)[self.day_of_week]
+        return f"{day_name}: {self.start_time.strftime('%H:%M')} - {self.end_time.strftime('%H:%M')}"
 
 
 
 
-    
-    
-
-    
-    
-    
-
-    
