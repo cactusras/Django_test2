@@ -88,6 +88,10 @@ def get_session_EndT(request):
     EndT = request.session.get('EndTime','Unavailable')
     return EndT
 
+def get_session_timeStatus(request):
+    tStatus = request.session.get('TimeStatus','Not found')
+    return tStatus
+
 def get_session_SchedulingID(request):
     SchedID = request.session.get('SchedulingID','NotFound')
     return SchedID
@@ -96,18 +100,34 @@ def add_Reservation(request):
     if request.user.is_authenticated:
         user_id = request.user.id
         if request.method == 'POST':
+            SchedulingID = get_session_SchedulingID(request)
+            ExpID = get_session_expID(request)
+            timeS = get_session_startT(request)
+            timeE = get_session_EndT
+            if get_session_timeStatus:
+                form = ReservationForm(request.POST)
+                if form.is_valid(): 
+                    with connection.cursor() as cursor:
+                        cursor.execute("INSERT INTO Reservation VALUES(user_id, SchedulinID, ExpID, timeS,timeE,0)")
+                else:
+                    return HttpResponse('form not valid')
+            else: 
+                form = WaitingForm(request.POST)
+                if form.is_valid(): 
+                    with connection.cursor() as cursor:
+                        cursor.execute("INSERT INTO Waiting VALUES(user_id, SchedulinID, ExpID, timeS,timeE,False)")
+                else:
+                    return HttpResponse('form not valid')
             
-            form = ReservationForm(request.POST)
-            if form.is_valid(): 
-                with connection.cursor()
-        
         #return HttpResponse(f'Your userid is {user_id}')
     else:
         return HttpResponse('Login failed')
-        
-        
-    if request.method == 'POST':
-        form = ReservationForm(request.POST)
+    
+    
+    
+    
+    
+
         
         
 
