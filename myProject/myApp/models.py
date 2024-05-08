@@ -1,41 +1,99 @@
 from django.db import models
 from datetime import timedelta
 from datetime import time
+from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 #PK皆Auto Increment
 
-class Clinic(models.Model):
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.db import models
+from django.utils import timezone
+
+# 定義自定義的使用者管理器
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email, name, phone_number, pw=None):
+        if not email:
+            raise ValueError('The Email field must be set')
+        user = self.model(
+            email=self.normalize_email(email),
+            name=name,
+            phone_number=phone_number,
+        )
+        user.set_password(pw)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, name, phone_number, pw=None):
+        user = self.create_user(
+            email=email,
+            name=name,
+            phone_number=phone_number,
+            pw=pw,
+        )
+        user.is_admin = True
+        user.save(using=self._db)
+        return user
+
+# 自定義的使用者模型
+class CustomUser(AbstractBaseUser):
+    email = models.EmailField(unique=True)
     name = models.CharField(max_length=100)
+    phone_number = models.CharField(max_length=35)
+    pw = models.CharField(max_length=128)
+    is_active = models.BooleanField(default=True)
+    is_admin = models.BooleanField(default=False)
+
+    objects = CustomUserManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['name', 'password']
+
+    def __str__(self):
+        return self.email
+
+    def has_perm(self, perm, obj=None):
+        return True
+
+    def has_module_perms(self, app_label):
+        return True
+
+    @property
+    def is_staff(self):
+        return self.is_admin
+
+class Clinic(CustomUser):
+   # user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)  # 與 CustomUser 關聯
+    #name = models.CharField(max_length=100)
     license_number = models.CharField(max_length=50, unique=True)
-    phone_number = models.CharField(max_length=15)
+    #phone_number = models.CharField(max_length=15)
     address = models.TextField()
     introduction = models.TextField(blank=True, null=True)
     photo = models.ImageField(upload_to='clinics/')
-    email = models.EmailField(unique=True)
-    pw = models.CharField(max_length=100)
-
+    
     def __str__(self):
         return self.name
     
-class Doctor(models.Model):
-    name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
-    phone_number = models.CharField(max_length=15)
-    photo = models.ImageField(upload_to='doctors/')
-    #degree = models.CharField(max_length=100)
-    clinicID = models.ForeignKey('Clinic',related_name='doctor',on_delete=models.CASCADE)
-    pw = models.CharField(max_length=100)
+class Doctor(CustomUser):
     
+    #user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)  # 與 CustomUser 關聯
+    #name = models.CharField(max_length=100)
+    #email = models.EmailField(unique=True)
+    #phone_number = models.CharField(max_length=15)
+    photo = models.ImageField(upload_to='doctors/')
+    clinic = models.ForeignKey('Clinic', related_name='doctors', on_delete=models.CASCADE)  # 與 Clinic 關聯
+    
+
     def __str__(self):
         return self.name
 
 class Expertise(models.Model):
+    
     name = models.CharField(max_length=100)
     #description = models.TextField()
     time = models.TimeField(default=time(hour=1))
 
     def __str__(self):
         return self.name
-
 
 class Doc_Expertise(models.Model):
     DocID = models.ForeignKey(
@@ -52,23 +110,6 @@ class Doc_Expertise(models.Model):
         #null = True,
         related_name='doctor_exp_license'
     )
-
-
-    
-#class Hiring(models.Model):
- #   clinic = models.ForeignKey(Clinic, related_name='hirings', on_delete=models.CASCADE)
-  #  doctor = models.ForeignKey(Doctor, related_name='hirings', on_delete=models.CASCADE)
-    #start_date = models.DateField()
-    #end_date = models.DateField(blank=True, null=True)
-    #working_hours = models.CharField(max_length=100)  # Example: '9AM-5PM'
-
-    #class Meta:
-     #   constraints = [
-      #      models.UniqueConstraint(fields=['clinic', 'doctor'], name='unique_clinic_doctor')
-       # ]
-
-    #def __str__(self):
-     #   return f"{self.doctor.name} at {self.clinic.name}"
      
 class Scheduling(models.Model):
     DoctorID = models.ForeignKey('Doctor', related_name='scheduling', on_delete=models.CASCADE)
@@ -77,8 +118,6 @@ class Scheduling(models.Model):
     StartDate = models.DateField()
     EndDate = models.DateField()
      
-    
-
 class Reservation(models.Model):
     ClientID = models.ForeignKey('Client', related_name='reservations', on_delete=models.CASCADE)
     SchedulingID = models.ForeignKey('Scheduling', related_name='reservations', on_delete=models.CASCADE)
@@ -118,16 +157,17 @@ class Waiting(models.Model):
     def __str__(self):
         return f"{self.client.name} waiting for doctor{self.SchedulingID.DoctorID}, clinic {self.SchedulingID.DoctorID.clnicID}"
 
-class Client(models.Model):
-    name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
-    phone_number = models.CharField(max_length=15)
+class Client(CustomUser):
+    #user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)  # 與 CustomUser 關聯
+    #name = models.CharField(max_length=100)
+    #email = models.EmailField(unique=True)
+    #phone_number = models.CharField(max_length=15)
     address = models.TextField()
     birth_date = models.DateField()
     gender = models.CharField(max_length=10)
     occupation = models.CharField(max_length=100)
     notify = models.BooleanField(default=True)
-    pw = models.CharField(max_length=100)
+    #pw = models.CharField(max_length=100)
 
     def __str__(self):
         return self.name
@@ -155,7 +195,5 @@ class WorkingHour(models.Model):
     def __str__(self):
         day_name = dict(self.DAY_CHOICES)[self.day_of_week]
         return f"{day_name}: {self.start_time.strftime('%H:%M')} - {self.end_time.strftime('%H:%M')}"
-
-
 
 
