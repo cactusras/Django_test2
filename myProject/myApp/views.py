@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from .forms import DoctorForm
 from .forms import ClinicForm
+from .forms import ClientForm
 
 def home(request):
     context={}
@@ -10,7 +11,6 @@ def home(request):
 def index(request):
     context={}
     return render(request, "myApp/index.html", context)
-
 
 
 def add_doctor(request):
@@ -33,6 +33,20 @@ def add_clinic(request):
     else:
         form = ClinicForm()
     return render(request, 'add_clinic.html', {'form': form})
+
+def add_client(request):
+    if request.method == 'POST':
+        form = ClientForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return render(request,'successAddedClient.html')
+    else:
+        form = ClientForm()
+    return render(request, 'add_client.html', {'form': form})
+
+
+
+
 
 
 
