@@ -80,7 +80,7 @@ class Doctor(CustomUser):
     #email = models.EmailField(unique=True)
     #phone_number = models.CharField(max_length=15)
     photo = models.ImageField(upload_to='doctors/')
-    clinic = models.ForeignKey('Clinic', related_name='doctors', on_delete=models.CASCADE)  # 與 Clinic 關聯
+    clinicID = models.ForeignKey('Clinic', related_name='doctors', on_delete=models.CASCADE)  # 與 Clinic 關聯
     
 
     def __str__(self):
