@@ -27,7 +27,7 @@ def add_doctor(request):
         WHrfrom = WorkingHourForm(request.POST)
         Doc_Expform = Doctor_ExpertiseForm(request.POST)
         
-        if Docform.is_valid() and Schedform.is_valid and WHrfrom.is_valid and Doc_Expform.is_valid:
+        if Docform.is_valid() and Schedform.is_valid() and WHrfrom.is_valid() and Doc_Expform.is_valid():
             
             doc_instance = Docform.save()  # 保存 DoctorForm 的實例並獲取對象
             whr_instance = WHrfrom.save(commit=False)  # 保存 WorkingHourForm 的實例但不提交
@@ -93,8 +93,14 @@ def get_session_timeStatus(request):
     return tStatus
 
 def get_session_SchedulingID(request):
+    
     SchedID = request.session.get('SchedulingID','NotFound')
     return SchedID
+
+#doc scheduling前端處理（因前端要顯示）
+
+    
+    
 
 def add_Reservation(request):
     if request.user.is_authenticated:
@@ -103,7 +109,7 @@ def add_Reservation(request):
             SchedulingID = get_session_SchedulingID(request)
             ExpID = get_session_expID(request)
             timeS = get_session_startT(request)
-            timeE = get_session_EndT
+            timeE = get_session_EndT(request)
             if get_session_timeStatus:
                 form = ReservationForm(request.POST)
                 if form.is_valid(): 
