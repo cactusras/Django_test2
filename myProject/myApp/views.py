@@ -14,9 +14,29 @@ def home(request):
     context={}
     return render(request, "myApp/home.html", context)
 
-def index(request):
+def clieRegis(request):
     context={}
-    return render(request, "myApp/index.html", context)
+    return render(request, "myApp/client_regis.html", context)
+
+def clieReserve(request):
+    context={}
+    return render(request, "myApp/client_reservation.html", context)
+
+def cliedataEd(request):
+    context={}
+    return render(request, "myApp/client_dataEdit.html", context)
+
+def clinRegis(request):
+    context={}
+    return render(request, "myApp/clinic_regis.html", context)
+
+def clinDataEd(request):
+    context={}
+    return render(request, "myApp/clinic_dataEdit.html", context)
+
+def docRegis(request):
+    context={}
+    return render(request, "myApp/doctor_regis.html", context)
 
 
 
