@@ -27,7 +27,7 @@ def add_doctor(request):
         WHrfrom = WorkingHourForm(request.POST)
         Doc_Expform = Doctor_ExpertiseForm(request.POST)
         
-        if Docform.is_valid() and Schedform.is_valid and WHrfrom.is_valid and Doc_Expform.is_valid:
+        if Docform.is_valid() and Schedform.is_valid() and WHrfrom.is_valid() and Doc_Expform.is_valid():
             
             doc_instance = Docform.save()  # 保存 DoctorForm 的實例並獲取對象
             whr_instance = WHrfrom.save(commit=False)  # 保存 WorkingHourForm 的實例但不提交
