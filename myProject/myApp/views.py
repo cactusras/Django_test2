@@ -12,31 +12,31 @@ from django.db import connection
 
 def home(request):
     context={}
-    return render(request, "myApp/home.html", context)
+    return render(request, "home.html", context)
 
 def clieRegis(request):
     context={}
-    return render(request, "myApp/client_regis.html", context)
+    return render(request, "client_regis.html", context)
 
 def clieReserve(request):
     context={}
-    return render(request, "myApp/client_reservation.html", context)
+    return render(request, "client_reservation.html", context)
 
 def cliedataEd(request):
     context={}
-    return render(request, "myApp/client_dataEdit.html", context)
+    return render(request, "client_dataEdit.html", context)
 
 def clinRegis(request):
     context={}
-    return render(request, "myApp/clinic_regis.html", context)
+    return render(request, "clinic_regis.html", context)
 
 def clinDataEd(request):
     context={}
-    return render(request, "myApp/clinic_dataEdit.html", context)
+    return render(request, "clinic_dataEdit.html", context)
 
 def docRegis(request):
     context={}
-    return render(request, "myApp/doctor_regis.html", context)
+    return render(request, "doctor_regis.html", context)
 
 
 
