@@ -100,7 +100,6 @@ def get_session_SchedulingID(request):
 #doc scheduling前端處理（因前端要顯示）
 
     
-    
 
 def add_Reservation(request):
     if request.user.is_authenticated:
@@ -131,7 +130,10 @@ def add_Reservation(request):
     
     
     
+#def searching(request):
     
+    #request.GET.get()
+        
     
 
         
