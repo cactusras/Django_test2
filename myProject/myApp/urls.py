@@ -10,4 +10,12 @@ urlpatterns = [
     path("clinic_regis/", views.clinRegis, name="clinRegis"),
     path("clinic_dataEdit/", views.clinDataEd, name="clinDataEd"),
     path("doctor_regis/", views.docRegis, name="docRegis"),
+    path("ClicktoEditSchedule/", views.clickSchedule, name="clickSchedule"),
+    #用google排班表 我比較傾向這個
+    path("ClicktoEditScheduleGoogle/", views.clickScheduleGg, name="clickScheduleGg"),
+    path("clinicPage/", views.clinHome, name="clinHome"),
+    path("clinic_login_docManage/", views.clinLoginDocManage, name="clinLoginDocManage"),
+    path("doctorPage/", views.docPage, name="docPage"),
+    path("searchPage/", views.home, name="home"),
+    path("UserAppointmentRecords/", views.clieReserveRecord, name="clieReserveRecord"),
 ]

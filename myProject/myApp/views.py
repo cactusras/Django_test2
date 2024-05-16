@@ -12,7 +12,7 @@ from django.db import connection
 
 def home(request):
     context={}
-    return render(request, "home.html", context)
+    return render(request, "searchPage.html", context)
 
 def clieRegis(request):
     context={}
@@ -37,6 +37,31 @@ def clinDataEd(request):
 def docRegis(request):
     context={}
     return render(request, "doctor_regis.html", context)
+
+def clickSchedule(request):
+    context={}
+    return render(request, "ClicktoEditSchedule.html", context)
+
+def clickScheduleGg(request):
+    context={}
+    return render(request, "ClicktoEditScheduleGoogle.html", context)
+
+def clinHome(request):
+    context={}
+    return render(request, "clinicPage.html", context)
+
+def clinLoginDocManage(request):
+    context={}
+    return render(request, "clinic_login_docManage.html", context)
+
+def docPage(request):
+    context={}
+    return render(request, "doctorPage.html", context)
+
+def clieReserveRecord(request):
+    context={}
+    return render(request, "UserAppointmentRecords.html", context)
+
 
 
 
