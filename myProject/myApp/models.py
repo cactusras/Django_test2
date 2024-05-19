@@ -195,5 +195,35 @@ class WorkingHour(models.Model):
     def __str__(self):
         day_name = dict(self.DAY_CHOICES)[self.day_of_week]
         return f"{day_name}: {self.start_time.strftime('%H:%M')} - {self.end_time.strftime('%H:%M')}"
-
+    
+    
+class docClinicSearch(models.Model):
+    DAY_CHOICES = [
+        (1, 'Monday'),
+        (2, 'Tuesday'),
+        (3, 'Wednesday'),
+        (4, 'Thursday'),
+        (5, 'Friday'),
+        (6, 'Saturday'),
+        (7, 'Sunday')
+    ]
+    doc_id = models.AutoField(primary_key=True)  #d.id
+    doc_name = models.CharField(max_length=100) #d.name    
+    clinic_id = models.AutoField(primary_key=True) #d.clinicid
+    clinic_name = models.CharField(max_length=100)  #c.name
+    clinic_adress = models.TextField()#c.adress
+    clinic_introduction = models.TextField(blank=True, null=True)#c.introduction
+    exp_id = models.AutoField(primary_key=True)#e.id
+    exp_name = models.CharField(max_length=100)#e.name
+    scheduling_id = models.AutoField(primary_key=True)#ms.id
+    start_date = models.DateField()#ms.start_date
+    end_date = models.DateField()#ms.end_date
+    workinghour_id = models.AutoField(primary_key=True)#w.WorkingHour_id
+    day_of_week = models.IntegerField(choices=DAY_CHOICES)#w.day_of_week
+    start_time = models.TimeField()#w.start_time
+    end_time = models.TimeField()#w.end_time
+    
+    class Meta:
+        managed = False  # No migrations will be made for this model
+        db_table = 'docClinicSearch'  # Name of the view in the database
 
