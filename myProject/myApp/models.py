@@ -162,10 +162,10 @@ class Client(CustomUser):
     #name = models.CharField(max_length=100)
     #email = models.EmailField(unique=True)
     #phone_number = models.CharField(max_length=15)
-    address = models.TextField()
+    address = models.TextField(blank=True, null=True)
     birth_date = models.DateField()
     gender = models.CharField(max_length=10)
-    occupation = models.CharField(max_length=100)
+    occupation = models.CharField(max_length=100, blank=True, null=True)
     notify = models.BooleanField(default=True)
     #pw = models.CharField(max_length=100)
 

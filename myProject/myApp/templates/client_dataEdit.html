@@ -53,9 +53,12 @@
         <section class="py-5"  style="background-color:#FFFFF4">
             <div class="container" style="border: 1px solid #F0EAD6;">
                 <div class="row row-cols-1">
-                    <div class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:80px; font-size: 20px; ">
+                    <form id="clientForm" method="post">
+                        {% csrf_token %}
+                            <fieldset>
+                    <legend class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:80px; font-size: 20px; ">
                         我的帳號
-                    </div>
+                    </legend>
                     <!--註冊內容-->
                     <div class="col" style="background-color:#fffff0; border: 1px solid #ada089; height:650px; font-size: 20px;">
                         <br>
@@ -128,14 +131,9 @@
                         </div>
 
                         <!--設定編輯按鈕-->
-                        <button class="rectangle-button" onclick="changeText()">編輯</button>
-                        <script>
-                            function changeText() {
-                                var button = document.querySelector('.rectangle-button');
-                                button.textContent = '完成';
-                            }
-                        </script>
-
+                        <button class="rectangle-button" onclick="changeText()">完成</button>
+                      </fieldset>
+                     </form>
                     </div>
 
                     <!--設定登出按鈕-->
@@ -168,7 +166,8 @@
             <!-- Bootstrap core JS-->
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
             <!-- Core theme JS-->
-            <script src="js/scripts.js"></script>
+            <script src="{% static 'myApp/js/scripts.js' %}"></script>
+            <script src="{% static 'myApp/js/client.js' %}"></script>
         
     </body>
 </html>

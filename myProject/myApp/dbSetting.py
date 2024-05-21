@@ -25,10 +25,7 @@ if len(inputRegis_clie_name) <=100:
             if len(inputRegis_clie_phone) <= 15:
                 if not (Client.object.filter(email = inputRegis_clie_email).exists()):
                     #用戶成功註冊
-                    clie_regis = Client(name = inputRegis_clie_name, email = inputRegis_clie_email, phone = inputRegis_clie_phone,
-                                        password = inputRegis_clie_pw, address = inputRegis_clie_addr, birth = inputRegis_clie_birth,
-                                        gender = inputRegis_clie_gender, occupation = inputRegis_clie_occup, isNotify = inputRegis_clie_isNotify)
-                    clie_regis.save()
+                    print("Register succeed")
                 else:
                     print("信箱已被註冊過")
             else:

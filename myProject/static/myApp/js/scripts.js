@@ -1,5 +1,5 @@
 // http://jsonblob.com/1221767613406633984
-function displayUsers(users) {
+/*function displayUsers(users) {
     var usersElement = document.getElementById("users");
     var str = "";
    
@@ -18,7 +18,7 @@ function getUsers() {
     });
 }
 // Call the getUsers function when the window loads
-window.onload = getUsers;
+window.onload = getUsers;*/
 
 function Linyi(){
     
@@ -35,19 +35,43 @@ function wntng(){
 function Linyi2(){
     
 }
-
-// 當頁面滾動時，顯示或隱藏返回頂部按鈕
+/*
 $('#date1').datetimepicker({
-    date:null,
-      format: 'YYYY-MM-DD',
-      locale: moment.locale('zh-tw'),
-      daysOfWeekDisabled: [0, 6],
-      minDate: moment().add(1,'days'),
-      maxDate: moment().add(30,'days'),
-      disabledDates: [
-        moment().add(1,'days'),
-        moment().add(2,'days'),
-        '2021-10-10',
-        '2021-12-25'
-      ]
+  date:null,
+    format: 'YYYY-MM-DD',
+    locale: moment.locale('zh-tw'),
+    daysOfWeekDisabled: [0, 6],
+    minDate: moment().add(1,'days'),
+    maxDate: moment().add(30,'days'),
+    disabledDates: [
+      moment().add(1,'days'),
+      moment().add(2,'days'),
+      '2021-10-10',
+      '2021-12-25'
+    ]
+});*/
+
+  //fetch使用者是否登入了 並設window變數(整個project都可取得)
+window.isLogin = false;
+document.addEventListener('DOMContentLoaded', function() {
+  fetch('/check_authentication/')
+  .then(response => {
+      if (response.ok) {
+          return response.json();
+      } else {
+          throw new Error('Network response was not ok');
+      }
+  })
+  .then(data => {
+      if (data.is_authenticated) {
+          isLogin = true;
+          console.log("isLogin = true");
+      }else{
+        console.log("isLogin = false");
+      }
+  })
+  .catch(error => {
+      console.log('Error checking authentication:', error);
   });
+})
+  

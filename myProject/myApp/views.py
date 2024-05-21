@@ -1,5 +1,7 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+
+from .models import Clinic, Doctor, Client
 from .forms import DoctorForm
 from .forms import ClinicForm
 from .forms import ClientForm
@@ -14,10 +16,6 @@ def home(request):
     context={}
     return render(request, "searchPage.html", context)
 
-def clieRegis(request):
-    context={}
-    return render(request, "client_regis.html", context)
-
 def clieReserve(request):
     context={}
     return render(request, "client_reservation.html", context)
@@ -25,10 +23,6 @@ def clieReserve(request):
 def cliedataEd(request):
     context={}
     return render(request, "client_dataEdit.html", context)
-
-def clinRegis(request):
-    context={}
-    return render(request, "clinic_regis.html", context)
 
 def clinDataEd(request):
     context={}
@@ -42,17 +36,17 @@ def clickSchedule(request):
     context={}
     return render(request, "ClicktoEditSchedule.html", context)
 
-def clickScheduleGg(request):
+def login(request):
     context={}
-    return render(request, "ClicktoEditScheduleGoogle.html", context)
+    return render(request, "login.html", context)
 
 def clinHome(request):
     context={}
     return render(request, "clinicPage.html", context)
 
-def clinLoginDocManage(request):
+def docManage(request):
     context={}
-    return render(request, "clinic_login_docManage.html", context)
+    return render(request, "doctor_management.html", context)
 
 def docPage(request):
     context={}
@@ -63,8 +57,28 @@ def clieReserveRecord(request):
     return render(request, "UserAppointmentRecords.html", context)
 
 
+# 獲取所有诊所/醫生/病患的email資料
+def get_clinics_emails(request):
+    clinics = Clinic.objects.all()
+    emails = [clinic.email for clinic in clinics]  
+    return JsonResponse({'emails': emails})
 
+def get_clinics_licenses(request):
+    clinics = Clinic.objects.all()
+    licenses = [clinic.license_number for clinic in clinics]  
+    return JsonResponse({'licenses': licenses})
 
+def get_doctors_emails(request):
+    doctors = Doctor.objects.all()
+    emails = [doctor.email for doctor in doctors]  
+    return JsonResponse({'emails': emails})
+
+def get_clients_emails(request):
+    clients = Client.objects.all()
+    emails = [client.email for client in clients]  
+    return JsonResponse({'emails': emails})
+
+#add doctor不需要設自動登入
 def add_doctor(request):
     if request.method == 'POST':
         Docform = DoctorForm(request.POST, request.FILES)
@@ -84,35 +98,42 @@ def add_doctor(request):
             sched_instance.doctor = doc_instance
             doc_exp_instance.doctor = doc_instance
             
-            whr_instance.save()  # 提交 WorkingHourForm 的實例
+            whr_instance.save()  # 提交 WForkingHourForm 的實例
             sched_instance.save()  # 提交 SchedulingForm 的實例
             doc_exp_instance.save()  # 提交 Doctor_ExpertiseForm 的實例
             
-            return render(request, 'success.html')
+            return JsonResponse({'Success': 'Doctor registered successfully'})
+        else:
+            return JsonResponse({'Error': 'Form is not valid'}, status=400)
     else:
         form = DoctorForm()
-    return render(request, 'add_doctor.html', {'form': form})
-
+    return render(request, 'doctor_regis.html', {'form': form})
 
 def add_clinic(request):
     if request.method == 'POST':
         form = ClinicForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
-            return render(request, 'success.html')
+            clinUser = form.save()
+            login(request, clinUser)  
+            return JsonResponse({'Success': 'Clinic registered successfully'})
+        else:
+            return JsonResponse({'Error': 'Form is not valid'}, status=400)
     else:
         form = ClinicForm()
-    return render(request, 'add_clinic.html', {'form': form})
+    return render(request, 'clinic_dataEdit.html', {'form': form})
 
 def add_client(request):
     if request.method == 'POST':
         form = ClientForm(request.POST)
         if form.is_valid():
-            form.save()
-            return render(request,'successAddedClient.html')
+            clieUser = form.save()
+            login(request, clieUser)  
+            return JsonResponse({'Success': 'Client registered successfully'})
+        else:
+            return JsonResponse({'Error': 'Form is not valid'}, status=400)
     else:
         form = ClientForm()
-    return render(request, 'add_client.html', {'form': form})
+    return render(request, 'client_dataEdit.html', {'form': form})
 
 
 def get_session_docRsv(request):
@@ -167,20 +188,61 @@ def add_Reservation(request):
         #return HttpResponse(f'Your userid is {user_id}')
     else:
         return HttpResponse('Login failed')
+
+#判斷使用者是否為登入狀態 
+def check_authentication(request):
+    if request.user.is_authenticated:
+        return JsonResponse({'is_authenticated': True})
+    else:
+        return JsonResponse({'is_authenticated': False})
+
+#fetch出user的資料(在dataEdit頁面顯示)   
+def doctor_info(request):
+    if hasattr(request.user, 'doctor'):
+        user = request.user
+        info = {
+            'email': user.email,
+            'name': user.name,
+            'phone_number': user.phone_number,
+            'password': user.pw,
+            'photo_url': user.doctor.photo.url,
+            'experience': user.doctor.experience,
+        }
+        return JsonResponse(info)
+    else:
+        return JsonResponse({'error': 'User is not a doctor'}, status=400)
     
-    
-    
-    
-    
+def client_info(request):
+    if hasattr(request.user, 'client'):
+        user = request.user
+        info = {
+            'email': user.email,
+            'name': user.name,
+            'phone_number': user.phone_number,
+            'password': user.pw,
+            'address': user.client.address,
+            'birth_date': user.client.birth_date,
+            'gender': user.client.gender,
+            'occupation': user.client.occupation,
+            'notify': user.client.notify,
+        }
+        return JsonResponse(info)
+    else:
+        return JsonResponse({'error': 'User is not a client'}, status=400)
 
-        
-        
-
-
-
-
-
-
-
-
-
+def clinic_info(request):
+    if hasattr(request.user, 'clinic'):
+        user = request.user
+        info = {
+            'email': user.email,
+            'name': user.name,
+            'phone_number': user.phone_number,
+            'password': user.pw,
+            'photo': user.clinic.photo.url,
+            'license_number': user.clinic.license_number,
+            'address': user.clinic.address,
+            'introduction': user.clinic.introduction,
+        }
+        return JsonResponse(info)
+    else:
+        return JsonResponse({'error': 'User is not a clinic admin'}, status=400)
