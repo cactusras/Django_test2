@@ -34,7 +34,7 @@
         <nav class="navbar navbar-expand-lg" style="background-color:#F0EAD6;  height: 100px;">
             <div class="container px-4 px-lg-5">
                <!-- 網站Logo -->
-               <img src="doctor-log/assets/denlogo.png" alt="DEN Logo">
+               <img src="assets/dental.png" alt="DEN Logo">
 
 
                 <!-- 網站名稱 -->
@@ -55,103 +55,137 @@
             </div>
         </nav>
       
-            <!-- 內容區域 -->
         <section class="py-5"  style="background-color:#FFFFF4">
-            <div class="container" >
-                <div class="container">
-                    <div class="row row-cols-2">
-                       <!-- 左側內容欄 -->
-                      <div class="col" style="background-color:#fffff4;  height:500px; font-size: 20px;">
-                      <div class="row g-2">
-                        <div class="col-12">
-                          <div class="p" style="background-color:#fffff0; height:320px; border: 1px solid #ada089;">
-                            <!-- 本周預約內容 -->
-                            <div class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:80px; font-size: 20px; ">
-                                本週預約
-                            </div>
-                            <!-- Google日曆嵌入 -->
-                            <iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=Asia%2FTaipei&bgcolor=%23ffffff&mode=WEEK&src=YzgxOGE4NzM2YTIxZGQ3OGZjOTI2NTJjZmMzN2IxYWE2NTJkMWVlYjY0NzFjYWJiOTBlMzk1Y2M3ZjkwN2ZmZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=emgtdHcudGFpd2FuI2hvbGlkYXlAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t&color=%234285F4&color=%230B8043" style="border: 0" width="622" height="235" frameborder="0" scrolling="no"></iframe>
-                        </div>
-                        </div>
-                        <!-- 其他內容塊 -->
-                        <div class="col-12">
-                          <div class="p" style="background-color:#fffff0; height:200px; border: 1px solid #ada089; "></div>   
-                        </div>
+          <div class="container">
+              <div class="row g-2">
+                  <div class="col-md-6">
+                      <div class="p-3" style="height:600px;">
+                          <div class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:80px; font-size: 20px;">
+                              診所時程
+                          </div>
+                          <div class="col d-flex align-items-center justify-content-center" style="background-color:#FFFFF0; border: 1px solid #ada089; height:500px; font-size: 20px;">
+                            <table class="table table-bordered" style="border: 1px solid #ada089;">
+                              <thead>
+                                  <tr>
+                                      <th scope="col"><i class="bi bi-clock-fill"></i></th>
+                                      <th scope="col">週一</th>
+                                      <th scope="col">週二</th>
+                                      <th scope="col">週三</th>
+                                      <th scope="col">週四</th>
+                                      <th scope="col">週五</th>
+                                      <th scope="col">週六</th>
+                                      <th scope="col">週日</th>
+                                  </tr>
+                              </thead>
+                              <tbody>
+                                  <tr>
+                                      <th scope="col"><p>10:00<br>-<br>14:00<br></p></th>
+                                      <td contenteditable="true"></td>
+                                      <td contenteditable="true"></td>
+                                      <td contenteditable="true"></td>
+                                      <td contenteditable="true"></td>
+                                      <td contenteditable="true"></td>
+                                      <td contenteditable="true"></td>
+                                      <td contenteditable="true"></td>
+                                  </tr>
+                                  <tr>
+                                      <th scope="col"><p>15:00<br>-<br>18:00<br></p></th>
+                                      <td contenteditable="true"></td>
+                                      <td contenteditable="true"></td>
+                                      <td contenteditable="true"></td>
+                                      <td contenteditable="true"></td>
+                                      <td contenteditable="true"></td>
+                                      <td contenteditable="true"></td>
+                                      <td contenteditable="true"></td>
+                                  </tr>
+                                  <tr>
+                                      <th scope="col"><p>19:00<br>-<br>21:00<br></p></th>
+                                      <td contenteditable="true"></td>
+                                      <td contenteditable="true"></td>
+                                      <td contenteditable="true"></td>
+                                      <td contenteditable="true"></td>
+                                      <td contenteditable="true"></td>
+                                      <td contenteditable="true"></td>
+                                      <td contenteditable="true"></td>
+                                  </tr>
+                              </tbody>
+                          </table>
+                          </div>
                       </div>
-                    </div>
-                     <!-- 右側內容欄 -->
-                    <div class="col" style="background-color:#fffff4;  height:500px; font-size: 20px;">
-                     <!-- 標題 -->
-                      <div class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:80px; font-size: 20px;">
-                        當日預約確認報到
-                      </div>
-                   <!-- 預約列表 -->
-                      <div class="col d-flex justify-content-center" style="background-color:#FFFFF0; border: 1px solid #ada089; height:450px; font-size: 20px; overflow: auto;">
-                      <table class="table table-hover">
-                          <thead>
-                                  <tr>
-                                    <th scope="row">星期一</th>
-                                    <td>10:00-14:00 XXX先生 項目</td>
-                                   
-                                  </tr>
-                                  <tr>
-                                    <th scope="row">星期二</th>
-                                    <td>10:00-14:00 XXX先生 項目</td>
-                                  
-                                  </tr>
-                                  <tr>
-                                    <th scope="row">星期三</th>
-                                    <td>10:00-14:00 XXX先生 項目</td>
-                                  </tr>
-                                  <tr>
-                                    <th scope="row">星期一</th>
-                                    <td>10:00-14:00 XXX先生 項目</td>
-                                   
-                                  </tr>
-                                  <tr>
-                                    <th scope="row">星期一</th>
-                                    <td>10:00-14:00 XXX先生 項目</td>
-                                   
-                                  </tr>
-                                  <tr>
-                                    <th scope="row">星期一</th>
-                                    <td>10:00-14:00 XXX先生 項目</td>
-                                   
-                                  </tr>
-                                  <tr>
-                                    <th scope="row">星期一</th>
-                                    <td>10:00-14:00 XXX先生 項目</td>
-                                   
-                                  </tr>
-                                  <tr>
-                                    <th scope="row">星期一</th>
-                                    <td>10:00-14:00 XXX先生 項目</td>
-                                   
-                                  </tr>
-                                  <tr>
-                                    <th scope="row">星期一</th>
-                                    <td>10:00-14:00 XXX先生 項目</td>
-                                   
-                                  </tr>
-                                  <tr>
-                                    <th scope="row">星期一</th>
-                                    <td>10:00-14:00 XXX先生 項目</td>
-                                   
-                                  </tr>
-                                </tbody>
-                              </table>
-                        </div>
-                    </div> 
-                    </div>
                   </div>
+                  <div class="col-md-6">
+                      <div class="p-3" style="height:600px;">
+                          <div class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:80px; font-size: 20px;">
+                              各時段詳細資訊
+                          </div>
+                            <!-- 各時段詳細資訊 -->
+                          <div class="col d-flex justify-content-center" style="background-color:#FFFFF0; border: 1px solid #ada089; height:500px; font-size: 20px; overflow: auto;">
+                            <table class="table table-hover">
+                              <thead>
+                                      <tr>
+                                        <th scope="row">星期一</th>
+                                        <td>10:00-14:00 XXX先生 項目</td>
+                                      </tr>
 
+                                      <tr>
+                                        <th scope="row">星期二</th>
+                                        <td>10:00-14:00 XXX先生 項目</td>
+                                      </tr>
 
+                                      <tr>
+                                        <th scope="row">星期二</th>
+                                        <td>10:00-14:00 XXX先生 項目</td>
+                                      </tr>
 
-                 </div> 
-        </div>
+                                      <tr>
+                                        <th scope="row">星期二</th>
+                                        <td>10:00-14:00 XXX先生 項目</td>
+                                      </tr>
 
-       
-            </section>
+                                      <tr>
+                                        <th scope="row">星期二</th>
+                                        <td>10:00-14:00 XXX先生 項目</td>
+                                      </tr>
+
+                                      <tr>
+                                        <th scope="row">星期二</th>
+                                        <td>10:00-14:00 XXX先生 項目</td>
+                                      </tr>
+
+                                      <tr>
+                                        <th scope="row">星期二</th>
+                                        <td>10:00-14:00 XXX先生 項目</td>
+                                      </tr>
+
+                                     <tr>
+                                        <th scope="row">星期二</th>
+                                        <td>10:00-14:00 XXX先生 項目</td>
+                                      </tr>
+
+                                     <tr>
+                                        <th scope="row">星期二</th>
+                                        <td>10:00-14:00 XXX先生 項目</td>
+                                      </tr>
+
+                                      <tr>
+                                        <th scope="row">星期一</th>
+                                        <td>10:00-14:00 XXX先生 項目</td>
+                                      </tr>
+
+                                      <tr>
+                                        <th scope="row">星期一</th>
+                                        <td>10:00-14:00 XXX先生 項目</td>
+                                      </tr>
+                                    </tbody>
+                                  </table>    
+                        </div>
+                        
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </section>
+
              <!--頁面底-->
             <footer class="py-5 bg-dark">
                 <div class="container"><p class="m-0 text-center text-white">Copyright &copy; Your Website 2023</p></div>
