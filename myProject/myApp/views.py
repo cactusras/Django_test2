@@ -8,6 +8,8 @@ from .filters import docClinicFilter
 from .models import Clinic, Doctor, Doc_Expertise, Expertise, Scheduling, WorkingHour,docClinicSearch,Reservation,Client,Waiting
 from datetime import datetime, timedelta
 from django.http import JsonResponse
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import authenticate, login
 
 def home(request):
     context={}
@@ -511,7 +513,6 @@ def client_loading(request):
          
     }
 
-
 #預約頁面日期選下去，計算可預約時間
 def add_times(time1, time2):
 	datetime1 = datetime.combine(datetime.min, time1)
@@ -613,3 +614,34 @@ def available(request):
 
 
 
+#login check身份別，django 自帶，用isinstance分身份
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                
+                user_type = None
+                if isinstance(user, Client):
+                    user_type = 'Client'
+                elif isinstance(user, Clinic):
+                    user_type = 'Clinic'
+                elif isinstance(user, Doctor):
+                    user_type = 'Doctor'
+
+                response = {
+                    'status': 'success',
+                    'message': 'User is logged in',
+                    'user_type': user_type,
+                    'username': user.username,
+                    'email': user.email
+                }
+                return JsonResponse(response)
+    else:
+        form = AuthenticationForm()
+
+    return render(request, 'login.html', {'form': form})

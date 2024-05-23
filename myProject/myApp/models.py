@@ -60,6 +60,23 @@ class CustomUser(AbstractBaseUser):
     @property
     def is_staff(self):
         return self.is_admin
+    
+
+class Client(CustomUser):
+    #user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)  # 與 CustomUser 關聯
+    #name = models.CharField(max_length=100)
+    #email = models.EmailField(unique=True)
+    #phone_number = models.CharField(max_length=15)
+    address = models.TextField()
+    birth_date = models.DateField()
+    gender = models.CharField(max_length=10)
+    occupation = models.CharField(max_length=100)
+    notify = models.BooleanField(default=True)
+    #pw = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+    
 
 class Clinic(CustomUser):
    # user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)  # 與 CustomUser 關聯
@@ -165,21 +182,7 @@ class Waiting(models.Model):
     def __str__(self):
         return f"{self.client.name} waiting for doctor{self.SchedulingID.DoctorID}, clinic {self.SchedulingID.DoctorID.clnicID}"
 
-class Client(CustomUser):
-    #user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)  # 與 CustomUser 關聯
-    #name = models.CharField(max_length=100)
-    #email = models.EmailField(unique=True)
-    #phone_number = models.CharField(max_length=15)
-    address = models.TextField()
-    birth_date = models.DateField()
-    gender = models.CharField(max_length=10)
-    occupation = models.CharField(max_length=100)
-    notify = models.BooleanField(default=True)
-    #pw = models.CharField(max_length=100)
 
-    def __str__(self):
-        return self.name
-    
 class WorkingHour(models.Model):
     DAY_CHOICES = [
         (1, 'Monday'),
