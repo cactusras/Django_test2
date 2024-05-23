@@ -96,37 +96,42 @@ def add_Reservation(request):
 
         if request.method == 'POST':
             # Retrieve session data
-            SchedulingID = request.session.get('SchedulingID', 'NotFound')
+            doctor_id = request.session.get('doctor_id')
+            date = request.session.get('date')  # Assuming date format is YYYY-MM-DD
+            
+            try:
+                scheduling = Scheduling.objects.get(DoctorID=doctor_id, StartDate__lte=date, EndDate__gte=date)
+                SchedulingID = scheduling.id
+            except Scheduling.DoesNotExist:
+                return HttpResponse('No scheduling found for this doctor on selected date')
+
             ExpID = request.session.get('ExpertiseID', 'Not Found')
             timeS = request.session.get('StartingTime', 'Not defined')
-            timeE = request.session.get('EndTime', 'Unavailable')
+
             
-            if SchedulingID == 'NotFound' or ExpID == 'Not Found' or timeS == 'Not defined' or timeE == 'Unavailable':
+            if SchedulingID == 'NotFound' or ExpID == 'Not Found' or timeS == 'Not defined' :
                 return HttpResponse('Missing scheduling information')
 
             # Convert string times to datetime objects
             timeS = datetime.strptime(timeS, '%Y-%m-%d %H:%M:%S')
-            timeE = datetime.strptime(timeE, '%Y-%m-%d %H:%M:%S')
             
-            tStatus = True
             # Fetch the expertise duration
             try:
                 expertise = Expertise.objects.get(id=ExpID)
                 expertise_duration = timedelta(hours=expertise.time.hour, minutes=expertise.time.minute)
             except Expertise.DoesNotExist:
                 return HttpResponse('Expertise not found')
-
-            # Check if the doctor has any reservation during the requested time
-            existing_reservations = Reservation.objects.filter(SchedulingID=SchedulingID, time_start__lt=timeS)
-            if existing_reservations.exists():
-                tStatus = False
-                return HttpResponse('Time slot already reserved')
-            
-            # Check if the doctor is working during the requested time
+            #可預約，邏輯參考avaliable
+            status_conditions = Q(status=0) | Q(status=2) | Q(status=3)
+            reservations = Reservation.objects.filter(
+                SchedulingID=SchedulingID,
+                time_start__lt=datetime.combine(datetime.strptime(date, '%Y-%m-%d').date(), timeS),
+                time_end__gt=datetime.combine(datetime.strptime(date, '%Y-%m-%d').date(), timeS),
+                Exoertise = expertise
+            )
             scheduling = Scheduling.objects.get(id=SchedulingID)
             day_of_week = timeS.weekday() + 1
             working_hours = WorkingHour.objects.filter(
-                scheduling=scheduling,
                 day_of_week=timeS.weekday() + 1,  # +1 because WorkingHour.day_of_week is 1-7, not 0-6
                 start_time__lte=timeS.time(),
                 end_time__gte=(timeS + expertise_duration).time()
@@ -135,9 +140,9 @@ def add_Reservation(request):
             if not working_hours.exists():
                 return HttpResponse('Doctor is not working during this time')
 
-            # Determine the tStatus based on the checks above
-            # Process the form based on tStatus
-            if tStatus:
+            status_conditions = Q(status=1) | Q(status=5)
+            schedule_condition = Q(schedule_id=SchedulingID)
+            if (status_conditions&schedule_condition):
                 form = ReservationForm(request.POST)
                 if form.is_valid():
                     try:
@@ -149,7 +154,7 @@ def add_Reservation(request):
                         return HttpResponse(f'Error creating reservation: {e}')
                 else:
                     return HttpResponse('Form not valid')
-            else:
+            elif schedule_condition:
                 form = WaitingForm(request.POST)
                 if form.is_valid():
                     try:
@@ -165,7 +170,37 @@ def add_Reservation(request):
         return HttpResponse(f'Your user ID is {user_id}')
     else:
         return HttpResponse('Login failed')
+    
+#還沒改完但還缺一個    
+def waitingToRes(request):
+    if request.method == 'GET':
+        scheduling_id = request.GET.get('scheduling_id')  # Assuming scheduling_id is received in the request
 
+        # Retrieve waiting list entries for the specified scheduling
+        waiting_list = Waiting.objects.filter(SchedulingID=scheduling_id)
+
+        # Process and format the waiting list data
+        waiting_list_data = []
+        for entry in waiting_list:
+            client_name = get_client_name(entry.ClientID)  # Assuming a function to get client name
+            expertise_name = get_expertise_name(entry.expertiseID)  # Assuming a function to get expertise name
+            time_start = entry.time_start.strftime('%Y-%m-%d %H:%M:%S')
+            time_end = entry.time_end.strftime('%Y-%m-%d %H:%M:%S')
+
+            waiting_list_data.append({
+                'client_name': client_name,
+                'expertise_name': expertise_name,
+                'time_start': time_start,
+                'time_end': time_end
+            })
+
+        # Return the formatted waiting list data as JSON
+        return JsonResponse({'waiting_list': waiting_list_data})
+    else:
+        return HttpResponse('Invalid request method')
+    
+
+    
 
 @login_required    
 def Doc_uploading(request):
@@ -419,7 +454,6 @@ def reservationStCbD(request, reservation_id):
     reservation.save()
 
 #預約此醫生按鈕按下去
-#預約此醫生按鈕按下去
 def doctor_reserve_page(request, doc_id):
 
 	request.session['doc_id'] = doc_id  # Save session
@@ -522,41 +556,37 @@ def add_times(time1, time2):
 	result_delta = delta1 + delta2
 	result_time = (datetime.min + result_delta).time()
 	return result_time
-
 def available(request):
-	doctor_id = request.GET.get('doctor_id')
-	date_str = request.GET.get('date')
-	date = datetime.strptime(date_str, '%Y-%m-%d').date()
-	week_day=date.weekday()
+    doctor_id = request.GET.get('doctor_id')
+    date_str = request.GET.get('date')
+    date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    week_day = date.weekday()
 
-	expertise_name = request.GET.get('expertise_name')	
-	#expertise = next((item for item in expertise_list if item['name'] == expertise_name), None)
-	expertise_list = request.session.get('expertise_list', [])
-	expertise_time = None
-	for expertise in expertise_list:
-		if expertise['name'] == expertise_name:
-			expertise_time = expertise['time']
-			break  # Exit the loop once the expertise is found
+    expertise_name = request.GET.get('expertise_name')
+    expertise_list = request.session.get('expertise_list', [])
+    expertise_time = None
+    for expertise in expertise_list:
+        if expertise['name'] == expertise_name:
+            expertise_time = expertise['time']
+            break  # Exit the loop once the expertise is found
 
-	schedules = Scheduling.objects.filter(DoctorID=doctor_id).select_related('WorkingHour')#該醫生的所有行程(之前之後)
+    schedules = Scheduling.objects.filter(DoctorID=doctor_id).select_related('WorkingHour')
+    #先取了再說，不管是不是當天
+    schedule_list = []
+    reservation_list = []
+    for schedule in schedules:
+        if schedule.end_date >= date.today():#只可能預約今天以後的時間，所以以前的schedule不要加入list
+            status_conditions = Q(status=0) | Q(status=2) | Q(status=3)
+            schedule_condition = Q(schedule_id=schedule)
+            reservation = Reservation.objects.filter(status_conditions & schedule_condition)#今天以後已經被預約走的
 
-	#先取了再說，不管是不是當天
-	schedule_list = []
-	reservation_list = []
-	for schedule in schedules:
-		if schedule.end_date >= date.today():#只可能預約今天以後的時間，所以以前的schedule不要加入list
-			status_conditions = Q(status=0) | Q(status=2) | Q(status=3)
-			schedule_condition = Q(schedule_id=schedule)
-			reservation = Reservation.objects.filter(status_conditions & schedule_condition)#今天以後已經被預約走的
-           
-			for res in reservation:
-			    reservation_list.append({
-					'scheduleID' : res.SchedulingID,
-					'date' :res.time_start.date(),
-					'start_time': res.time_start,
-					'end_time': res.time_end
-				})
-       
+            for res in reservation:
+                reservation_list.append({
+                    'scheduleID': res.SchedulingID,
+                    'date': res.time_start.date(),
+                    'start_time': res.time_start,
+                    'end_time': res.time_end
+                })
             schedule_list.append({
                 'start_date': schedule.StartDate,
                 'end_date': schedule.EndDate,
@@ -564,54 +594,50 @@ def available(request):
                 'start_time': schedule.WorkingHour.start_time,
                 'end_time': schedule.WorkingHour.end_time
             })
-		
-        
-			
-	time_available = []
-	#此時time_available是要預約當日醫生有上班的時段們
-	for schedule in schedule_list:
-		#選擇預約日期當天無效且工作的日子不對的schedule不會加入
-		if schedule['start_date'] <= date and schedule['end_date'] >= date and schedule['day_of_week'] == week_day:
-			available = {
-				'start_time': schedule['start_time'],
-				'end_time': schedule['end_time']
-			}
-			time_available.append(available)
-	#扣掉已經被預約的時段(上班時段包含整個預約時段、預約時段跨開始時間、預約時段跨結束時間)
-	for reservation in reservation_list:
-		if reservation['date'] == date:#如果已經預約的紀錄，日期跟我想預約的日期相同
-			for available in time_available[:]:
-				if available['start_time'] <= reservation['start_time'] and available['end_time'] >= reservation['start_time']:#res起始在schedule範圍內
-					available['end_time'] = reservation['start_time']
-					if available['end_time'] >= reservation['end_time']:
-						new_segment = {
-							'start_time': reservation['end_time'],
-							'end_time': available['end_time']
-						}
-						time_available.append(new_segment)
-					
-				if available['end_time'] >= reservation['end_time']:
-					available['start_time'] = reservation['end_time']
-	#扣完，時段會破碎，所以把連續的時段併在一起	
-	time_available = sorted(time_available, key=lambda x: x['start_time'])
-	consolidated_time_available = []
-	for available in time_available:
-		if consolidated_time_available and consolidated_time_available[-1]['end_time'] == available['start_time']:
-			consolidated_time_available[-1]['end_time'] = available['end_time']
-		else:
-			consolidated_time_available.append(available)
 
-	#考量治療時間，修改time_available
+    time_available = []
+    #此時time_available是要預約當日醫生有上班的時段們
+    for schedule in schedule_list:
+        #選擇預約日期當天無效且工作的日子不對的schedule不會加入
+        if schedule['start_date'] <= date and schedule['end_date'] >= date and schedule['day_of_week'] == week_day:
+            available = {
+                'start_time': schedule['start_time'],
+                'end_time': schedule['end_time']
+            }
+            time_available.append(available)
+    #扣掉已經被預約的時段(上班時段包含整個預約時段、預約時段跨開始時間、預約時段跨結束時間)
+    for reservation in reservation_list:
+        if reservation['date'] == date:#如果已經預約的紀錄，日期跟我想預約的日期相同
+            for available in time_available[:]:
+                if available['start_time'] <= reservation['start_time'] and available['end_time'] >= reservation['start_time']:
+                    available['end_time'] = reservation['start_time']
+                    if available['end_time'] >= reservation['end_time']:
+                        new_segment = {
+                            'start_time': reservation['end_time'],
+                            'end_time': available['end_time']
+                        }
+                        time_available.append(new_segment)
+
+                if available['end_time'] >= reservation['end_time']:
+                    available['start_time'] = reservation['end_time']
+    #扣完，時段會破碎，所以把連續的時段併在一起	
+    time_available = sorted(time_available, key=lambda x: x['start_time'])
+    consolidated_time_available = []
+    for available in time_available:
+        if consolidated_time_available and consolidated_time_available[-1]['end_time'] == available['start_time']:
+            consolidated_time_available[-1]['end_time'] = available['end_time']
+        else:
+            consolidated_time_available.append(available)
+    #考量治療時間，修改time_available
 	#expertise_time
-	reserve_choises = []
-	for available in consolidated_time_available:
-		start = available['start_time']
-		while add_times(start, expertise_time) <= available['end_time']:
-			reserve_choises.append(start.strftime('%H:%M:%S'))
-			start = add_times(start, expertise_time)
+    reserve_choices = []
+    for available in consolidated_time_available:
+        start = available['start_time']
+        while add_times(start, expertise_time) <= available['end_time']:
+            reserve_choices.append(start.strftime('%H:%M:%S'))
+            start = add_times(start, expertise_time)
 
-	return JsonResponse({'reserve_choices': reserve_choises})
-
+    return JsonResponse({'reserve_choices': reserve_choices})
 
 
 #login check身份別，django 自帶，用isinstance分身份
