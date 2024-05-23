@@ -19,6 +19,37 @@ def index(request):
     context={}
     return render(request, "myApp/index.html", context)
 
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                
+                user_type = None
+                if isinstance(user, Client):
+                    user_type = 'Client'
+                elif isinstance(user, Clinic):
+                    user_type = 'Clinic'
+                elif isinstance(user, Doctor):
+                    user_type = 'Doctor'
+
+                response = {
+                    'status': 'success',
+                    'message': 'User is logged in',
+                    'user_type': user_type,
+                    'username': user.username,
+                    'email': user.email
+                }
+                return JsonResponse(response)
+    else:
+        form = AuthenticationForm()
+
+    return render(request, 'login.html', {'form': form})
+
 @login_required
 def add_doctor(request):
     if request.method == 'POST':
@@ -108,7 +139,6 @@ def add_Reservation(request):
             ExpID = request.session.get('ExpertiseID', 'Not Found')
             timeS = request.session.get('StartingTime', 'Not defined')
 
-            
             if SchedulingID == 'NotFound' or ExpID == 'Not Found' or timeS == 'Not defined' :
                 return HttpResponse('Missing scheduling information')
 
@@ -171,36 +201,7 @@ def add_Reservation(request):
     else:
         return HttpResponse('Login failed')
     
-#還沒改完但還缺一個    
-def waitingToRes(request):
-    if request.method == 'GET':
-        scheduling_id = request.GET.get('scheduling_id')  # Assuming scheduling_id is received in the request
-
-        # Retrieve waiting list entries for the specified scheduling
-        waiting_list = Waiting.objects.filter(SchedulingID=scheduling_id)
-
-        # Process and format the waiting list data
-        waiting_list_data = []
-        for entry in waiting_list:
-            client_name = get_client_name(entry.ClientID)  # Assuming a function to get client name
-            expertise_name = get_expertise_name(entry.expertiseID)  # Assuming a function to get expertise name
-            time_start = entry.time_start.strftime('%Y-%m-%d %H:%M:%S')
-            time_end = entry.time_end.strftime('%Y-%m-%d %H:%M:%S')
-
-            waiting_list_data.append({
-                'client_name': client_name,
-                'expertise_name': expertise_name,
-                'time_start': time_start,
-                'time_end': time_end
-            })
-
-        # Return the formatted waiting list data as JSON
-        return JsonResponse({'waiting_list': waiting_list_data})
-    else:
-        return HttpResponse('Invalid request method')
-    
-
-    
+#還沒改完但還缺一個*選定一比reservation，將其狀態改變，並轉變為reservation
 
 @login_required    
 def Doc_uploading(request):
@@ -270,7 +271,6 @@ def delete_doctor(request, doctor_email):
         return redirect('doctor_management.html')
 
     return render(request, 'doctor_management.html', {'doctor': doctor})
-
 
 #above are the reservation handling 計畫是將前端提交的搜索數據放到session storage中，在js裡處理運算邏輯後再到頁面上顯示，但這裡仍需要去檢查scheduling狀態（是否有人預約）
 
@@ -488,9 +488,10 @@ def doctor_reserve_page(request, doc_id):
 
 #診所預約按鈕按下去
 def clinic_reserve_page(request, clinic_id):
+    
     clinic_details = get_object_or_404(Clinic, id='clinic_id')
     return render(request, 'clinic_reserve.html', clinic_details)
-
+#unfinished
 @login_required
 def doctorPage_loading(request):
     #取完doctor reservation
@@ -641,33 +642,33 @@ def available(request):
 
 
 #login check身份別，django 自帶，用isinstance分身份
-def login_view(request):
-    if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                login(request, user)
-                
-                user_type = None
-                if isinstance(user, Client):
-                    user_type = 'Client'
-                elif isinstance(user, Clinic):
-                    user_type = 'Clinic'
-                elif isinstance(user, Doctor):
-                    user_type = 'Doctor'
 
-                response = {
-                    'status': 'success',
-                    'message': 'User is logged in',
-                    'user_type': user_type,
-                    'username': user.username,
-                    'email': user.email
-                }
-                return JsonResponse(response)
+
+def waitingToRes(request):
+    if request.method == 'GET':
+        scheduling_id = request.GET.get('scheduling_id')  # Assuming scheduling_id is received in the request
+
+        # Retrieve waiting list entries for the specified scheduling
+        waiting_list = Waiting.objects.filter(SchedulingID=scheduling_id)
+
+        # Process and format the waiting list data
+        waiting_list_data = []
+        for entry in waiting_list:
+            client_name = get_client_name(entry.ClientID)  # Assuming a function to get client name
+            expertise_name = get_expertise_name(entry.expertiseID)  # Assuming a function to get expertise name
+            time_start = entry.time_start.strftime('%Y-%m-%d %H:%M:%S')
+            time_end = entry.time_end.strftime('%Y-%m-%d %H:%M:%S')
+
+            waiting_list_data.append({
+                'client_name': client_name,
+                'expertise_name': expertise_name,
+                'time_start': time_start,
+                'time_end': time_end
+            })
+
+        # Return the formatted waiting list data as JSON
+        return JsonResponse({'waiting_list': waiting_list_data})
     else:
-        form = AuthenticationForm()
+        return HttpResponse('Invalid request method')
+    
 
-    return render(request, 'login.html', {'form': form})

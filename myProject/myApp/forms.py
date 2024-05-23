@@ -73,7 +73,7 @@ class ReservationForm(forms.ModelForm):
 class WaitingForm(forms.ModelForm):
     class Meta:
         model = Waiting
-        fields = ['ClientID','SchedulingID','expertiseID','time_start','time_end','Status']
+        fields = ['ClientID','SchedulingID','expertiseID','time_start','time_end','status']
         
         
 #django自帶login

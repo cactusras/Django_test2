@@ -218,15 +218,15 @@ class docClinicSearch(models.Model):
         (6, 'Saturday'),
         (7, 'Sunday')
     ]
-    doc_id = models.AutoField(primary_key=True)  #d.id
+    doc_id = models.IntegerField(primary_key=True)  #d.id
     doc_name = models.CharField(max_length=100) #d.name    
-    clinic_id = models.AutoField(primary_key=True) #d.clinicid
+    clinic_id = models.IntegerField() #d.clinicid
     clinic_name = models.CharField(max_length=100)  #c.name
     clinic_adress = models.TextField()#c.adress
     clinic_introduction = models.TextField(blank=True, null=True)#c.introduction
-    exp_id = models.AutoField(primary_key=True)#e.id
+    exp_id = models.IntegerField(primary_key=True)#e.id
     exp_name = models.CharField(max_length=100)#e.name
-    scheduling_id = models.AutoField(primary_key=True)#ms.id
+    scheduling_id = models.IntegerField()#ms.id
     start_date = models.DateField()#ms.start_date
     end_date = models.DateField()#ms.end_date
     workinghour_id = models.AutoField(primary_key=True)#w.WorkingHour_id
@@ -238,3 +238,4 @@ class docClinicSearch(models.Model):
         managed = False  # No migrations will be made for this model
         db_table = 'docClinicSearch'  # Name of the view in the database
 
+#docClinicSearch: AutoField to IntegerField, and PK? 
