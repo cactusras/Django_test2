@@ -124,6 +124,7 @@ class Reservation(models.Model):
     expertiseID = models.ForeignKey('Expertise', related_name='reservations', on_delete=models.CASCADE)
     time_start = models.DateTimeField()
     time_end = models.DateTimeField()
+
     #check_in = models.BooleanField(default=False)
     STATUS_CHOICES = (
         (0, 'reserved'),
@@ -143,6 +144,13 @@ class Reservation(models.Model):
     #改成scheduling之後應該就變成直觀能看到醫生不一定有診所
     def __str__(self):
         return f"{self.client.name} reservation for doctor{self.SchedulingID.DoctorID}, clinic {self.SchedulingID.DoctorID.clnicID}"
+    
+    def update_status(self, new_status):
+        if new_status in self.STATUS_CHOICES:
+            self.Status = new_status
+            self.save()
+        else:
+            raise ValueError("Invalid status value")
 
 class Waiting(models.Model):
     ClientID = models.ForeignKey('Client', related_name='waitings', on_delete=models.CASCADE)
