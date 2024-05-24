@@ -496,12 +496,13 @@ def clinic_reserve_page(request, clinic_id):
 def doctorPage_loading(request):
     #取完doctor reservation
     user = request.user
-    doctor = Doctor.objects.filter(user=user)
-    schedules = Scheduling.objects.filter(DocID = doctor)
+    doctor = Doctor.objects.filter(id=user.id)
+    schedules = Scheduling.objects.filter(DocID = doctor.id)
     #status 0,2,3才是真正在預約狀態中
     reservations = Reservation.objects.filter(SchedulingID__in=schedules).filter(status__in=[0, 2, 3])
+    empty_list = Reservation.objects.filter(SchedulingID__in=schedules).filter(status__in=[1, 5])
+    #是不是有另一種寫法？
     #empty 他處已有實現邏輯，之後我抄過來就好
-   # Empty = 
     context={
     'reservation_list': [
         {
@@ -512,18 +513,26 @@ def doctorPage_loading(request):
             'status': reservation.get_status_display(),  # Use get_status_display() method
         }
         for reservation in reservations
-    ]
+    ],
+      'empty_list':[
+          {
+            'client_name': empty_list.ClientID.name,
+            'empty_WD': empty_list.time_start.date(),
+            'empty_ST': empty_list.time_start.strftime('%H:%M'),
+            'expertise': empty_list.expertiseID.name, 
+            'status': empty_list.get_status_display()
+          }
+      ]
         
     }
     
     return render(request, 'doctor_page.html', context)
-    
-    
+        
 def client_loading(request):
     user = request.user
-    client = Client.objects.filter(user = user)
-    reservations = Reservation.objects.filter(ClientID=user)
-    waitings = Waiting.objects.filter(ClientID=user)
+    client = Client.objects.filter(id = user.id)
+    reservations = Reservation.objects.filter(ClientID=client.id)
+    waitings = Waiting.objects.filter(ClientID=client.id)
     context ={
         'reservation_list': [
         {
@@ -547,6 +556,7 @@ def client_loading(request):
         ],
          
     }
+    return render(request,'client_mainPage.html',context)
 
 #預約頁面日期選下去，計算可預約時間
 def add_times(time1, time2):
@@ -640,35 +650,49 @@ def available(request):
 
     return JsonResponse({'reserve_choices': reserve_choices})
 
-
 #login check身份別，django 自帶，用isinstance分身份
 
+def ClinicWaitingC(request):
+    return 
 
-def waitingToRes(request):
-    if request.method == 'GET':
-        scheduling_id = request.GET.get('scheduling_id')  # Assuming scheduling_id is received in the request
-
-        # Retrieve waiting list entries for the specified scheduling
-        waiting_list = Waiting.objects.filter(SchedulingID=scheduling_id)
-
-        # Process and format the waiting list data
-        waiting_list_data = []
-        for entry in waiting_list:
-            client_name = get_client_name(entry.ClientID)  # Assuming a function to get client name
-            expertise_name = get_expertise_name(entry.expertiseID)  # Assuming a function to get expertise name
+@login_required
+def waitingToResForC(request):
+    user = request.user
+    # Find the waiting entries for the current user with status=False
+    waiting_list = Waiting.objects.filter(ClientID=user.id, status=False)
+    
+    # Process and format the waiting list data
+    waiting_list_data = []
+    for entry in waiting_list:
+        # Check if the scheduling slot is available (not reserved)
+        if not Reservation.objects.filter(SchedulingID=entry.SchedulingID, Status__in=[0,2,4]).exists():
+            # Update the waiting status to True
+            entry.status = True
+            entry.save()
+            
+            # Format the waiting list data
+            client_name = entry.ClientID.name
+            expertise_name = entry.expertiseID.name
             time_start = entry.time_start.strftime('%Y-%m-%d %H:%M:%S')
             time_end = entry.time_end.strftime('%Y-%m-%d %H:%M:%S')
-
             waiting_list_data.append({
                 'client_name': client_name,
                 'expertise_name': expertise_name,
                 'time_start': time_start,
                 'time_end': time_end
             })
-
-        # Return the formatted waiting list data as JSON
-        return JsonResponse({'waiting_list': waiting_list_data})
-    else:
-        return HttpResponse('Invalid request method')
+            
+              # Insert a new reservation
+            reservation = Reservation.objects.create(
+                ClientID=entry.ClientID,
+                SchedulingID=entry.SchedulingID,
+                expertiseID=entry.expertiseID,
+                time_start=entry.time_start,
+                time_end=entry.time_end,
+                Status=0,  # Initial status
+            )
+            reservation.save()
+            
     
-
+    # Return the formatted waiting list data as JSON
+    return JsonResponse({'waiting_list': waiting_list_data})
