@@ -63,26 +63,20 @@ class CustomUser(AbstractBaseUser):
     
 
 class Client(CustomUser):
-    #user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)  # 與 CustomUser 關聯
-    #name = models.CharField(max_length=100)
-    #email = models.EmailField(unique=True)
-    #phone_number = models.CharField(max_length=15)
-    address = models.TextField()
+   
+    address = models.TextField(null=True,blank=True)
     birth_date = models.DateField()
     gender = models.CharField(max_length=10)
-    occupation = models.CharField(max_length=100)
+    occupation = models.CharField(max_length=100,null=True,blank=True)
     notify = models.BooleanField(default=True)
-    #pw = models.CharField(max_length=100)
 
     def __str__(self):
         return self.name
     
 
 class Clinic(CustomUser):
-   # user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)  # 與 CustomUser 關聯
-    #name = models.CharField(max_length=100)
+   
     license_number = models.CharField(max_length=50, unique=True)
-    #phone_number = models.CharField(max_length=15)
     address = models.TextField()
     introduction = models.TextField(blank=True, null=True)
     photo = models.ImageField(upload_to='clinics/')
@@ -92,12 +86,9 @@ class Clinic(CustomUser):
     
 class Doctor(CustomUser):
     
-    #user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)  # 與 CustomUser 關聯
-    #name = models.CharField(max_length=100)
-    #email = models.EmailField(unique=True)
-    #phone_number = models.CharField(max_length=15)
-    photo = models.ImageField(upload_to='doctors/')
-    clinic = models.ForeignKey('Clinic', related_name='doctors', on_delete=models.CASCADE)  # 與 Clinic 關聯
+    photo = models.ImageField(upload_to='doctors/',null=True,blank=True)
+    clinicID = models.ForeignKey('Clinic', related_name='doctors', on_delete=models.CASCADE)  # 與 Clinic 關聯
+    exoerience = models.TextField(null=True,blank=True)
     
 
     def __str__(self):
@@ -106,7 +97,6 @@ class Doctor(CustomUser):
 class Expertise(models.Model):
     
     name = models.CharField(max_length=100)
-    #description = models.TextField()
     time = models.TimeField(default=time(hour=1))
 
     def __str__(self):
@@ -218,18 +208,19 @@ class docClinicSearch(models.Model):
         (6, 'Saturday'),
         (7, 'Sunday')
     ]
-    doc_id = models.IntegerField(primary_key=True)  #d.id
+    id = models.CharField(max_length=255, primary_key=True)
+    doc_id = models.IntegerField()  #d.id
     doc_name = models.CharField(max_length=100) #d.name    
     clinic_id = models.IntegerField() #d.clinicid
     clinic_name = models.CharField(max_length=100)  #c.name
     clinic_adress = models.TextField()#c.adress
     clinic_introduction = models.TextField(blank=True, null=True)#c.introduction
-    exp_id = models.IntegerField(primary_key=True)#e.id
+    exp_id = models.IntegerField()#e.id
     exp_name = models.CharField(max_length=100)#e.name
     scheduling_id = models.IntegerField()#ms.id
     start_date = models.DateField()#ms.start_date
     end_date = models.DateField()#ms.end_date
-    workinghour_id = models.AutoField(primary_key=True)#w.WorkingHour_id
+    workinghour_id = models.IntegerField()#w.WorkingHour_id
     day_of_week = models.IntegerField(choices=DAY_CHOICES)#w.day_of_week
     start_time = models.TimeField()#w.start_time
     end_time = models.TimeField()#w.end_time

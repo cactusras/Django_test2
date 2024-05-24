@@ -16,9 +16,10 @@ def home(request):
     return render(request, "myApp/home.html", context)
 
 def index(request):
+    
     context={}
     return render(request, "myApp/index.html", context)
-
+#login check身份別，django 自帶，用isinstance分身份，此處等migrate完可進行初步測試，看要手動加資料還是把register頁面都弄好一併測試（需要頁面跳轉邏輯）
 def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
@@ -117,9 +118,6 @@ def add_client(request):
         form = ClientForm()
     return render(request, 'client_reges.html', {'form': form})
 
-#session getters刪除好
-
-#doc scheduling前端處理（因前端要顯示）
 
 def add_Reservation(request):
     if request.user.is_authenticated:
@@ -201,8 +199,6 @@ def add_Reservation(request):
     else:
         return HttpResponse('Login failed')
     
-#還沒改完但還缺一個*選定一比reservation，將其狀態改變，並轉變為reservation
-
 @login_required    
 def Doc_uploading(request):
     if request.method == 'POST':
@@ -271,8 +267,6 @@ def delete_doctor(request, doctor_email):
         return redirect('doctor_management.html')
 
     return render(request, 'doctor_management.html', {'doctor': doctor})
-
-#above are the reservation handling 計畫是將前端提交的搜索數據放到session storage中，在js裡處理運算邏輯後再到頁面上顯示，但這裡仍需要去檢查scheduling狀態（是否有人預約）
 
 def doctor_clinic_search_view(request):
         # Apply the filter
@@ -372,7 +366,6 @@ def get_time_slots(schedule):
     return time_slots
 
 #clinic 載入頁
-
 @login_required
 def clinic_load(request):
     #return clinic main page
@@ -491,18 +484,20 @@ def clinic_reserve_page(request, clinic_id):
     
     clinic_details = get_object_or_404(Clinic, id='clinic_id')
     return render(request, 'clinic_reserve.html', clinic_details)
-#unfinished
+
 @login_required
 def doctorPage_loading(request):
     #取完doctor reservation
     user = request.user
     doctor = Doctor.objects.filter(id=user.id)
+    
     schedules = Scheduling.objects.filter(DocID = doctor.id)
     #status 0,2,3才是真正在預約狀態中
     reservations = Reservation.objects.filter(SchedulingID__in=schedules).filter(status__in=[0, 2, 3])
     empty_list = Reservation.objects.filter(SchedulingID__in=schedules).filter(status__in=[1, 5])
     #是不是有另一種寫法？
     #empty 他處已有實現邏輯，之後我抄過來就好
+    
     context={
     'reservation_list': [
         {
@@ -513,16 +508,8 @@ def doctorPage_loading(request):
             'status': reservation.get_status_display(),  # Use get_status_display() method
         }
         for reservation in reservations
-    ],
-      'empty_list':[
-          {
-            'client_name': empty_list.ClientID.name,
-            'empty_WD': empty_list.time_start.date(),
-            'empty_ST': empty_list.time_start.strftime('%H:%M'),
-            'expertise': empty_list.expertiseID.name, 
-            'status': empty_list.get_status_display()
-          }
-      ]
+    ]
+    
         
     }
     
@@ -555,49 +542,53 @@ def client_loading(request):
         for waiting in waitings
         ],
          
+         
     }
     return render(request,'client_mainPage.html',context)
 
 #預約頁面日期選下去，計算可預約時間
-def add_times(time1, time2):
-	datetime1 = datetime.combine(datetime.min, time1)
-	datetime2 = datetime.combine(datetime.min, time2)
-	delta1 = datetime1 - datetime.min
-	delta2 = datetime2 - datetime.min
-	result_delta = delta1 + delta2
-	result_time = (datetime.min + result_delta).time()
-	return result_time
+
+def add_times(time1, duration):
+    # Helper function to add a timedelta to a time object
+    datetime1 = datetime.combine(datetime.min, time1)
+    result_datetime = datetime1 + duration
+    return result_datetime.time()
+
 def available(request):
+    # Get doctor_id, date, and expertise_name from the GET request
     doctor_id = request.GET.get('doctor_id')
     date_str = request.GET.get('date')
     date = datetime.strptime(date_str, '%Y-%m-%d').date()
     week_day = date.weekday()
 
+
     expertise_name = request.GET.get('expertise_name')
     expertise_list = request.session.get('expertise_list', [])
     expertise_time = None
+   
+    # Find the expertise time from the session
     for expertise in expertise_list:
         if expertise['name'] == expertise_name:
-            expertise_time = expertise['time']
+            expertise_time = datetime.strptime(expertise['time'], '%H:%M:%S').time()
             break  # Exit the loop once the expertise is found
 
+
+    # Fetch all schedules for the given doctor, including related WorkingHour data
     schedules = Scheduling.objects.filter(DoctorID=doctor_id).select_related('WorkingHour')
-    #先取了再說，不管是不是當天
+
+
     schedule_list = []
     reservation_list = []
+   
+    # Filter and prepare the schedule list
     for schedule in schedules:
-        if schedule.end_date >= date.today():#只可能預約今天以後的時間，所以以前的schedule不要加入list
+        if schedule.EndDate >= date.today():  # Only include future schedules
             status_conditions = Q(status=0) | Q(status=2) | Q(status=3)
-            schedule_condition = Q(schedule_id=schedule)
-            reservation = Reservation.objects.filter(status_conditions & schedule_condition)#今天以後已經被預約走的
+            schedule_condition = Q(schedule_id=schedule.id)
+            reservations = Reservation.objects.filter(status_conditions & schedule_condition)
 
-            for res in reservation:
-                reservation_list.append({
-                    'scheduleID': res.SchedulingID,
-                    'date': res.time_start.date(),
-                    'start_time': res.time_start,
-                    'end_time': res.time_end
-                })
+
+            # Append schedule details to the schedule list
             schedule_list.append({
                 'start_date': schedule.StartDate,
                 'end_date': schedule.EndDate,
@@ -606,32 +597,47 @@ def available(request):
                 'end_time': schedule.WorkingHour.end_time
             })
 
+
+            # Append reservation details to the reservation list
+            for res in reservations:
+                reservation_list.append({
+                    'scheduleID': res.schedule_id,
+                    'date': res.time_start.date(),
+                    'start_time': res.time_start,
+                    'end_time': res.time_end
+                })
+
+
     time_available = []
-    #此時time_available是要預約當日醫生有上班的時段們
+   
+    # Filter schedules for the given date
     for schedule in schedule_list:
-        #選擇預約日期當天無效且工作的日子不對的schedule不會加入
-        if schedule['start_date'] <= date and schedule['end_date'] >= date and schedule['day_of_week'] == week_day:
+        if schedule['start_date'] <= date <= schedule['end_date'] and schedule['day_of_week'] == week_day:
             available = {
                 'start_time': schedule['start_time'],
                 'end_time': schedule['end_time']
             }
             time_available.append(available)
-    #扣掉已經被預約的時段(上班時段包含整個預約時段、預約時段跨開始時間、預約時段跨結束時間)
+
+
+    # Remove reserved times from available times
     for reservation in reservation_list:
-        if reservation['date'] == date:#如果已經預約的紀錄，日期跟我想預約的日期相同
+        if reservation['date'] == date:
             for available in time_available[:]:
-                if available['start_time'] <= reservation['start_time'] and available['end_time'] >= reservation['start_time']:
+                if available['start_time'] <= reservation['start_time'] < available['end_time']:
+                    last_available_end = available['end_time']
                     available['end_time'] = reservation['start_time']
-                    if available['end_time'] >= reservation['end_time']:
+                    if last_available_end >= reservation['end_time']:
                         new_segment = {
                             'start_time': reservation['end_time'],
-                            'end_time': available['end_time']
+                            'end_time': last_available_end
                         }
                         time_available.append(new_segment)
-
-                if available['end_time'] >= reservation['end_time']:
+                if available['end_time'] >= reservation['end_time'] > available['start_time']:
                     available['start_time'] = reservation['end_time']
-    #扣完，時段會破碎，所以把連續的時段併在一起	
+
+
+    # Consolidate adjacent time slots
     time_available = sorted(time_available, key=lambda x: x['start_time'])
     consolidated_time_available = []
     for available in time_available:
@@ -639,22 +645,29 @@ def available(request):
             consolidated_time_available[-1]['end_time'] = available['end_time']
         else:
             consolidated_time_available.append(available)
-    #考量治療時間，修改time_available
-	#expertise_time
+
+
+    # Consider expertise time to modify time_available
     reserve_choices = []
+    expertise_duration = timedelta(hours=expertise_time.hour, minutes=expertise_time.minute, seconds=expertise_time.second)
     for available in consolidated_time_available:
         start = available['start_time']
-        while add_times(start, expertise_time) <= available['end_time']:
+        while add_times(start, expertise_duration) <= available['end_time']:
             reserve_choices.append(start.strftime('%H:%M:%S'))
-            start = add_times(start, expertise_time)
+            start = add_times(start, expertise_duration)
 
+
+    # Return available reservation choices as a JSON response
     return JsonResponse({'reserve_choices': reserve_choices})
+
+
 
 #login check身份別，django 自帶，用isinstance分身份
 
 def ClinicWaitingC(request):
     return 
 
+#存疑，（應該）現在這邊必須要候補時段跟被取消的預約時段一模一樣才卡的進去
 @login_required
 def waitingToResForC(request):
     user = request.user
@@ -669,7 +682,6 @@ def waitingToResForC(request):
             # Update the waiting status to True
             entry.status = True
             entry.save()
-            
             # Format the waiting list data
             client_name = entry.ClientID.name
             expertise_name = entry.expertiseID.name
