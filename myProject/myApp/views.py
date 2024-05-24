@@ -115,7 +115,7 @@ def add_client(request):
             return render(request,'successAddedClient.html')
     else:
         form = ClientForm()
-    return render(request, 'add_client.html', {'form': form})
+    return render(request, 'client_reges.html', {'form': form})
 
 #session getters刪除好
 

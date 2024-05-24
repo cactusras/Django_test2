@@ -32,26 +32,39 @@
                     {% csrf_token %}
                     <fieldset>
                         <legend class="login100-form-title p-b-26">
-                            <img src="{% static 'myApp/assets/dental.png' %}" alt="dental" style="width: 200px;" >
+                            <img src="{% static 'myApp/assets/dental.png' %}" alt="dental" style="width: 200px;">
                         </legend>
-                        
+
                         <!-- Display form errors if any -->
                         {% if form.errors %}
                             <div class="alert alert-danger">
                                 <strong>Error:</strong> Please correct the following errors.<br>
                                 {% for field in form %}
                                     {% for error in field.errors %}
-                                    <span>{{ error }}</span><br>
+                                        <span>{{ error }}</span><br>
                                     {% endfor %}
                                 {% endfor %}
                             </div>
-                        {% endif %}                
+                        {% endif %}
+
                         <!-- Form fields for CustomUserForm -->
                         {{ form.email }}
                         {{ form.name }}
                         {{ form.phone_number }}
                         {{ form.pw }}
-                    
+
+                        <!-- Dropdown for selecting user type -->
+                        <div class="wrap-input100 validate-input">
+                            <p>Identity</p>
+                            <div class="wrap-input100 dropdown">
+                                <select class="input100" name="userType">
+                                    <option value="Doctor">Doctor</option>
+                                    <option value="Client">Client</option>
+                                    <option value="Clinic">Clinic</option>
+                                </select>
+                            </div>
+                        </div>
+
                         <!-- Add additional fields based on the user type -->
                         {% if user_type == 'Doctor' %}
                             {{ doctor_form.as_p }}
@@ -60,15 +73,15 @@
                         {% elif user_type == 'Client' %}
                             {{ client_form.as_p }}
                         {% endif %}
-                        
+
                         <div class="container-login100-form-btn">
                             <div class="wrap-login100-form-btn">
                                 <div class="login100-form-bgbtn"></div>
-                                    <button class="login100-form-btn" type="submit">
-                                        Login
-                                    </button>
-                                </div>
+                                <button class="login100-form-btn" type="submit">
+                                    Login
+                                </button>
                             </div>
+                        </div>
                     </fieldset>
                 </form>
             </div>
@@ -76,10 +89,9 @@
     </div>
 
     <!-- JavaScript imports if needed -->
+    <script type="text/javascript">
+        /* Your JavaScript functions here */
+    </script>
 </body>
 
 </html>
-
-<script type="text/javascript">
-    /* Your JavaScript functions here */
-</script>
