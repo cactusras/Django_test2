@@ -4,7 +4,7 @@ email現在註解是因為頁面還沒有email 等html加上email 我這裡註�
 */
 
 var clinField = {
-    //email:"",
+    email:"",
     name: "",
     phone_number: "",
     license_number: "",
@@ -15,7 +15,7 @@ var clinField = {
 };
 
 function fetch_element(){
-        //clinField['email'] = document.getElementById('email').value
+        clinField['email'] = document.getElementById('email').value
         clinField['name'] = document.getElementById('name').value,
         clinField['phone_number'] = document.getElementById('phone_number').value,
         clinField['license_number'] = document.getElementById('license_number').value,
