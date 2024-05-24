@@ -52,7 +52,7 @@ $('#date1').datetimepicker({
 });*/
 
   //fetch使用者是否登入了 並設window變數(整個project都可取得)
-window.isLogin = false;
+window.isLogin = "";
 document.addEventListener('DOMContentLoaded', function() {
   fetch('/check_authentication/')
   .then(response => {
@@ -64,11 +64,13 @@ document.addEventListener('DOMContentLoaded', function() {
   })
   .then(data => {
       if (data.is_authenticated) {
-          isLogin = true;
-          console.log("isLogin = true");
+        window.isLogin = true;
+        console.log("isLogin = true");
       }else{
+        window.isLogin = false;
         console.log("isLogin = false");
       }
+      document.dispatchEvent(new CustomEvent('authChecked', { detail: window.isLogin }));
   })
   .catch(error => {
       console.log('Error checking authentication:', error);

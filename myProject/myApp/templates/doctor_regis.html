@@ -31,7 +31,7 @@
                         <li class="nav-item"><a class="nav-link" href="#!" style="font-size: 20px;">Q&A</a></li>
                     </ul>
                     <form class="d-flex">
-                        <button class="btn btn-outline-dark" type="submit"  style="font-size: 20px;">
+                        <button class="btn btn-outline-dark" type="button" id="nav_btn" onclick="navBtn_listener(event)" style="font-size: 20px;">
                             <i class="bi bi-person-fill"></i>
                             登入
                          <!--  <span class="badge bg-dark text-white ms-1 rounded-pill">0</span> -->
@@ -57,14 +57,14 @@
                                 <div class="col">
                                     <label for="name" class="required">名字</label>
                                     <div class="form-floating">
-                                        <input type="text" class="form-control half-width" id="name" name="name">
+                                        <input type="text" class="form-control half-width" id="name" name="name" required>
                                         <label for="name" style="color:#808080">請輸入您的名字</label>
                                     </div>
                                 </div>
                                 <div class="col">
                                     <label for="phone" class="required">電話</label>
                                     <div class="form-floating">
-                                        <input type="tel" class="form-control" id="phone_number" name="phone_number">
+                                        <input type="tel" class="form-control" id="phone_number" name="phone_number" required>
                                         <label for="phone" style="color:#808080">請輸入您的電話</label>
                                     </div>
                                 </div>
@@ -76,13 +76,6 @@
                                     <div class="form-floating">
                                         <input type="text" class="form-control half-width" id="license_doc" name="license_doc">
                                         <label for="name" style="color:#808080">請輸入您的執照編號</label>
-                                    </div>
-                                </div>
-                                <div class="col">
-                                    <label for="phone">學歷</label>
-                                    <div class="form-floating">
-                                        <input type="tel" class="form-control" id="school" name="school">
-                                        <label for="phone" style="color:#808080">請輸入您的學歷</label>
                                     </div>
                                 </div>
                             </div>
@@ -97,20 +90,13 @@
                                 <div class="col">
                                     <label for="phone">任職經歷</label>
                                     <div class="form-floating">
-                                        <input type="tel" class="form-control" id="experience" name="experience">
+                                        <input type="text" class="form-control" id="experience" name="experience">
                                         <label for="phone" style="color:#808080">請輸入您的任職經歷</label>
                                     </div>
                                 </div>
                             </div>
                             <br>
                             <div class="row">
-                                <div class="col">
-                                    <label for="name">診所名稱</label>
-                                    <div class="form-floating">
-                                        <input type="text" class="form-control" id="clinicID" name="clinicID">
-                                        <label for="name" style="color:#808080">請輸入您任職的診所名稱</label>
-                                    </div>
-                                </div>
                                 <div class="col">
                                     <label for="phone" class="required">時刻表</label>
                                     <div class="form-floating">

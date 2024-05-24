@@ -42,7 +42,7 @@ class ClinicForm(forms.ModelForm):
 class ClientForm(forms.ModelForm):
     class Meta:
         model = Client
-        fields = [ 'email','name','phone_number','pw','address','birth_date','gender','occupation','notify']
+        fields = [ 'email','name','phone_number','pw','address','gender','occupation','notify']
     
     def __init__(self, *args, **kwargs):
         super(ClientForm, self).__init__(*args,**kwargs)

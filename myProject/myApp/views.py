@@ -1,6 +1,11 @@
-from django.shortcuts import render
+import json
+import time
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import redirect, render
 from django.http import HttpResponse, JsonResponse
-
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import authenticate, login
 from .models import Clinic, Doctor, Client
 from .forms import DoctorForm
 from .forms import ClinicForm
@@ -57,26 +62,54 @@ def clieReserveRecord(request):
     return render(request, "UserAppointmentRecords.html", context)
 
 
-# 獲取所有诊所/醫生/病患的email資料
-def get_clinics_emails(request):
-    clinics = Clinic.objects.all()
-    emails = [clinic.email for clinic in clinics]  
-    return JsonResponse({'emails': emails})
+# 用filter查看所有诊所/醫生/病患的email資料是否已存在
+@csrf_exempt
+def isUniqueEmail_clin(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        email = data.get('email')
+        if Clinic.objects.filter(email=email).exists():
+            return JsonResponse({'isUnique': False}, status=200)
+        else:
+            return JsonResponse({'isUnique': True}, status=200)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-def get_clinics_licenses(request):
-    clinics = Clinic.objects.all()
-    licenses = [clinic.license_number for clinic in clinics]  
-    return JsonResponse({'licenses': licenses})
+@csrf_exempt
+def isUniqueLicense_clin(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        license_number = data.get('license_number')
+        if Clinic.objects.filter(license_number=license_number).exists():
+            return JsonResponse({'isUnique': False}, status=200)
+        else:
+            return JsonResponse({'isUnique': True}, status=200)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-def get_doctors_emails(request):
-    doctors = Doctor.objects.all()
-    emails = [doctor.email for doctor in doctors]  
-    return JsonResponse({'emails': emails})
+@csrf_exempt
+def isUniqueEmail_clie(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        email = data.get('email')
+        if Client.objects.filter(email=email).exists():
+            return JsonResponse({'isUnique': False}, status=200)
+        else:
+            return JsonResponse({'isUnique': True}, status=200)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-def get_clients_emails(request):
-    clients = Client.objects.all()
-    emails = [client.email for client in clients]  
-    return JsonResponse({'emails': emails})
+@csrf_exempt
+def isUniqueEmail_doc(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        email = data.get('email')
+        if Doctor.objects.filter(email=email).exists():
+            return JsonResponse({'isUnique': False}, status=200)
+        else:
+            return JsonResponse({'isUnique': True}, status=200)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 #add doctor不需要設自動登入
 def add_doctor(request):
@@ -246,3 +279,44 @@ def clinic_info(request):
         return JsonResponse(info)
     else:
         return JsonResponse({'error': 'User is not a clinic admin'}, status=400)
+    
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                
+                user_type = None
+                if isinstance(user, Client):
+                    user_type = 'Client'
+                elif isinstance(user, Clinic):
+                    user_type = 'Clinic'
+                elif isinstance(user, Doctor):
+                    user_type = 'Doctor'
+
+                response = {
+                    'status': 'success',
+                    'message': 'User is logged in',
+                    'user_type': user_type,
+                    'username': user.username,
+                    'email': user.email
+                }
+
+                if user_type == 'Client':
+                    return redirect('/searchPage')
+                elif user_type == 'Clinic':
+                    return redirect('/clinicPage')
+                elif user_type == 'Doctor':
+                    return redirect('/doctorPage')
+                
+                # 如果以上所有都不匹配，則返回登錄頁面
+                return redirect('/ClicktoEditSchedule')
+
+    else:
+        form = AuthenticationForm()
+
+    return render(request, 'login.html', {'form': form})

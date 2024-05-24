@@ -119,11 +119,12 @@
     <div class="limiter">
         <div class="container-login100">
             <div class="wrap-login100">
-                <form class="login100-form validate-form">
-        
-                    <div class="login100-form-title p-b-26">
-                        <img src="{% static 'myApp/assets/dental.png' %}" alt="dental" style="width: 200px;">
-                    </div>
+                <form id="loginForm" method="post" class="login100-form validate-form">
+                  {% csrf_token %}
+                   <fieldset>
+                    <legend class="login100-form-title p-b-26">
+                        <img src="{% static 'myApp/assets/dental.png' %}" alt="dental" style="width: 200px;" >
+                    </legend>
 
                    
 
@@ -131,15 +132,15 @@
                         <p>Identity</p>
                         <div class="wrap-input100 dropdown">
                             <select class="input100" name="userType">
-                                <option value="Dentist">醫生</option>
-                                <option value="Client">患者</option>
+                                <option value="Dentist">患者</option>
+                                <option value="Client">醫生</option>
                                 <option value="Clinic">診所</option>
                             </select>
                         </div>
                     </div>
                     
                     <div class="wrap-input100 validate-input">
-                            <input class="input100" type="email" name="useremail">
+                            <input class="input100" type="email" name="username" id="username">
                             <span class="focus-input100" data-placeholder="Email"></span>
                     </div>
                     
@@ -147,21 +148,36 @@
                         <span class="btn-show-pass">
                            <i class="zmdi zmdi-eye"></i>
                         </span>
-                        <input class="input100" type="password" name="pass">
+                        <input class="input100" type="password" name="password" id="password">
                       <span class="focus-input100" data-placeholder="Password"></span>
                     </div>
 
                     <div class="container-login100-form-btn">
                         <div class="wrap-login100-form-btn">
                             <div class="login100-form-bgbtn"></div>
-                            <button class="login100-form-btn">
+                            <button class="login100-form-btn" type="submit">
                                 Login
                             </button>
                         </div>
                     </div>
 
-                    <div class="text-center p-t-115">
-                    </div>
+                <br>
+
+                    <div class="container px-4">
+                        <div class="row gx-5">
+                          <div class="col">
+                            <button type="button" onclick="clieRegis(event)" class="btn btn-primary" style="background-color: #F0EAD6; border-color: #F0EAD6; color: #333;">
+                                患者註冊
+                            </button>
+                          </div>
+                          <div class="col">
+                            <button type="button" onclick="clinRegis(event)" class="btn btn-primary" style="background-color: #F0EAD6; border-color: #F0EAD6; color: #333;">
+                                診所註冊
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                   </fieldset> 
                 </form>
             </div>
         </div>
@@ -169,7 +185,7 @@
 
     <div id="dropDownSelect1"></div>
 
-    <script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+    <!--<script src="vendor/jquery/jquery-3.2.1.min.js"></script>
     <script src="vendor/animsition/js/animsition.min.js"></script>
     <script src="vendor/bootstrap/js/popper.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
@@ -177,9 +193,20 @@
     <script src="vendor/daterangepicker/moment.min.js"></script>
     <script src="vendor/daterangepicker/daterangepicker.js"></script>
     <script src="vendor/countdowntime/countdowntime.js"></script>
-    <script src="js/main.js"></script>
+    <script src="{% static 'myApp/js/main.js' %}"></script>-->
 
     <script type="text/javascript">
+
+        function clieRegis(event){
+            event.preventDefault();
+            window.location.href = "/client_dataEdit";
+        }
+
+        function clinRegis(event){
+            event.preventDefault();
+            window.location.href = "/clinic_dataEdit";
+        }
+
         /* 加入email */
         let data = {
             "example@example.com": "password123",
@@ -188,7 +215,7 @@
     
         function login(event) {
             let emailInput = document.querySelector("input[name='useremail']");
-            let passwordInput = document.querySelector("input[name='pass']");
+            let passwordInput = document.querySelector("input[name='password']");
     
             let email = emailInput.value;
             let password = passwordInput.value;
@@ -210,7 +237,7 @@
             event.preventDefault();
         }
     
-        document.querySelector(".login100-form-btn").addEventListener("click", login);
+        //document.querySelector(".login100-form-btn").addEventListener("click", login(event));
     </script>
     
 

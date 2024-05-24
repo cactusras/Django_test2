@@ -26,7 +26,7 @@
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <form class="d-flex">
-                        <button class="btn btn-outline-dark" type="submit"  style="font-size: 20px;" id="nav_btn">
+                        <button class="btn btn-outline-dark" onclick="navBtn_listener(event)"  style="font-size: 20px;" id="nav_btn">
                             <i class="bi bi-person-fill"></i>
                             登入
                          <!--  <span class="badge bg-dark text-white ms-1 rounded-pill">0</span> -->
@@ -53,49 +53,43 @@
                             <div class="col">
                                 <label for="name" class="required">診所名稱</label>
                                 <div class="form-floating">
-                                    <input type="text" class="form-control half-width" id="name">
-                                    <label for="name" style="color:#808080">請輸入診所名稱</label>
+                                    <input type="text" class="form-control half-width" id="name" name="name" required>
                                 </div>
                             </div>
                             <div class="col">
-                                <label for="phone" class="required">電話</label>
+                                <label for="phone_number" class="required">電話</label>
                                 <div class="form-floating">
-                                    <input type="tel" class="form-control" id="phone_number" name="phone_number">
-                                    <label for="phone" style="color:#808080">請輸入您的診所電話</label>
-                                </div>
-                            </div>
-                        </div>
-                        <br>
-                        <div class="row">
-                            <div class="col">
-                                <label for="password" class="required">密碼</label>
-                                <div class="form-floating">
-                                    <input type="text" class="form-control half-width" id="pw" name="pw">
-                                    <label for="name" style="color:#808080">請輸入您的密碼</label>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <label for="intro">介紹</label>
-                                <div class="form-floating">
-                                    <input type="tel" class="form-control" id="introduction" name="introduction">
-                                    <label for="phone" style="color:#808080">請輸入您的診所介紹</label>
+                                    <input type="tel" class="form-control" id="phone_number" name="phone_number" required>
                                 </div>
                             </div>
                         </div>
                         <br>
                         <div class="row">
                             <div class="col">
-                                <label for="num" class="required">營業執照編號</label>
+                                <label for="pw" class="required">密碼</label>
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="license_number" name="license_number" style="width: 50%; margin-right: 30px;">
-                                    <label for="name" style="color:#808080">請輸入您的營業執照編號</label>
+                                    <input type="password" class="form-control half-width" id="pw" name="pw" required>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <label for="introduction">介紹</label>
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="introduction" name="introduction">
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col">
+                                <label for="license_number" class="required">營業執照編號</label>
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="license_number" name="license_number" style="width: 50%; margin-right: 30px;" required>
                                 </div>
                             </div>
                             <div class="col">
                                 <label for="address" class="required">地址</label>
                                 <div class="form-floating">
-                                    <input type="tel" class="form-control" id="address" name="address">
-                                    <label for="phone" style="color:#808080">請輸入您的地址</label>
+                                    <input type="text" class="form-control" id="address" name="address" autocomplete="address" required>
                                 </div>
                             </div>
                         </div>
@@ -103,7 +97,7 @@
                         <div class="row">
                         </div>
                         <div class="col">
-                            <label for="name">圖片</label>
+                            <label for="photo">圖片</label>
                             <div class="form-floating">
                                 <input type="file" class="form-control-file" id="photo" name="photo">
                             </div>
@@ -113,7 +107,7 @@
                        
                         <button class="setting-button" id="btnDocManage">管理/新增醫師</button>
 
-                        <button class="rectangle-button" id="btnClinRegis">完成</button>
+                        <button class="rectangle-button" id="btnClinRegis" onclick="regisBtn_listener(event)">完成</button>
                      </fieldset>
                     </form>
                     </div>
@@ -141,5 +135,6 @@
             <!-- Core theme JS-->
             <script src="{% static 'myApp/js/scripts.js' %}"></script>
             <script src="{% static 'myApp/js/clinic.js' %}"></script>
+            
     </body>
 </html>
