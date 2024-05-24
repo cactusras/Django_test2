@@ -33,9 +33,9 @@ def clinDataEd(request):
     context={}
     return render(request, "clinic_dataEdit.html", context)
 
-def docRegis(request):
+def docDataEd(request):
     context={}
-    return render(request, "doctor_regis.html", context)
+    return render(request, "doctor_dataEdit.html", context)
 
 def clickSchedule(request):
     context={}
@@ -60,6 +60,10 @@ def docPage(request):
 def clieReserveRecord(request):
     context={}
     return render(request, "UserAppointmentRecords.html", context)
+
+def dentalLogin(request):
+    context={}
+    return render(request, "dentalLogin.html", context)
 
 
 # 用filter查看所有诊所/醫生/病患的email資料是否已存在
@@ -306,15 +310,7 @@ def login_view(request):
                     'email': user.email
                 }
 
-                if user_type == 'Client':
-                    return redirect('/searchPage')
-                elif user_type == 'Clinic':
-                    return redirect('/clinicPage')
-                elif user_type == 'Doctor':
-                    return redirect('/doctorPage')
-                
-                # 如果以上所有都不匹配，則返回登錄頁面
-                return redirect('/ClicktoEditSchedule')
+                return JsonResponse(response)
 
     else:
         form = AuthenticationForm()

@@ -102,7 +102,7 @@ async function isUniqueEmail(email){
 }
 
 function fetch_info(){
-    fetch('/clinic/add_clinic/', {
+    fetch('/clinic/clinic_info/', {
         method: 'GET'
     })
     .then(response => {
@@ -180,7 +180,7 @@ async function regisBtn_listener(event) {
 
     //html元素name == elements[]中的name == model中的attribute name
     // 发送 POST 请求到 Django 后端视图
-    fetch('/clinic_dataEdit/', {
+    fetch('/clinic_dataEdit/add_clinic/', {
         method: 'POST',
         body: JSON.stringify(clinField),
         headers: {
