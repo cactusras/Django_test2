@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponse
 from .forms import DoctorForm,ClinicForm,ClientForm,SchedulingForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm
@@ -10,10 +11,9 @@ from datetime import datetime, timedelta
 from django.http import JsonResponse
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login
+from django.views.decorators.csrf import csrf_exempt
 
-def home(request):
-    context={}
-    return render(request, "myApp/home.html", context)
+
 
 def index(request):
     
@@ -51,61 +51,6 @@ def login_view(request):
 
     return render(request, 'login.html', {'form': form})
 
-@login_required
-def add_doctor(request):
-    if request.method == 'POST':
-        doctor_form_data = request.session.get('doctor_form_data')
-        expertise_list = request.session.get('expertise_list', [])
-        schedule_form_data = request.session.get('schedule_form_data')
-        working_hour_list = request.session.get('working_hour_list', [])
-
-        if not (doctor_form_data and expertise_list and schedule_form_data and working_hour_list):
-            return redirect('step_one')
-
-        clinic = Clinic.objects.get(user=request.user)
-        # Add clinic to the doctor form data
-        doctor_form_data['clinic'] = clinic
-
-        email = doctor_form_data.pop('email')
-        doctor, created = Doctor.objects.update_or_create(email=email, defaults=doctor_form_data)
-
-        # Delete all existing doctor expertise entries
-        Doc_Expertise.objects.filter(doctor=doctor).delete()
-
-        # Create new doctor expertise instances
-        for expertise_data in expertise_list:
-            expertise_name = expertise_data.get('name')
-            expertise, created = Expertise.objects.get_or_create(name=expertise_name)
-            Doc_Expertise.objects.create(doctor=doctor, expertise=expertise)
-
-        for working_hour_data in working_hour_list:
-            working_hour, created = WorkingHour.objects.update_or_create(
-                day_of_week=working_hour_data['day_of_week'],
-                start_time=working_hour_data['start_time'],
-                end_time=working_hour_data['end_time'],
-                defaults=working_hour_data
-            )
-            Scheduling.objects.update_or_create(
-                doctor=doctor,
-                working_hour=working_hour,
-                defaults=schedule_form_data
-            )
-
-        request.session.flush()
-        return redirect('success')
-
-    return redirect('step_one')
-
-#clinic posting
-def add_clinic(request):
-    if request.method == 'POST':
-        form = ClinicForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return render(request, 'success.html')
-    else:
-        form = ClinicForm()
-    return render(request, 'add_clinic.html', {'form': form})
 
 #client posting
 def add_client(request):
@@ -113,13 +58,15 @@ def add_client(request):
         form = ClientForm(request.POST)
         if form.is_valid():
             form.save()
-            return render(request,'successAddedClient.html')
+            return render(request,'searchPage.html')
     else:
         form = ClientForm()
-    return render(request, 'client_reges.html', {'form': form})
+    return render(request, 'client_dataEdit.html', {'form': form})
 
 
 def add_Reservation(request):
+    
+
     if request.user.is_authenticated:
         user_id = request.user.id
 
@@ -199,53 +146,110 @@ def add_Reservation(request):
     else:
         return HttpResponse('Login failed')
     
+#clinic posting
+def add_clinic(request):
+    if request.method == 'POST':
+        form = ClinicForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return render(request, 'clinic_dataEdit.html')
+    else:
+        form = ClinicForm()
+    return render(request, 'clinic_dataEdit.html', {'form': form})
+
+
+@login_required
+def add_doctor(request):
+    if request.method == 'POST':
+        doctor_form_data = request.session.get('doctor_form_data')
+        expertise_list = request.session.get('expertise_list', [])
+        schedule_form_data = request.session.get('schedule_form_data')
+        working_hour_list = request.session.get('working_hour_list', [])
+
+        if not (doctor_form_data and expertise_list and schedule_form_data and working_hour_list):
+            return render(request,'doctor_dataEdit.html')
+
+        clinic = Clinic.objects.get(user=request.user)
+        # Add clinic to the doctor form data
+        doctor_form_data['clinic'] = clinic
+
+        email = doctor_form_data.pop('email')
+        doctor, created = Doctor.objects.update_or_create(email=email, defaults=doctor_form_data)
+
+        # Delete all existing doctor expertise entries
+        Doc_Expertise.objects.filter(doctor=doctor).delete()
+
+        # Create new doctor expertise instances
+        for expertise_data in expertise_list:
+            expertise_name = expertise_data.get('name')
+            expertise, created = Expertise.objects.get_or_create(name=expertise_name)
+            Doc_Expertise.objects.create(doctor=doctor, expertise=expertise)
+
+        for working_hour_data in working_hour_list:
+            working_hour, created = WorkingHour.objects.update_or_create(
+                day_of_week=working_hour_data['day_of_week'],
+                start_time=working_hour_data['start_time'],
+                end_time=working_hour_data['end_time'],
+                defaults=working_hour_data
+            )
+            Scheduling.objects.update_or_create(
+                doctor=doctor,
+                working_hour=working_hour,
+                defaults=schedule_form_data
+            )
+
+        request.session.flush()
+        return redirect('success')
+
+    return render(request,'doctor_dataEdit.html')
+
 @login_required    
 def Doc_uploading(request):
     if request.method == 'POST':
-        doctor_form = DoctorForm(request.POST, request.FILES, prefix='doctor')
+        doctor_form = DoctorForm(request.POST, request.FILES)
         if doctor_form.is_valid():
             request.session['doctor_form_data'] = doctor_form.cleaned_data
-            return redirect('step_two')
+            return render(request,'ClicktoEditSchedule.html')
     else:
-        doctor_form = DoctorForm(prefix='doctor')
-    return render(request, 'step_one.html', {'doctor_form': doctor_form})
+        doctor_form = DoctorForm()
+    return render(request, 'doctor_dataEdit.html', {'doctor_form': doctor_form})
 
 @login_required
 def DocExp_uploading(request):
     if request.method == 'POST':
-        doc_expertise_form = ExpertiseForm(request.POST, prefix='expertise')
+        doc_expertise_form = ExpertiseForm(request.POST)
         if doc_expertise_form.is_valid():
             doc_expertise_list = request.session.get('doc_expertise_list', [])
             doc_expertise_list.append(doc_expertise_form.cleaned_data)
             request.session['expertise_list'] = doc_expertise_list
-            return redirect('step_two')
+            return render(request,'doctor_dataEdit.html')
     else:
-        expertise_form = ExpertiseForm(prefix='expertise')
-    return render(request, 'step_two.html', {'expertise_form': expertise_form})
+        expertise_form = ExpertiseForm()
+    return render(request, 'doctor_dataEdit.html', {'expertise_form': expertise_form})
 
 @login_required
 def workingHour_upload(request):
     if request.method == 'POST':
-        working_hour_form = WorkingHourForm(request.POST, prefix='working_hour')
+        working_hour_form = WorkingHourForm(request.POST)
         if working_hour_form.is_valid():
             working_hour_list = request.session.get('working_hour_list', [])
             working_hour_list.append(working_hour_form.cleaned_data)
             request.session['working_hour_list'] = working_hour_list
-            return redirect('step_three')
+            return render(request,'ClicktoEditSchedule.html')
     else:
-        working_hour_form = WorkingHourForm(prefix='working_hour')
-    return render(request, 'step_four.html', {'working_hour_form': working_hour_form})
+        working_hour_form = WorkingHourForm()
+    return render(request, 'ClicktoEditSchedule.html', {'working_hour_form': working_hour_form})
 
 @login_required
 def scheduling_upload(request):
     if request.method == 'POST':
-        schedule_form = SchedulingForm(request.POST, prefix='schedule')
+        schedule_form = SchedulingForm(request.POST)
         if schedule_form.is_valid():
             request.session['schedule_form_data'] = schedule_form.cleaned_data
-            return redirect('step_four')
+            return render(request,'doctor_dataEdit.html')
     else:
-        schedule_form = SchedulingForm(prefix='schedule')
-    return render(request, 'step_three.html', {'schedule_form': schedule_form})
+        schedule_form = SchedulingForm()
+    return render(request, 'doctor_dataEdit.html', {'schedule_form': schedule_form})
 
 @login_required
 def success(request):
@@ -342,7 +346,7 @@ def doctor_clinic_search_view(request):
             #clinic_list.append(clinic['clinic_id'])
             #request.session['clinic_list'] = clinic_list  # Save session
     
-    return render(request, 'search_results.html', {
+    return render(request, 'searchPage.html', {
         'filter': filter,
         'doc_final': doc_final,
         'clinic_final': clinic_final
@@ -409,7 +413,7 @@ def clinic_load(request):
         for reservation in reservations
     ],
     }
-    return render(request, 'clinic_main.html', context)
+    return render(request, 'clinicPage.html', context)
 
 #reservation id required
 #以下為reservation狀態改變
@@ -515,7 +519,7 @@ def doctorPage_loading(request):
     
     return render(request, 'doctor_page.html', context)
         
-def client_loading(request):
+def clientRecord_loading(request):
     user = request.user
     client = Client.objects.filter(id = user.id)
     reservations = Reservation.objects.filter(ClientID=client.id)
@@ -544,7 +548,7 @@ def client_loading(request):
          
          
     }
-    return render(request,'client_mainPage.html',context)
+    return render(request,'UserAppointmentRecords.html',context)
 
 #預約頁面日期選下去，計算可預約時間
 
@@ -660,12 +664,8 @@ def available(request):
     # Return available reservation choices as a JSON response
     return JsonResponse({'reserve_choices': reserve_choices})
 
-
-
 #login check身份別，django 自帶，用isinstance分身份
 
-def ClinicWaitingC(request):
-    return 
 
 #存疑，（應該）現在這邊必須要候補時段跟被取消的預約時段一模一樣才卡的進去
 @login_required
@@ -708,3 +708,157 @@ def waitingToResForC(request):
     
     # Return the formatted waiting list data as JSON
     return JsonResponse({'waiting_list': waiting_list_data})
+
+
+def home(request):
+    context={}
+    return render(request, "searchPage.html", context)
+
+def clieReserve(request):
+    context={}
+    return render(request, "client_reservation.html", context)
+
+
+def cliedataEd(request):
+    context={}
+    return render(request, "client_dataEdit.html", context)
+
+
+def clinDataEd(request):
+    context={}
+    return render(request, "clinic_dataEdit.html", context)
+
+
+def docDataEd(request):
+    context={}
+    return render(request, "doctor_dataEdit.html", context)
+
+
+def clickSchedule(request):
+    context={}
+    return render(request, "ClicktoEditSchedule.html", context)
+
+
+def login(request):
+    context={}
+    return render(request, "login.html", context)
+
+
+def clinHome(request):
+    context={}
+    return render(request, "clinicPage.html", context)
+
+
+def docManage(request):
+    context={}
+    return render(request, "doctor_management.html", context)
+
+
+def docPage(request):
+    context={}
+    return render(request, "doctorPage.html", context)
+
+
+def clieReserveRecord(request):
+    context={}
+    return render(request, "UserAppointmentRecords.html", context)
+
+
+def dentalLogin(request):
+    context={}
+    return render(request, "dentalLogin.html", context)
+
+
+
+
+# 用filter查看所有诊所/醫生/病患的email資料是否已存在
+@csrf_exempt
+def isUniqueEmail_clin(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        email = data.get('email')
+        if Clinic.objects.filter(email=email).exists():
+            return JsonResponse({'isUnique': False}, status=200)
+        else:
+            return JsonResponse({'isUnique': True}, status=200)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+@csrf_exempt
+def isUniqueLicense_clin(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        license_number = data.get('license_number')
+        if Clinic.objects.filter(license_number=license_number).exists():
+            return JsonResponse({'isUnique': False}, status=200)
+        else:
+            return JsonResponse({'isUnique': True}, status=200)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+@csrf_exempt
+def isUniqueEmail_clie(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        email = data.get('email')
+        if Client.objects.filter(email=email).exists():
+            return JsonResponse({'isUnique': False}, status=200)
+        else:
+            return JsonResponse({'isUnique': True}, status=200)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+@csrf_exempt
+def isUniqueEmail_doc(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        email = data.get('email')
+        if Doctor.objects.filter(email=email).exists():
+            return JsonResponse({'isUnique': False}, status=200)
+        else:
+            return JsonResponse({'isUnique': True}, status=200)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+def check_authentication(request):
+    if request.user.is_authenticated:
+        return JsonResponse({'is_authenticated': True})
+    else:
+        return JsonResponse({'is_authenticated': False})
+def doctor_info(request):
+    if hasattr(request.user, 'doctor'):
+        user = request.user
+        info = {
+            'email': user.email,
+            'name': user.name,
+            'phone_number': user.phone_number,
+            'password': user.pw,
+            'photo_url': user.doctor.photo.url,
+            'experience': user.doctor.experience,
+        }
+        return JsonResponse(info)
+    else:
+        return JsonResponse({'error': 'User is not a doctor'}, status=400)
+   
+def client_info(request):
+    if hasattr(request.user, 'client'):
+        user = request.user
+        info = {
+            'email': user.email,
+            'name': user.name,
+            'phone_number': user.phone_number,
+            'password': user.pw,
+            'address': user.client.address,
+            'birth_date': user.client.birth_date,
+            'gender': user.client.gender,
+            'occupation': user.client.occupation,
+            'notify': user.client.notify,
+        }
+        return JsonResponse(info)
+    else:
+        return JsonResponse({'error': 'User is not a client'}, status=400)
+
