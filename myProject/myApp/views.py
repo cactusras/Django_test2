@@ -423,18 +423,21 @@ def reservationStCF(request, reservation_id):
     # Update the status to "checkin Failed"
     reservation.update_status(1) 
     reservation.save()
+    return render(request,'clinicPage.html')
     
 def reservationStSc(request, reservation_id):
     reservation = Reservation.objects.get(pk=reservation_id)
     # Update the status to "checkin successed"
     reservation.update_status(2) 
     reservation.save()
+    return render(request,'clinicPage.html')
     
 def reservationStIt(request, reservation_id):
     reservation = Reservation.objects.get(pk=reservation_id)
     # Update the status to "in treatment"
     reservation.update_status(3) 
     reservation.save()
+    return render(request,'clinicPage.html')
     
 def reservationStFn(request, reservation_id):
     reservation = Reservation.objects.get(pk=reservation_id)
@@ -442,13 +445,15 @@ def reservationStFn(request, reservation_id):
     reservation.update_status(4) 
     reservation.save()
     #下次預約
-    return render(request,'Next_Reservation.html')
+    return render(request,'clinicPage.html')
+    
     
 def reservationStCbD(request, reservation_id):
     reservation = Reservation.objects.get(pk=reservation_id)
     # Update the status to "cancelled by doc"
     reservation.update_status(5) 
     reservation.save()
+    return render(request,'clinicPage.html')
 
 #預約此醫生按鈕按下去
 def doctor_reserve_page(request, doc_id):
@@ -767,9 +772,6 @@ def clieReserveRecord(request):
 def dentalLogin(request):
     context={}
     return render(request, "dentalLogin.html", context)
-
-
-
 
 # 用filter查看所有诊所/醫生/病患的email資料是否已存在
 @csrf_exempt
