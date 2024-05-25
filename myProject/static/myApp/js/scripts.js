@@ -20,21 +20,7 @@ function getUsers() {
 // Call the getUsers function when the window loads
 window.onload = getUsers;*/
 
-function Linyi(){
-    
-}
 
-function julieTest3(){
-    
-}
-
-function wntng(){
-
-}
-
-function Linyi2(){
-    
-}
 /*
 $('#date1').datetimepicker({
   date:null,
@@ -53,7 +39,10 @@ $('#date1').datetimepicker({
 
   //fetch使用者是否登入了 並設window變數(整個project都可取得)
 window.isLogin = "";
+window.username = "";
+
 document.addEventListener('DOMContentLoaded', function() {
+  const btnNav = document.getElementById('nav_btn');
   fetch('/check_authentication/')
   .then(response => {
       if (response.ok) {
@@ -66,9 +55,11 @@ document.addEventListener('DOMContentLoaded', function() {
       if (data.is_authenticated) {
         window.isLogin = true;
         console.log("isLogin = true");
+        btnNav.innerText = username;
       }else{
         window.isLogin = false;
         console.log("isLogin = false");
+        btnNav.innerText = '登入';
       }
       document.dispatchEvent(new CustomEvent('authChecked', { detail: window.isLogin }));
   })
@@ -77,3 +68,30 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 })
   
+function navBtn_listener(event){
+  event.preventDefault();
+  fetch('/login/login_view/')
+  .then(response => {
+      if (response.ok) {
+          return response.json();
+      } else {
+          throw new Error('Network response was not ok');
+      }
+  })
+  .then(data => {
+      if (window.isLogin) {
+        if(data.user_type == 'Client'){
+          window.location.href = 'searchPage.html'
+        }else if(data.user_type == 'Clinic'){
+          window.location.href = '/clinic/home/'
+        }else if(data.user_type == 'Doctor'){
+          window.location.href = '/doctor/page/'
+        }
+      }else{
+        window.location.href = '/login'
+      }
+  })
+  .catch(error => {
+      console.log('Error checking authentication:', error);
+  });
+}

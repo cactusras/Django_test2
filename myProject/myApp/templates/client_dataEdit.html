@@ -34,13 +34,9 @@
                 <a class="navbar-brand" href="#!"  style="font-size: 24px;"> 牙醫預約平台</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
-                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="#!" style="font-size: 20px;">找醫師</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#!" style="font-size: 20px;">紀錄</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#!" style="font-size: 20px;">Q&A</a></li>
-                    </ul>
-                    <form class="d-flex">
-                        <button class="btn btn-outline-dark" type="submit"  style="font-size: 20px;">
+                   
+                    <div class="ms-auto">
+                        <button class="btn btn-outline-dark" id="nav_btn" type="submit" onclick="navBtn_listener(event)" style="font-size: 20px;">
                             <i class="bi bi-person-fill"></i>
                             使用者
                          <!--  <span class="badge bg-dark text-white ms-1 rounded-pill">0</span> -->
@@ -53,10 +49,10 @@
         <section class="py-5"  style="background-color:#FFFFF4">
             <div class="container" style="border: 1px solid #F0EAD6;">
                 <div class="row row-cols-1">
-                    <form id="clientForm" method="post">
+                    <form id="clientForm" method="post"  action="{% url 'add_client' %}">
                         {% csrf_token %}
                             <fieldset>
-                    <legend class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:80px; font-size: 20px; ">
+                    <legend id="barTitle" class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:80px; font-size: 20px; ">
                         我的帳號
                     </legend>
                     <!--註冊內容-->
@@ -64,33 +60,30 @@
                         <br>
                         <div class="row">
                             <div class="col">
-                                <label for="email">帳號(電子郵件)</label>
+                                <label for="email" class="required">帳號(電子郵件)</label>
                                 <div class="form-floating">
-                                    <input type="email" class="form-control" id="email">
-                                    <label for="email" style="color:#808080">請輸入您的電子郵件</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
                                 </div>
                             </div>
                             <div class="col">
                                 <label for="phone" class="required">電話</label>
                                 <div class="form-floating">
-                                    <input type="tel" class="form-control" id="phone">
-                                    <label for="phone" style="color:#808080">請輸入您的電話</label>
+                                    <input type="tel" class="form-control" id="phone" name="phone" required>
                                 </div>
                             </div>
                         </div>
                         <br>
                         <div class="row">
                             <div class="col">
-                                <label for="password">密碼</label>
+                                <label for="password" class="required">密碼</label>
                                 <div class="form-floating">
-                                    <input type="password" class="form-control" id="password">
-                                    <label for="password" style="color:#808080">請輸入您的密碼</label>
+                                    <input type="password" class="form-control" id="pw" name="pw" required>
                                 </div>
                             </div>
                             <div class="col">
                                 <label for="gender" class="required">性別</label>
                                 <div class="form-floating">
-                                    <select class="form-select" id="gender">
+                                    <select class="form-select" id="gender" required>
                                         <option value="">選擇性別</option>
                                         <option value="male">男</option>
                                         <option value="female">女</option>
@@ -103,8 +96,15 @@
                             <div class="col">
                                 <label for="name" class="required">名字</label>
                                 <div class="form-floating">
-                                    <input type="text" class="form-control half-width" id="name" style="width: 575px;">
-                                    <label for="name" style="color:#808080">請輸入您的名字</label>
+                                    <input type="text" class="form-control half-width" id="name" name="name" style="width: 575px;" required>
+                                  
+                                </div>
+                            </div>
+                            <div class="col">
+                                <label for="address">地址</label>
+                                <div class="form-floating">
+                                    <input type="text" class="form-control half-width" id="address" name="address" style="width: 575px;">
+                                  
                                 </div>
                             </div>
                         </div>
@@ -113,9 +113,12 @@
                             <div class="col">
                                 <label for="birthdate" class="required">生日</label>
                                 <div class="form-floating">
-                                    <input type="date" class="form-control half-width" id="birthdate" style="width: 575px;">
+                                    <input type="date" class="form-control half-width" id="birth_date" name="birth_date" style="width: 575px;" required>
                                     
                                 </div>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" id="notify" name="notify" value="isNotify" checked>是否確認接收通知
                             </div>
                         </div>
                         <br>
@@ -124,14 +127,13 @@
                                 <label for="occupation">職業</label>
                                 <div class="form-floating">
                                     <input type="text" class="form-control half-width" id="occupation" style="width: 575px;">
-                                    <label for="occupation" style="color:#808080">請輸入您的職業</label>
                                 </div>
                             </div>
                             
                         </div>
 
                         <!--設定編輯按鈕-->
-                        <button class="rectangle-button" onclick="changeText()">完成</button>
+                        <button class="rectangle-button" id="btnClieRegis" type="submit">完成</button>
                       </fieldset>
                      </form>
                     </div>

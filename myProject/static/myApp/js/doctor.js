@@ -1,29 +1,32 @@
     var docField = {
-        //email:"",
+        email:"",
         name: "",
         phone_number: "",
-        //pw: "",
+        pw: "",
         photo: null,
         experience: ""
     };
     
     function fetch_element(){
-            //docField['email'] = document.getElementById('email').value
+            docField['email'] = document.getElementById('email').value
             docField['name'] = document.getElementById('name').value,
             docField['phone_number'] = document.getElementById('phone_number').value,
-            //docField['pw'] = document.getElementById('pw').value,
+            docField['pw'] = document.getElementById('pw').value,
             docField['experience'] = document.getElementById('experience').value,
             docField['photo'] = document.getElementById('photo').files[0]
             console.log('name' + docField['name']);
     }
+
+    /*function toSchedule(event){
+        event.preventDefault();
+        window.location.href = '/click/schedule'
+    }*/
     
     document.addEventListener('DOMContentLoaded', function() {
             //頁面加載後才能把這些element load進來
             const btnRegis = document.getElementById('btnDocRegis');
-            const btnNav = document.getElementById('nav_btn');
             const barTitle = document.getElementById('barTitle');
             fetch_element();
-            var username = "";
     
             //canva11進入canva12   
             if (window.isLogin){
@@ -32,14 +35,12 @@
                     window.location.href = "clinicPage.html"
                 })
                 fetch_info();
-                btnNav.innerText = username;
             }else{
-                btnNav.innerText = '登入'
                 barTitle.innerText = '註冊'
             }
     })
     
-    function navBtn_listener(event){
+    /*function navBtn_listener(event){
         event.preventDefault();
         if (window.isLogin) {
             console.log("Navigating to clinic_dataEdit.html");
@@ -48,7 +49,7 @@
             console.log("login.html after 2 seconds");
             window.location.href = "/login";
         }
-    }
+    }*/
     
     async function isUniqueEmail(email){
         try {
@@ -93,7 +94,31 @@
         });
     }
     
-    async function regisBtn_listener(event) {
+    async function clickRegis(){
+        fetch('/add/doctor/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({}),
+        })
+        .then(async response => {
+            if (!response.ok) {
+                throw new Error('Failed to add doctor');
+            }
+            const data = await response.json();
+            // 处理成功响应，例如显示成功消息或重定向
+            alert('Doctor added successfully!');
+            window.location.href = '/doctor/manage';
+        })
+        .catch(error => {
+            // 处理错误情况，例如显示错误消息给用户
+            alert('Error adding doctor: ' + error.message);
+        });
+    }
+
+    document.getElementById('doctorForm').addEventListener('submit', async function(event){
+        let isValid = false;
         console.log("clicked regis")
         event.preventDefault(); // 防止user沒填必填資料
         
@@ -117,13 +142,18 @@
                         if (await isUniqueEmail(email)) {
                             alert("Email already registered");
                             return;
+                        }else{
+                            isValid = true;
                         }
                     }
                 }
         }    
-        
+        if (isValid) {
+            document.getElementById('doctorForm').submit();
+            window.location.href = '/click/schedule'
+        }
     
-        const doctorForm = new FormData(document.getElementById("doctorForm"));
+        /*const doctorForm = new FormData(document.getElementById("doctorForm"));
     
         //html元素name == elements[]中的name == model中的attribute name
         // 发送 POST 请求到 Django 后端视图
@@ -149,5 +179,5 @@
         .catch(error => {
             console.log('Error:', error);
             // 处理错误情况，例如显示错误消息给用户
-        });
-    };
+        });*/
+    });

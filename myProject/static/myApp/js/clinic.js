@@ -1,7 +1,3 @@
-/*
-email現在註解是因為頁面還沒有email 等html加上email 我這裡註解會放掉
-判斷有沒有重複的email或license_number要等串資料庫之後才測試(我還沒migrate)
-*/
 
 var clinField = {
     email:"",
@@ -30,10 +26,8 @@ document.addEventListener('DOMContentLoaded', function() {
         //頁面加載後才能把這些element load進來
         const btnRegis = document.getElementById('btnClinRegis');
         const btnDocManage = document.getElementById('btnDocManage');
-        const btnNav = document.getElementById('nav_btn');
         const barTitle = document.getElementById('barTitle');
         fetch_element();
-        var username = "";
 
         //canva11進入canva12   
         if (window.isLogin){
@@ -46,28 +40,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.location.href = "clinicPage.html"
             })
             fetch_info();
-            btnNav.innerText = username;
         }else{
             btnDocManage.hidden = true;
-            btnNav.innerText = '登入'
             barTitle.innerText = '註冊'
         }
 })
 
-function navBtn_listener(event){
+/*function navBtn_listener(event){
     event.preventDefault();
     if (window.isLogin) {
         console.log("Navigating to clinic_dataEdit.html");
-        window.location.href = "/clinic_dataEdit";
+        window.location.href = "/clinic/data/edit";
     } else {
         console.log("login.html after 2 seconds");
         window.location.href = "/login";
     }
-}
+}*/
 
 async function isUniqueLicense(license_number){
     try {
-        const response = await fetch('/clinic/isUniqueLicense_clin/', {
+        const response = await fetch('/isUniqueLicense_clin/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -85,7 +77,7 @@ async function isUniqueLicense(license_number){
 
 async function isUniqueEmail(email){
     try {
-        const response = await fetch('/clinic/isUniqueEmail_clin/', {
+        const response = await fetch('/isUniqueEmail_clin/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -102,7 +94,7 @@ async function isUniqueEmail(email){
 }
 
 function fetch_info(){
-    fetch('/clinic/clinic_info/', {
+    fetch('/clinic_info/', {
         method: 'GET'
     })
     .then(response => {
@@ -113,7 +105,7 @@ function fetch_info(){
     })
     .then(infoDic =>{
         
-        username = infoDic['name'];
+        window.username = infoDic['name'];
         for (var key in infoDic) {
             if (infoDic.hasOwnProperty(key)) {
                 //
@@ -126,7 +118,8 @@ function fetch_info(){
     });
 }
 
-async function regisBtn_listener(event) {
+document.getElementById('clinicForm').addEventListener('submit', async function(event){
+    let isValid = false;
     console.log("clicked regis")
     event.preventDefault(); // 防止user沒填必填資料
     
@@ -169,14 +162,18 @@ async function regisBtn_listener(event) {
                         if (await isUniqueLicense(clinField['license_number'])) {
                             alert("License already registered");
                             return;
+                        }else{
+                            isValid = true;
                         }
                     }
                 }
             }
     }    
-    
+    if (isValid) {
+        document.getElementById('clinicForm').submit();
+    }
 
-    const clinicForm = new FormData(document.getElementById("clinicForm"));
+    /*const clinicForm = new FormData(document.getElementById("clinicForm"));
 
     //html元素name == elements[]中的name == model中的attribute name
     // 发送 POST 请求到 Django 后端视图
@@ -202,5 +199,5 @@ async function regisBtn_listener(event) {
     .catch(error => {
         console.log('Error:', error);
         // 处理错误情况，例如显示错误消息给用户
-    });
-};
+    });*/
+});

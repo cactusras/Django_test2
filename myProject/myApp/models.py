@@ -60,27 +60,35 @@ class CustomUser(AbstractBaseUser):
     @property
     def is_staff(self):
         return self.is_admin
+    
+
+class Client(CustomUser):
+   
+    address = models.TextField(null=True,blank=True)
+    birth_date = models.DateField()
+    gender = models.CharField(max_length=10)
+    occupation = models.CharField(max_length=100,null=True,blank=True)
+    notify = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+    
 
 class Clinic(CustomUser):
-   # user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)  # 與 CustomUser 關聯
-    #name = models.CharField(max_length=100)
+   
     license_number = models.CharField(max_length=50, unique=True)
-    #phone_number = models.CharField(max_length=15)
     address = models.TextField()
     introduction = models.TextField(blank=True, null=True)
-    photo = models.ImageField(upload_to='clinics/')
+    photo = models.ImageField(upload_to='clinics/',blank=True, null=True)
     
     def __str__(self):
         return self.name
     
 class Doctor(CustomUser):
     
-    #user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)  # 與 CustomUser 關聯
-    #name = models.CharField(max_length=100)
-    #email = models.EmailField(unique=True)
-    #phone_number = models.CharField(max_length=15)
-    photo = models.ImageField(upload_to='doctors/')
+    photo = models.ImageField(upload_to='doctors/',null=True,blank=True)
     clinicID = models.ForeignKey('Clinic', related_name='doctors', on_delete=models.CASCADE)  # 與 Clinic 關聯
+    exoerience = models.TextField(null=True,blank=True)
     
 
     def __str__(self):
@@ -89,7 +97,6 @@ class Doctor(CustomUser):
 class Expertise(models.Model):
     
     name = models.CharField(max_length=100)
-    #description = models.TextField()
     time = models.TimeField(default=time(hour=1))
 
     def __str__(self):
@@ -124,6 +131,7 @@ class Reservation(models.Model):
     expertiseID = models.ForeignKey('Expertise', related_name='reservations', on_delete=models.CASCADE)
     time_start = models.DateTimeField()
     time_end = models.DateTimeField()
+
     #check_in = models.BooleanField(default=False)
     STATUS_CHOICES = (
         (0, 'reserved'),
@@ -143,6 +151,13 @@ class Reservation(models.Model):
     #改成scheduling之後應該就變成直觀能看到醫生不一定有診所
     def __str__(self):
         return f"{self.client.name} reservation for doctor{self.SchedulingID.DoctorID}, clinic {self.SchedulingID.DoctorID.clnicID}"
+    
+    def update_status(self, new_status):
+        if new_status in self.STATUS_CHOICES:
+            self.Status = new_status
+            self.save()
+        else:
+            raise ValueError("Invalid status value")
 
 class Waiting(models.Model):
     ClientID = models.ForeignKey('Client', related_name='waitings', on_delete=models.CASCADE)
@@ -157,21 +172,7 @@ class Waiting(models.Model):
     def __str__(self):
         return f"{self.client.name} waiting for doctor{self.SchedulingID.DoctorID}, clinic {self.SchedulingID.DoctorID.clnicID}"
 
-class Client(CustomUser):
-    #user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)  # 與 CustomUser 關聯
-    #name = models.CharField(max_length=100)
-    #email = models.EmailField(unique=True)
-    #phone_number = models.CharField(max_length=15)
-    address = models.TextField(blank=True, null=True)
-    birth_date = models.DateField()
-    gender = models.CharField(max_length=10)
-    occupation = models.CharField(max_length=100, blank=True, null=True)
-    notify = models.BooleanField(default=True)
-    #pw = models.CharField(max_length=100)
 
-    def __str__(self):
-        return self.name
-    
 class WorkingHour(models.Model):
     DAY_CHOICES = [
         (1, 'Monday'),
@@ -195,5 +196,37 @@ class WorkingHour(models.Model):
     def __str__(self):
         day_name = dict(self.DAY_CHOICES)[self.day_of_week]
         return f"{day_name}: {self.start_time.strftime('%H:%M')} - {self.end_time.strftime('%H:%M')}"
+    
+    
+class docClinicSearch(models.Model):
+    DAY_CHOICES = [
+        (1, 'Monday'),
+        (2, 'Tuesday'),
+        (3, 'Wednesday'),
+        (4, 'Thursday'),
+        (5, 'Friday'),
+        (6, 'Saturday'),
+        (7, 'Sunday')
+    ]
+    id = models.CharField(max_length=255, primary_key=True)
+    doc_id = models.IntegerField()  #d.id
+    doc_name = models.CharField(max_length=100) #d.name    
+    clinic_id = models.IntegerField() #d.clinicid
+    clinic_name = models.CharField(max_length=100)  #c.name
+    clinic_adress = models.TextField()#c.adress
+    clinic_introduction = models.TextField(blank=True, null=True)#c.introduction
+    exp_id = models.IntegerField()#e.id
+    exp_name = models.CharField(max_length=100)#e.name
+    scheduling_id = models.IntegerField()#ms.id
+    start_date = models.DateField()#ms.start_date
+    end_date = models.DateField()#ms.end_date
+    workinghour_id = models.IntegerField()#w.WorkingHour_id
+    day_of_week = models.IntegerField(choices=DAY_CHOICES)#w.day_of_week
+    start_time = models.TimeField()#w.start_time
+    end_time = models.TimeField()#w.end_time
+    
+    class Meta:
+        managed = False  # No migrations will be made for this model
+        db_table = 'docClinicSearch'  # Name of the view in the database
 
-
+#docClinicSearch: AutoField to IntegerField, and PK? 

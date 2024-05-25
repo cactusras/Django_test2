@@ -25,7 +25,7 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
      
                 <form class="d-flex">
-                    <button class="btn btn-outline-dark" type="submit" style="font-size: 20px;">
+                    <button class="btn btn-outline-dark" type="submit" style="font-size: 20px;" id="nav_btn">
                         <i class="bi bi-person-fill"></i>
                         登入
                     </button>
@@ -42,9 +42,58 @@
                 </div>
                 <div class="col" style="background-color:#fffff0; border: 1px solid #ada089; height:600px; font-size: 20px;">
                     <div class="container">
+                        <button class="btn btn-outline-dark" type="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop" style="font-size: 20px; width: 160px; height: 40px;">
+                            <i class="bi bi-calendar2-plus-fill"></i>
+                            時段
+                        </button>
+                        <!--時段按鈕的彈跳視窗-->
+                        <form id="timePopForm" method="post" action="<{% url 'working_hour_upload' %}">
+                        {% csrf_token %}
+                        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="staticBackdropLabel">編輯時段</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <select class="form-select" id="daySelect" aria-label="Default select example">
+                                            <option selected>選擇星期</option>
+                                            <option value="1">週一</option>
+                                            <option value="2">週二</option>
+                                            <option value="3">週三</option>
+                                            <option value="4">週四</option>
+                                            <option value="5">週五</option>
+                                            <option value="6">週六</option>
+                                            <option value="7">週日</option>
+                                        </select>
+                                        <br>
+                        
+                                        <div style="text-align: left;">
+                                           
+                                            <label for="startTime">開始：</label>
+                                            <input type="time" id="startTime" min="10:00" max="21:00" step="3600" />
+                                            <label for="endTime">結束：</label>
+                                            <input type="time" id="endTime" min="10:00" max="21:00" step="3600" />
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">刪除</button>
+                                        <button type="submit" class="btn btn-primary" id="addTimeSlot">新增</button>
+                                    </div>
+                                       
+                                </div>
+                            </div>
+                        </div>
+                        </form>
+                        <form id="schedulingForm" method="post" action="<{% url 'scheduling_upload' %}">
                         <div style="border: 20px solid #fffff0; ">
                             <!--選擇第幾週-->
-                            <input type="week" name="week" id="camp-week" min="2024-W20" max="2024-W52" required />
+                           <!--選擇天數-->
+                           開始：
+                           <input type="date"  min="2024-05-20" id="startDate" required />
+                           結束：
+                           <input type="date"  min="2024-05-20" id="endDate"  required />
                         </div>
 
                         <table class="table table-bordered" style="border: 1px solid #ada089;">
@@ -94,52 +143,16 @@
                             </tbody>
                         </table>
                     </div>
+                    
                     <div style="text-align: right; margin-right: 10px;">
-                        <button class="btn btn-outline-dark" type="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop" style="font-size: 20px; width: 160px; height: 40px;">
-                            <i class="bi bi-calendar2-plus-fill"></i>
-                            時段
-                        </button>
-                        <!--時段按鈕的彈跳視窗-->
-                        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="staticBackdropLabel">編輯時段</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <select class="form-select" id="daySelect" aria-label="Default select example">
-                                            <option selected>選擇星期</option>
-                                            <option value="1">週一</option>
-                                            <option value="2">週二</option>
-                                            <option value="3">週三</option>
-                                            <option value="4">週四</option>
-                                            <option value="5">週五</option>
-                                            <option value="6">週六</option>
-                                            <option value="7">週日</option>
-                                        </select>
-                                        <br>
                         
-                                        <form id="timeForm" style="text-align: left;">
-                                            <label for="startTime">開始：</label>
-                                            <input type="time" id="startTime" min="10:00" max="21:00" step="3600" />
-                                            <label for="endTime">結束：</label>
-                                            <input type="time" id="endTime" min="10:00" max="21:00" step="3600" />
-                                        </form>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">刪除</button>
-                                        <button type="button" class="btn btn-primary" id="addTimeSlot">新增</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         
-                        <button class="btn btn-outline-dark" type="submit" style="font-size: 20px; width: 160px; height: 40px;">
+                        <button class="btn btn-outline-dark" type="submit" style="font-size: 20px; width: 160px; height: 40px;" id="btnSchedule">
                             <i class="bi bi-calendar-check-fill"></i>
                             完成
                         </button>
                     </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -151,9 +164,38 @@
     <!-- Bootstrap core JS-->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Core theme JS-->
-    <script src="js/scripts.js"></script>
     <!-- Custom JS to handle adding time slots -->
     <script>
+        var timePopForm = document.getElementById('timePopForm');
+        timePopForm.addEventListener('submit', function(event){
+            event.preventDefault();
+            checkVlue = checkTime();
+            if(checkVlue == 'success'){
+                timePopForm.submit();
+                // Close the modal
+                const modal = document.getElementById('staticBackdrop');
+                const modalInstance = bootstrap.Modal.getInstance(modal);
+                modalInstance.hide();
+            }else if(checkVlue == 'timeInvalid'){
+                alert('選擇的時間範圍無效。請選擇以下區間段之一：10:00-14:00，15:00-18:00，19:00-21:00。');
+            }else if(checkVlue == 'timeWrong'){
+                alert('請選擇正確的開始和結束時間。結束時間必須晚於開始時間。');
+            }          
+        });
+
+        var scheduleForm = document.getElementById('schedulingForm');
+        scheduleForm.addEventListener('submit', function(event){
+            event.preventDefault();
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value
+            if(startDate < endDate){
+               scheduleForm.submit()
+            }else{
+                alert("請選擇正確的開始和結束日期。結束日期必須晚於開始日期。")
+            }
+            
+        });
+
         // Function to set minutes to 00
         function adjustTimeToHour(input) {
             const timeValue = input.value;
@@ -162,6 +204,7 @@
                 input.value = `${hour}:00`;
             }
         }
+
 
         // Listen for changes on time inputs
         document.getElementById('startTime').addEventListener('change', function() {
@@ -172,7 +215,8 @@
             adjustTimeToHour(this);
         });
 
-        document.getElementById('addTimeSlot').addEventListener('click', function () {
+        function checkTime() {
+            console.log('checkTime');
             const daySelect = document.getElementById('daySelect');
             const startTime = document.getElementById('startTime').value;
             const endTime = document.getElementById('endTime').value;
@@ -204,18 +248,18 @@
                         const cell = row.cells[selectedDay];
                         cell.textContent = `${startTime} - ${endTime}`;
                     }
-
-                    // Close the modal
-                    const modal = document.getElementById('staticBackdrop');
-                    const modalInstance = bootstrap.Modal.getInstance(modal);
-                    modalInstance.hide();
+                    return "success";
+                    
                 } else {
-                    alert('選擇的時間範圍無效。請選擇以下區間段之一：10:00-14:00，15:00-18:00，19:00-21:00。');
+                    return "timeInvalid"
+                    //alert('選擇的時間範圍無效。請選擇以下區間段之一：10:00-14:00，15:00-18:00，19:00-21:00。');
                 }
             } else {
-                alert('請選擇正確的開始和結束時間。結束時間必須晚於開始時間。');
+                return "timeWrong";
+               // alert('請選擇正確的開始和結束時間。結束時間必須晚於開始時間。');
+
             }
-        });
+        };
     </script>
 </body>                        
 </html>

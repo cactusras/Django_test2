@@ -39,12 +39,12 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4"></ul>
-                <form class="d-flex">
+                <div class="ms-auto">
                     <button class="btn btn-outline-dark" type="submit"  style="font-size: 20px;">
                         <i class="bi bi-person-fill"></i>
                         使用者
                     </button>
-                </form>
+                </div>
             </div>
         </div>
     </nav>
@@ -53,14 +53,7 @@
         <div class="container">
             <div class="row g-2">
                 <div class="col-md-6">
-                    <div class="p-3" style="height:600px;">
-                        <div class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:80px; font-size: 20px;">
-                            診所時程
-                        </div>
-                        <div class="col d-flex align-items-center justify-content-center" style="background-color:#FFFFF0; border: 1px solid #ada089; height:500px; font-size: 20px;">
-                            <iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=Asia%2FTaipei&bgcolor=%23ffffff&mode=WEEK&src=MmE0OTVjZmVlYjBkYjBjMjdmNDNjODgzMjFmY2ZjYzg0ZTllNGNkZWFjNjNjNzljMGRjOTc0MGYyNmNkZDg4Y0Bncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=YzgxOGE4NzM2YTIxZGQ3OGZjOTI2NTJjZmMzN2IxYWE2NTJkMWVlYjY0NzFjYWJiOTBlMzk1Y2M3ZjkwN2ZmZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=emgtdHcudGFpd2FuI2hvbGlkYXlAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t&src=YWRkcmVzc2Jvb2sjY29udGFjdHNAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t&color=%237986CB&color=%234285F4&color=%230B8043&color=%2333B679" style="border:solid 1px #777; height: 500px; width: 600px;" frameborder="0" scrolling="no"></iframe>
-                        </div>
-                    </div>
+                    
                 </div>
                 <div class="col-md-6">
                     <div class="p-3" style="height:600px;">
@@ -74,13 +67,43 @@
                                   <tr>
                                       <th scope="col">時間</th>
                                       <th scope="col">姓名</th>
-                                      <th scope="col">DOC</th>
+                                      <th scope="col">項目</th>
                                       <th scope="col">狀態</th>
                                       <th scope="col">下次預約</th>
                                   </tr>
                               </thead>
                               <tbody>
-                                <tr>
+                                {% for reservation in reservation_list %}
+                            <tr>
+                                <td>{{ reservation.appointment_date }}  {{ reservation.appointment_time }}</td>
+                                <td>{{ reservation.name }}</td>
+                                <td>{{ reservation.expertise }}</td>
+                                <td>{{ reservation.status }}</td>
+                                <td>
+                                    <button type="button" class="btn btn-outline-dark" id="appointmentButton1" data-bs-toggle="modal" data-bs-target="#appointmentModal1" style="font-size: 15px;" disabled>
+                                        <i class="bi bi-calendar-check"></i> 預約
+                                    </button>
+                                    <div class="modal fade" id="appointmentModal1" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="appointmentModalLabel1" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="appointmentModalLabel1">下次預約確認</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    是否要預約下次服務？
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-primary" id="confirmAppointmentButton1" data-bs-dismiss="modal">是</button>
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">否</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                                <!--<tr>
                                     <td>A</td>
                                     <td>A</td>
                                     <td>A</td>
@@ -88,7 +111,7 @@
                                         <button type="button" class="btn btn-outline-dark" id="reportButton1" data-bs-toggle="modal" data-bs-target="#staticBackdrop1" style="font-size: 15px;">
                                             <i class="bi bi-x-circle"></i> 未報到
                                         </button>
-                                        <!-- Report Modal 1 -->
+                                        <!-- Report Modal 1
                                         <div class="modal fade" id="staticBackdrop1" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel1" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
@@ -111,7 +134,7 @@
                                         <button type="button" class="btn btn-outline-dark" id="appointmentButton1" data-bs-toggle="modal" data-bs-target="#appointmentModal1" style="font-size: 15px;" disabled>
                                             <i class="bi bi-calendar-check"></i> 預約
                                         </button>
-                                        <!-- New Appointment Modal 1 -->
+                                        <!-- New Appointment Modal 1 
                                         <div class="modal fade" id="appointmentModal1" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="appointmentModalLabel1" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
@@ -140,7 +163,7 @@
                                         <button type="button" class="btn btn-outline-dark" id="reportButton2" data-bs-toggle="modal" data-bs-target="#staticBackdrop2" style="font-size: 15px;">
                                             <i class="bi bi-x-circle"></i> 未報到
                                         </button>
-                                        <!-- Report Modal 2 -->
+                                        <!-- Report Modal 2 
                                         <div class="modal fade" id="staticBackdrop2" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel2" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
@@ -163,7 +186,7 @@
                                         <button type="button" class="btn btn-outline-dark" id="appointmentButton2" data-bs-toggle="modal" data-bs-target="#appointmentModal2" style="font-size: 15px;" disabled>
                                             <i class="bi bi-calendar-check"></i> 預約
                                         </button>
-                                        <!-- New Appointment Modal 2 -->
+                                        <!-- New Appointment Modal 2
                                         <div class="modal fade" id="appointmentModal2" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="appointmentModalLabel2" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
@@ -191,7 +214,7 @@
                                         <button type="button" class="btn btn-outline-dark" id="reportButton3" data-bs-toggle="modal" data-bs-target="#staticBackdrop3" style="font-size: 15px;">
                                             <i class="bi bi-x-circle"></i> 未報到
                                         </button>
-                                        <!-- Report Modal 3 -->
+                                        <!-- Report Modal 3 
                                         <div class="modal fade" id="staticBackdrop3" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel3" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
@@ -214,7 +237,7 @@
                                         <button type="button" class="btn btn-outline-dark" id="appointmentButton3" data-bs-toggle="modal" data-bs-target="#appointmentModal3" style="font-size: 15px;" disabled>
                                             <i class="bi bi-calendar-check"></i> 預約
                                         </button>
-                                        <!-- New Appointment Modal 3 -->
+                                        <!-- New Appointment Modal 3 
                                         <div class="modal fade" id="appointmentModal3" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="appointmentModalLabel3" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
@@ -239,12 +262,12 @@
                                       <td>A</td>
                                       <td>A</td>
                                       <td>A</td>
-                                                                        <!-- Row 4 -->
+                                                                        <!-- Row 4 
                                     <td>
                                         <button type="button" class="btn btn-outline-dark" id="reportButton4" data-bs-toggle="modal" data-bs-target="#staticBackdrop4" style="font-size: 15px;">
                                             <i class="bi bi-x-circle"></i> 未報到
                                         </button>
-                                        <!-- Report Modal 4 -->
+                                        <!-- Report Modal 4 
                                         <div class="modal fade" id="staticBackdrop4" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel4" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
@@ -267,7 +290,7 @@
                                         <button type="button" class="btn btn-outline-dark" id="appointmentButton4" data-bs-toggle="modal" data-bs-target="#appointmentModal4" style="font-size: 15px;" disabled>
                                             <i class="bi bi-calendar-check"></i> 預約
                                         </button>
-                                        <!-- New Appointment Modal 4 -->
+                                        <!-- New Appointment Modal 4 
                                         <div class="modal fade" id="appointmentModal4" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="appointmentModalLabel4" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
@@ -295,7 +318,7 @@
                                         <button type="button" class="btn btn-outline-dark" id="reportButton5" data-bs-toggle="modal" data-bs-target="#staticBackdrop5" style="font-size: 15px;">
                                             <i class="bi bi-x-circle"></i> 未報到
                                         </button>
-                                        <!-- Report Modal 5 -->
+                                        <!-- Report Modal 5 
                                         <div class="modal fade" id="staticBackdrop5" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel5" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
@@ -318,7 +341,7 @@
                                         <button type="button" class="btn btn-outline-dark" id="appointmentButton5" data-bs-toggle="modal" data-bs-target="#appointmentModal5" style="font-size: 15px;" disabled>
                                             <i class="bi bi-calendar-check"></i> 預約
                                         </button>
-                                        <!-- New Appointment Modal 5 -->
+                                        <!-- New Appointment Modal 5
                                         <div class="modal fade" id="appointmentModal5" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="appointmentModalLabel5" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
@@ -347,7 +370,7 @@
                                         <button type="button" class="btn btn-outline-dark" id="reportButton6" data-bs-toggle="modal" data-bs-target="#staticBackdrop6" style="font-size: 15px;">
                                             <i class="bi bi-x-circle"></i> 未報到
                                         </button>
-                                        <!-- Report Modal 6 -->
+                                        <!-- Report Modal 6 
                                         <div class="modal fade" id="staticBackdrop6" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel6" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
@@ -370,7 +393,7 @@
                                         <button type="button" class="btn btn-outline-dark" id="appointmentButton6" data-bs-toggle="modal" data-bs-target="#appointmentModal6" style="font-size: 15px;" disabled>
                                             <i class="bi bi-calendar-check"></i> 預約
                                         </button>
-                                        <!-- New Appointment Modal 6 -->
+                                        <!-- New Appointment Modal 6 
                                         <div class="modal fade" id="appointmentModal6" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="appointmentModalLabel6" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
@@ -395,12 +418,12 @@
                                       <td>A</td>
                                       <td>A</td>
                                       <td>A</td>
-                                        <!-- Row 7 -->
+                                        <!-- Row 7 
                                         <td>
                                             <button type="button" class="btn btn-outline-dark" id="reportButton7" data-bs-toggle="modal" data-bs-target="#staticBackdrop7" style="font-size: 15px;">
                                                 <i class="bi bi-x-circle"></i> 未報到
                                             </button>
-                                            <!-- Report Modal 7 -->
+                                            <!-- Report Modal 7 
                                             <div class="modal fade" id="staticBackdrop7" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel7" aria-hidden="true">
                                                 <div class="modal-dialog">
                                                     <div class="modal-content">
@@ -423,7 +446,7 @@
                                             <button type="button" class="btn btn-outline-dark" id="appointmentButton7" data-bs-toggle="modal" data-bs-target="#appointmentModal7" style="font-size: 15px;" disabled>
                                                 <i class="bi bi-calendar-check"></i> 預約
                                             </button>
-                                            <!-- New Appointment Modal 7 -->
+                                            <!-- New Appointment Modal 7 
                                             <div class="modal fade" id="appointmentModal7" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="appointmentModalLabel7" aria-hidden="true">
                                                 <div class="modal-dialog">
                                                     <div class="modal-content">
@@ -446,12 +469,12 @@
                                   <tr>
                                       <td>A</td>
                                       <td>A</td>
-                                      <td>A</td>                           <!-- Row 8 -->
+                                      <td>A</td>                           <!-- Row 8 
                                     <td>
                                         <button type="button" class="btn btn-outline-dark" id="reportButton8" data-bs-toggle="modal" data-bs-target="#staticBackdrop8" style="font-size: 15px;">
                                             <i class="bi bi-x-circle"></i> 未報到
                                         </button>
-                                        <!-- Report Modal 8 -->
+                                        <!-- Report Modal 8 
                                         <div class="modal fade" id="staticBackdrop8" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel8" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
@@ -474,7 +497,7 @@
                                         <button type="button" class="btn btn-outline-dark" id="appointmentButton8" data-bs-toggle="modal" data-bs-target="#appointmentModal8" style="font-size: 15px;" disabled>
                                             <i class="bi bi-calendar-check"></i> 預約
                                         </button>
-                                        <!-- New Appointment Modal 8 -->
+                                        <!-- New Appointment Modal 8 
                                         <div class="modal fade" id="appointmentModal8" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="appointmentModalLabel8" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
@@ -498,12 +521,12 @@
                                       <td>A</td>
                                       <td>A</td>
                                       <td>A</td>
-                                      <!-- Row 9 -->
+                                      <!-- Row 9 
                                     <td>
                                         <button type="button" class="btn btn-outline-dark" id="reportButton9" data-bs-toggle="modal" data-bs-target="#staticBackdrop9" style="font-size: 15px;">
                                             <i class="bi bi-x-circle"></i> 未報到
                                         </button>
-                                        <!-- Report Modal 9 -->
+                                        <!-- Report Modal 9 
                                         <div class="modal fade" id="staticBackdrop9" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel9" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
@@ -526,7 +549,7 @@
                                         <button type="button" class="btn btn-outline-dark" id="appointmentButton9" data-bs-toggle="modal" data-bs-target="#appointmentModal9" style="font-size: 15px;" disabled>
                                             <i class="bi bi-calendar-check"></i> 預約
                                         </button>
-                                        <!-- New Appointment Modal 9 -->
+                                        <!-- New Appointment Modal 9
                                         <div class="modal fade" id="appointmentModal9" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="appointmentModalLabel9" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
@@ -546,7 +569,7 @@
                                         </div>
                                     </td>
 
-                                  </tr>
+                                  </tr>-->
                               </tbody>
                           </table>
                       </div>
@@ -566,7 +589,6 @@
     <!-- Bootstrap core JS-->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Core theme JS-->
-    <script src="js/scripts.js"></script>
     <script>
         // For Button 1
         document.getElementById('confirmReportButton1').addEventListener('click', function() {

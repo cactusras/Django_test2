@@ -19,21 +19,16 @@
     <!--網頁頭-->
     <nav class="navbar navbar-expand-lg" style="background-color:#F0EAD6;  height: 100px;">
         <div class="container px-4 px-lg-5">
-            <img src={% static 'myApp/assets/dental.png' %}" alt="DEN Logo">
+            <img src="{% static 'myApp/assets/dental.png' %}" alt="DEN Logo">
             <a class="navbar-brand" href="#!"  style="font-size: 24px;"> 牙醫預約平台</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
-                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="#!" style="font-size: 20px;">找醫師</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#!" style="font-size: 20px;">紀錄</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#!" style="font-size: 20px;">Q&A</a></li>
-                </ul>
-                <form class="d-flex">
+                <div class="ms-auto">
                     <button class="btn btn-outline-dark" type="submit"  style="font-size: 20px;">
                         <i class="bi bi-person-fill"></i>
                         使用者
                     </button>
-                </form>
+                </div>
             </div>
         </div>
     </nav>
@@ -51,14 +46,30 @@
                         <thead>
                             <tr>
                                 <th scope="col">醫師</th>
-                                <th scope="col">專長</th>
+                                <th scope="col">信箱</th>
                                 <th scope="col">電話</th>
-                                <th scope="col">時刻表編輯</th>
+                                <th scope="col">經歷</th>
                                 <th scope="col">刪除</th>
                             </tr>
                         </thead>
                         <tbody>
+                            {% for doctor in doctors %}
                             <tr>
+                                <td>{{ doctor.name }}</td>
+                                <td>{{ doctor.email }}</td>
+                                <td>{{ doctor.phone_number }}</td>
+                                <td>{{ doctor.experience }}</td>
+                                <td>
+                                    <form method="post" action="{% url 'delete_doctor' doctor.email %}">
+                                        {% csrf_token %}
+                                        <div>
+                                            <button type="submit" class="rectangle-button">刪除</button>
+                                        </div>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            <!--<tr>
                                 <td>A</td>
                                 <td>A</td>
                                 <td>A</td>
@@ -146,58 +157,134 @@
                                         <input class="form-check-input" type="checkbox" value="" aria-label="..." onchange="toggleDeleteButton()">
                                     </div>
                                 </td> 
-                            </tr>
+                            </tr>-->
 
                           
 
                         </tbody>
                     </table>
 
-                    <div class="col" style="background-color:#fffff0;  height:520px; font-size: 20px;">
-                      <form id="doctorForm">
-                          <div class="mb-3">
-                              <label for="doctorName" class="form-label">醫師：</label>
-                              <input type="text" class="form-control" id="doctorName" required style="width: 200px;">
-                          </div>
-                          <div class="mb-3">
-                              <label for="specialty" class="form-label">專長：</label>
-                              <input type="text" class="form-control" id="specialty" required style="width: 200px;">
-                          </div>
-                          <div class="mb-3">
-                              <label for="phone" class="form-label">電話：</label>
-                              <input type="tel" class="form-control" id="phone" required style="width: 200px;">
-                          </div>
-                          <div class="mb-3">
-                              <label for="schedule" class="form-label">時刻表編輯：</label>
-                              <input type="text" class="form-control" id="schedule" required style="width: 200px;">
-                          </div>
-                          <button type="button" class="btn btn-outline-dark" onclick="addDoctor()" style="font-size: 20px;">新增</button>
-                      </form>
-                    </div>
+                </table>
 
-                    <div style="text-align: right; margin-right: 10px;">
-                      <button class="btn btn-outline-dark" type="button" onclick="deleteCheckedRows()" id="deleteButton" style="font-size: 20px; width: 160px; height: 40px;"  data-bs-toggle="modal" data-bs-target="#exampleModal">
-                          <i class="bi bi-calendar-check-fill"></i>
-                          完成
-                      </button>
+                <div style="text-align: right; margin-right: 10px;">
 
-                      <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                        <div class="modal-dialog">
-                          <div class="modal-content">
-                            <div class="modal-header">
-                              <h5 class="modal-title" id="exampleModalLabel">更新通知</h5>
-                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button class="btn btn-outline-dark" type="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop" style="font-size: 20px; width: 160px; height: 40px;" onclick="addDocPage(event)">
+
+                        <i class="bi bi-calendar2-plus-fill"></i>
+
+                        新增
+
+                    </button>
+
+                    <!--時段按鈕的彈跳視窗-->
+
+                <!--    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+
+                        <div class="modal-dialog modal-dialog-centered">
+
+                            <div class="modal-content">
+
+                                <div class="modal-header">
+
+                                    <h5 class="modal-title" id="staticBackdropLabel">編輯時段</h5>
+
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+                                </div>
+
+                                <div class="modal-body text-start">
+
+                                    <form id="doctorForm">
+
+                                        <div class="mb-3">
+
+                                            <label for="doctorName" class="form-label">醫師：</label>
+
+                                            <input type="text" class="form-control" id="doctorName" required style="width: 200px;">
+
+                                        </div>
+
+                                        <div class="mb-3">
+
+                                            <label for="specialty" class="form-label">專長：</label>
+
+                                            <input type="text" class="form-control" id="specialty" required style="width: 200px;">
+
+                                        </div>
+
+                                        <div class="mb-3">
+
+                                            <label for="phone" class="form-label">電話：</label>
+
+                                            <input type="tel" class="form-control" id="phone" required style="width: 200px;">
+
+                                        </div>
+
+                                        <div class="mb-3">
+
+                                            <label for="schedule" class="form-label">時刻表編輯：</label>
+
+                                            <input type="text" class="form-control" id="schedule" required style="width: 200px;">
+
+                                        </div>
+
+                                    </form>
+
+                                </div>
+
+                                <div class="modal-footer">
+
+                                    <button type="button" class="btn btn-primary" id="addTimeSlot" data-bs-dismiss="modal">新增</button>
+
+                                </div>
+
                             </div>
-                            <div class="modal-body align-items-center" style="text-align: center;">
-                              已刪除並更新
-                          </div>                          
-                            <div class="modal-footer">
-                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 
-                            </div>
-                          </div>
                         </div>
-                      </div>
+
+                    </div> -->
+                    <!--如果要用回checkbox的話 還有deleteCheckedRows()可以當eventListener-->
+                    <button class="btn btn-outline-dark" type="button" onclick="clinPage(event)" id="btnClinPage" style="font-size: 20px; width: 160px; height: 40px;" data-bs-toggle="modal" data-bs-target="#exampleModal">
+
+                        <i class="bi bi-calendar-check-fill"></i>
+
+                        回到主頁
+
+                    </button>
+
+
+                    <!-- 如果要用回checkbox的話可以加這個彈跳視窗
+                    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+
+                        <div class="modal-dialog">
+
+                            <div class="modal-content">
+
+                                <div class="modal-header">
+
+                                    <h5 class="modal-title" id="exampleModalLabel">更新通知</h5>
+
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+                                </div>
+
+                                <div class="modal-body align-items-center" style="text-align: center;">
+
+                                    已刪除並更新
+
+                                </div>
+
+                                <div class="modal-footer">
+
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div> -->      
                       
                   </div>
                 </div>
@@ -211,60 +298,119 @@
     <!-- Bootstrap core JS-->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Core theme JS-->
-    <script src="js/scripts.js"></script>
+    <script src="{% static 'myApp/js/scripts.js' %}"></script>
     <script>
-      function toggleDeleteButton() {
-          var deleteButton = document.getElementById('deleteButton');
-          var checkboxes = document.querySelectorAll('input[type="checkbox"]');
-          var checkedCount = 0;
-          
-          checkboxes.forEach(function(checkbox) {
-              if (checkbox.checked) {
-                  checkedCount++;
-              }
-          });
-          
-          deleteButton.disabled = (checkedCount === 0);
-      }
-      
-      function deleteCheckedRows() {
-          var checkboxes = document.querySelectorAll('input[type="checkbox"]');
-          
-          checkboxes.forEach(function(checkbox) {
-              if (checkbox.checked) {
-                  var row = checkbox.closest('tr');
-                  row.parentNode.removeChild(row);
-              }
-          });
-      }
+        function clinPage(event){
+            event.preventDefault();
+            window.location.href = '/clinic/home/'
+        }
 
-      function addDoctor() {
-        var doctorNameInput = document.getElementById('doctorName');
-        var specialtyInput = document.getElementById('specialty');
-        var phoneInput = document.getElementById('phone');
-        var scheduleInput = document.getElementById('schedule');
+        function addDocPage(event){
+            event.preventDefault();
+            window.location.href = "/doctor/data/edit"
+        }
 
-        var doctorName = doctorNameInput.value;
-        var specialty = specialtyInput.value;
-        var phone = phoneInput.value;
-        var schedule = scheduleInput.value;
+        document.getElementById('addTimeSlot').addEventListener('click', function() {
 
-        var table = document.getElementById('doctorTable').getElementsByTagName('tbody')[0];
-        var newRow = table.insertRow();
-        newRow.innerHTML = `
-            <td>${doctorName}</td>
-            <td>${specialty}</td>
-            <td>${phone}</td>
-            <td>${schedule}</td>
-            <td><div><input class="form-check-input" type="checkbox" aria-label="..." onchange="toggleDeleteButton()"></div></td>
-        `;
-
-        // 清除输入框内容
-        doctorNameInput.value = '';
-        specialtyInput.value = '';
-        phoneInput.value = '';
-        scheduleInput.value = '';
-      }
+            const doctorName = document.getElementById('doctorName').value;
+    
+            const specialty = document.getElementById('specialty').value;
+    
+            const phone = document.getElementById('phone').value;
+    
+            const schedule = document.getElementById('schedule').value;
+    
+    
+    
+            if (doctorName && specialty && phone && schedule) {
+    
+                const table = document.getElementById('doctorTable').getElementsByTagName('tbody')[0];
+    
+                const newRow = table.insertRow();
+    
+                
+    
+                newRow.innerHTML = `
+    
+                    <td>${doctorName}</td>
+    
+                    <td>${specialty}</td>
+    
+                    <td>${phone}</td>
+    
+                    <td>${schedule}</td>
+    
+                    <td>
+    
+                        <div>
+    
+                            <input class="form-check-input" type="checkbox" value="" aria-label="..." onchange="toggleDeleteButton()">
+    
+                        </div>
+    
+                    </td>
+    
+                `;
+    
+    
+    
+                // Clear the form fields
+    
+                document.getElementById('doctorForm').reset();
+    
+            }
+    
+        });
+    
+    
+    
+        function deleteCheckedRows() {
+    
+            const table = document.getElementById('doctorTable').getElementsByTagName('tbody')[0];
+    
+            const rows = table.getElementsByTagName('tr');
+    
+            for (let i = rows.length - 1; i >= 0; i--) {
+    
+                const checkbox = rows[i].getElementsByTagName('input')[0];
+    
+                if (checkbox.checked) {
+    
+                    table.deleteRow(i);
+    
+                }
+    
+            }
+    
+        }
+    
+    
+    
+        function toggleDeleteButton() {
+    
+            const table = document.getElementById('doctorTable').getElementsByTagName('tbody')[0];
+    
+            const rows = table.getElementsByTagName('tr');
+    
+            let anyChecked = false;
+    
+            for (const row of rows) {
+    
+                const checkbox = row.getElementsByTagName('input')[0];
+    
+                if (checkbox.checked) {
+    
+                    anyChecked = true;
+    
+                    break;
+    
+                }
+    
+            }
+    
+            document.getElementById('deleteButton').disabled = !anyChecked;
+    
+        }
       
   </script>
 </body>
