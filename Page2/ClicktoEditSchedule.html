@@ -223,11 +223,21 @@
         });
 
         window.onload = function() {
-            var today = new Date();
-            var minDate = today.toISOString().slice(0, 10);
-            document.getElementById("start-date").min = minDate;
-            document.getElementById("end-date").min = minDate;
-        };
+        var today = new Date();
+        var minDate = today.toISOString().slice(0, 10);
+        document.getElementById("start-date").min = minDate;
+        document.getElementById("end-date").min = minDate;
+
+        // Add event listener to end date input
+        document.getElementById("end-date").addEventListener("change", function() {
+            var startDate = document.getElementById("start-date").value;
+            var endDate = document.getElementById("end-date").value;
+            if (endDate < startDate) {
+                // If end date is before start date, set it to be equal to start date
+                document.getElementById("end-date").value = startDate;
+            }
+        });
+    };
 
     </script>
 </body>                        
