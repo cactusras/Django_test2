@@ -17,19 +17,23 @@
        
 
     <body>
-        <!--網頁頭-->
-        <nav class="navbar navbar-expand-lg" style="background-color:#F0EAD6; height: 100px;">
+         <!--網頁頭-->
+         <nav class="navbar navbar-expand-lg" style="background-color:#F0EAD6;  height: 100px;">
             <div class="container px-4 px-lg-5">
                 <img src="{% static 'assets/dental.png' %}" alt="DEN Logo">
-                <a class="navbar-brand" href="#!" style="font-size: 24px;">牙醫預約平台</a>
+                <a class="navbar-brand" href="#!"  style="font-size: 24px;"> 牙醫預約平台</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <div class="ms-auto">
-                        <button class="btn btn-outline-dark" type="submit" style="font-size: 20px;">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="#!" style="font-size: 20px;">找醫師</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#!" style="font-size: 20px;">紀錄</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#!" style="font-size: 20px;">Q&A</a></li>
+                    </ul>
+                    <form class="d-flex">
+                        <button class="btn btn-outline-dark" type="submit"  style="font-size: 20px;">
                             <i class="bi bi-person-fill"></i>
                             登入
                         </button>
-                    </div>
                 </div>
             </div>
         </nav>
