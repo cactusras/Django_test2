@@ -108,14 +108,19 @@
                         </div>
                         看診日期<br>
                        <form>
-                            <label>
+                        
+                            <!-- <label>
                                 開始：
                                 <input type="date" id="date" name="date" min="" style="width: 240px; height: 40px;"/>
                             </label>
                             <label>
                                 結束：
                                 <input type="date" id="date" name="date" min="" style="width: 250px; height: 40px;"/>
-                            </label>
+                            </label> -->
+                            開始：
+                            <input type="date" id="start-date" name="start-date" style="width: 240px; height: 40px;" required />
+                            結束：
+                            <input type="date" id="end-date" name="end-date" style="width: 240px; height: 40px;" required />
                         </form>
                         <br>
                         <br>
@@ -322,9 +327,12 @@
         </script>
 
         <script>
+            window.onload = function() {
             var today = new Date();
             var minDate = today.toISOString().slice(0, 10);
-            document.getElementById("date").min = minDate;
+            document.getElementById("start-date").min = minDate;
+            document.getElementById("end-date").min = minDate;
+        };
         </script>
         
             
