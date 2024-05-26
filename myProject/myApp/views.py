@@ -6,7 +6,7 @@ from django.db.models import Q
 from django.db import connection
 from django.contrib.auth.decorators import login_required
 from .filters import docClinicFilter
-from .models import Clinic, Doctor, Doc_Expertise, Expertise, Scheduling, WorkingHour,docClinicSearch,Reservation,Client,Waiting
+from .models import Clinic, Doctor, Doc_Expertise, Expertise, Scheduling, WorkingHour,docClinicSearch,Reservation,Client,Waiting,CustomUser
 from datetime import datetime, timedelta
 from django.http import JsonResponse
 from django.contrib.auth.forms import AuthenticationForm
@@ -53,6 +53,9 @@ def login_view(request):
 
     return render(request, 'myApp/login.html', {'form': form})
 
+from django.shortcuts import render
+from .forms import ClientForm
+from .models import CustomUser, Client
 
 def add_client(request):
     if request.method == 'POST':
@@ -84,17 +87,17 @@ def add_client(request):
 
             email = cleaned_data.get('email')
 
-            customuser, created_user = CustomUser.objects.update_or_create(
-                email=email,
-                defaults=cleaned_data_custom_user
-            )
+            # customuser, created_user = CustomUser.objects.update_or_create(
+            #     email=email,
+            #     defaults=cleaned_data_custom_user
+            # )
 
             client, created_client = Client.objects.update_or_create(
                 email=email,
-                defaults=cleaned_data_client
+                defaults=cleaned_data
             )
 
-            if created_user or created_client:
+            if created_client:
                 message = 'Client created successfully.'
             else:
                 message = 'Client updated successfully.'
@@ -102,8 +105,7 @@ def add_client(request):
             return render(request, 'searchPage.html', {'message': message})
     else:
         form = ClientForm()
-    print(request.POST)
-    return render(request, 'myApp/client_dataEdit.html', {'form': form})
+    return render(request, 'myApp/login.html', {'form': form})
 
 
 
