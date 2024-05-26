@@ -73,22 +73,6 @@
                                     </td>
                                 </tr>
                             {% endfor %}
-                            {% for waiting in waiting_list %}
-                                <tr>
-                                    <td>{{ waiting.client_name }}</td>
-                                    <td>{{ waiting.appointment_date }} {{ waiting.appointment_time }}</td>
-                                    <td>{{ waiting.expertise }}</td>
-                                    <td>{{ waiting.status }}</td>
-                                    <td>
-                                        <form method="post" action="{% url 'client_cancel_waiting'%}">
-                                            {% csrf_token %}
-                                            <div>
-                                                <button type="submit" class="rectangle-button">取消候補</button>
-                                            </div>
-                                        </form>
-                                    </td>
-                                </tr>
-                            {% endfor %}
                                <!-- 紀錄內容 
                              <tr>
                                   <th scope="row">1</th>

@@ -59,7 +59,7 @@
                     <div class="col" style="background-color:#fffff0; border: 1px solid #ada089; height:450px; font-size: 20px;">
                         縣市地區<br>
                         <div class="row">
-                            <select class="form-select" id="city" name="city" onchange="updateDistricts()" style="width: 320px; height: 40px;">
+                            <select class="form-select" id="city" onchange="updateDistricts()" style="width: 320px; height: 40px;">
                                 <option selected value="">--請選擇縣市--</option>
                                 <option value="台北市">台北市</option>
                                 <option value="新北市">新北市</option>
@@ -83,14 +83,14 @@
                                 <option value="金門縣">金門縣</option>
                                 <option value="連江縣">連江縣</option>
                             </select>
-                            <select class="form-select" id="district" name="district" style="width: 320px; height: 40px;">
+                            <select class="form-select" id="district" style="width: 320px; height: 40px;">
                                 <option value="">--請先選擇縣市--</option>
                             </select>
                             <input id="addressVlue" hidden>
                         </div>
                         治療項目<br>
                         <div class="row">
-                            <select class="form-select" id="category" name="category" onchange="updateTreatments()" style="width: 320px; height: 40px;">
+                            <select class="form-select" id="category" onchange="updateTreatments()" style="width: 320px; height: 40px;">
                                 <option selected>--請選擇大範圍治療項目--</option>
                                 <option value="預防性治療">預防性治療</option>
                                 <option value="修復性治療">修復性治療</option>
@@ -101,7 +101,7 @@
                                 <option value="兒童牙科">兒童牙科</option>
                                 <option value="假牙及義齒">假牙及義齒</option>
                             </select>
-                            <select class="form-select" id="treatment" name="treatment" style="width: 320px; height: 40px;">
+                            <select class="form-select" id="treatment" style="width: 320px; height: 40px;">
                                 <option value="">--請先選擇大範圍治療項目--</option>
                             </select>
                             <input id="experVlue" hidden>
@@ -110,11 +110,11 @@
                        <div>
                             <label>
                                 開始：
-                                <input type="date" name="bday" min="2024-04-01" style="width: 240px; height: 40px;"/>
+                                <input type="date" id="" name="bday" min=new Date().toISOString().split('T')[0] style="width: 240px; height: 40px;"/>
                             </label>
                             <label>
                                 結束：
-                                <input type="date" name="bday" min="2024-04-01" style="width: 250px; height: 40px;"/>
+                                <input type="date" name="bday" min=new Date().toISOString().split('T')[0] style="width: 250px; height: 40px;"/>
                             </label>
                        </div>
                         <br>
@@ -251,6 +251,7 @@
                             throw new Error('Failed to add doctor');
                         }
                         const data = await response.json();
+                        searchForm.submit();
                         window.location.href = 'searchPage.html';
                     })
                     .catch(error => {

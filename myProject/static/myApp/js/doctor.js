@@ -75,6 +75,8 @@
         const expertise = document.getElementById('expertiseSelect').value;
         const formVlue = document.getElementById('experVlue');
         formVlue.value = expertise;
+
+        this.submit();
     })
 
     function fetch_info(){

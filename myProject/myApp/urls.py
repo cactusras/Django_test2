@@ -37,7 +37,6 @@ urlpatterns = [
     path('success/', views.success, name='success'),
     path('doctor/delete/', views.delete_doctor, name='delete_doctor'),
     path('client/delete/reserve/', views.client_cancel_reservation, name='client_cancel_reservation'),
-    path('client/delete/waiting/', views.client_cancel_waiting, name='client_cancel_waiting'),
     path("login/", views.login, name="login"),
     #path("dentalLogin/", views.dentalLogin, name="dentalLogin"),
     path('login/login_view/', views.login_view, name='login_view'),
