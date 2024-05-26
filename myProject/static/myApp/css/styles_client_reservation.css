@@ -91,6 +91,42 @@
   }
 }
 
+/* 設定結束button */
+.rectangle-button {
+  border: 1px solid #ccc;
+  background-color: #2e1a02; /* 按钮的背景颜色 */
+  color: white; /* 按钮文本的颜色 */
+  padding: 10px 20px; /* 按钮的内边距 */
+  margin-left: auto; /* 将按钮向右对齐 */
+  display: block; /* 将按钮显示为块级元素，以占据整行 */
+  cursor: pointer; /* 鼠标悬停时显示指针 */
+  border-radius: 5px; /* 设置按钮的圆角 */
+}
+
+
+.pop-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* 半透明背景 */
+  z-index: 999; /* 確保它在最上層 */
+}
+
+.pop {
+  display: none;
+  position: fixed;
+  top: 50%; /* 垂直置中 */
+  left: 50%; /* 水平置中 */
+  transform: translate(-50%, -50%); /* 使其置中 */
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+  z-index: 1000; /* 確保它在半透明背景上 */
+}
+
 body {
   margin: 0;
   font-family: var(--bs-body-font-family);
@@ -891,6 +927,52 @@ progress {
 .gy-5 {
   --bs-gutter-y: 3rem;
 }
+
+
+form{
+  width:50%;
+  text-align: left;
+}
+
+/* 设置 label 和 input-group 在同一行 */
+.input-group {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* 调整 label 的样式 */
+label {
+  margin-right: 10px; /* 可根据需要调整间距 */
+}
+
+/* 設定時段button */
+.button-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-left: -5px;
+}
+
+.button-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.rounded-button {
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  background-color: #ada089;
+  color: white;
+  padding: 10px 20px;
+  margin: 0 5px;
+  cursor: pointer;
+}
+
+.rounded-button:hover {
+  background-color: #e0e0e0;
+}
+
 
 @media (min-width: 576px) {
   .col-sm {

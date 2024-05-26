@@ -1,5 +1,5 @@
 // http://jsonblob.com/1221767613406633984
-function displayUsers(users) {
+/*function displayUsers(users) {
     var usersElement = document.getElementById("users");
     var str = "";
    
@@ -18,20 +18,80 @@ function getUsers() {
     });
 }
 // Call the getUsers function when the window loads
-window.onload = getUsers;
+window.onload = getUsers;*/
 
-function Linyi(){
+
+/*
+$('#date1').datetimepicker({
+  date:null,
+    format: 'YYYY-MM-DD',
+    locale: moment.locale('zh-tw'),
+    daysOfWeekDisabled: [0, 6],
+    minDate: moment().add(1,'days'),
+    maxDate: moment().add(30,'days'),
+    disabledDates: [
+      moment().add(1,'days'),
+      moment().add(2,'days'),
+      '2021-10-10',
+      '2021-12-25'
+    ]
+});*/
+
+  //fetch使用者是否登入了 並設window變數(整個project都可取得)
+  window.isLogin = "";
+  window.username = "";
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    const btnNav = document.getElementById('nav_btn');
+    fetch('/check_authentication/')
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            throw new Error('Network response was not ok');
+        }
+    })
+    .then(data => {
+        if (data.is_authenticated) {
+          window.isLogin = true;
+          console.log("isLogin = true");
+          btnNav.innerText = username;
+        }else{
+          window.isLogin = false;
+          console.log("isLogin = false");
+          btnNav.innerText = '登入';
+        }
+        document.dispatchEvent(new CustomEvent('authChecked', { detail: window.isLogin }));
+    })
+    .catch(error => {
+        console.log('Error checking authentication:', error);
+    });
+  })
     
-}
-
-function julieTest3(){
-    
-}
-
-function wntng(){
-
-}
-
-function Linyi2(){
-    
-}
+  function navBtn_listener(event){
+    event.preventDefault();
+    fetch('/login/login_view/')
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            throw new Error('Network response was not ok');
+        }
+    })
+    .then(data => {
+        if (window.isLogin) {
+          if(data.user_type == 'Client'){
+            window.location.href = 'searchPage.html'
+          }else if(data.user_type == 'Clinic'){
+            window.location.href = '/clinic/home/'
+          }else if(data.user_type == 'Doctor'){
+            window.location.href = '/doctor/page/'
+          }
+        }else{
+          window.location.href = '/login'
+        }
+    })
+    .catch(error => {
+        console.log('Error checking authentication:', error);
+    });
+  }

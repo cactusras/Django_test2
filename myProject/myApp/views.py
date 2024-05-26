@@ -10,9 +10,10 @@ from .models import Clinic, Doctor, Doc_Expertise, Expertise, Scheduling, Workin
 from datetime import datetime, timedelta
 from django.http import JsonResponse
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login,logout
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import now
+from myApp import forms
 
 
 
@@ -50,19 +51,63 @@ def login_view(request):
     else:
         form = AuthenticationForm()
 
-    return render(request, 'login.html', {'form': form})
+    return render(request, 'myApp/login.html', {'form': form})
 
 
-#client posting
 def add_client(request):
     if request.method == 'POST':
         form = ClientForm(request.POST)
         if form.is_valid():
-            form.save()
-            return render(request,'searchPage.html')
+            # Extract cleaned data from the form
+            cleaned_data = form.cleaned_data
+
+            # Add the extra fields to the cleaned data
+            cleaned_data['is_active'] = True
+            cleaned_data['is_admin'] = False
+
+            cleaned_data_custom_user = {
+                'email': cleaned_data['email'],
+                'name': cleaned_data['name'],
+                'phone_number': cleaned_data['phone_number'],
+                'pw': cleaned_data['pw'],
+                'is_active': cleaned_data['is_active'],
+                'is_admin': cleaned_data['is_admin']
+            }
+
+            cleaned_data_client = {
+                'address': cleaned_data['address'],
+                'birth_date': cleaned_data['birth_date'],
+                'gender': cleaned_data['gender'],
+                'occupation': cleaned_data['occupation'],
+                'notify': cleaned_data['notify']
+            }
+
+            email = cleaned_data.get('email')
+
+            customuser, created_user = CustomUser.objects.update_or_create(
+                email=email,
+                defaults=cleaned_data_custom_user
+            )
+
+            client, created_client = Client.objects.update_or_create(
+                email=email,
+                defaults=cleaned_data_client
+            )
+
+            if created_user or created_client:
+                message = 'Client created successfully.'
+            else:
+                message = 'Client updated successfully.'
+
+            return render(request, 'searchPage.html', {'message': message})
     else:
         form = ClientForm()
-    return render(request, 'client_dataEdit.html', {'form': form})
+    print(request.POST)
+    return render(request, 'myApp/client_dataEdit.html', {'form': form})
+
+
+
+
 
 @login_required
 def add_Reservation(request):  
@@ -142,7 +187,7 @@ def add_Reservation(request):
                     return HttpResponse('Form not valid')
 
         request.session.flush()
-        return (request,'UserAppointmentRecords.html')
+        return (request,'myApp/UserAppointmentRecords.html')
     else:
         return HttpResponse('Login failed')
     
@@ -152,10 +197,10 @@ def add_clinic(request):
         form = ClinicForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            return render(request, 'clinic_dataEdit.html')
+            return render(request, 'myApp/clinic_dataEdit.html')
     else:
         form = ClinicForm()
-    return render(request, 'clinic_dataEdit.html', {'form': form})
+    return render(request, 'myApp/clinic_dataEdit.html', {'form': form})
 
 
 @login_required
@@ -167,7 +212,7 @@ def add_doctor(request):
         working_hour_list = request.session.get('working_hour_list', [])
 
         if not (doctor_form_data and expertise_list and schedule_form_data and working_hour_list):
-            return render(request,'doctor_dataEdit.html')
+            return render(request,'myApp/doctor_dataEdit.html')
 
         clinic = Clinic.objects.get(user=request.user)
         # Add clinic to the doctor form data
@@ -201,7 +246,7 @@ def add_doctor(request):
         request.session.flush()
         return redirect('success')
 
-    return render(request,'doctor_dataEdit.html')
+    return render(request,'myApp/doctor_dataEdit.html')
 
 @login_required    
 def Doc_uploading(request):
@@ -209,10 +254,10 @@ def Doc_uploading(request):
         doctor_form = DoctorForm(request.POST, request.FILES)
         if doctor_form.is_valid():
             request.session['doctor_form_data'] = doctor_form.cleaned_data
-            return render(request,'ClicktoEditSchedule.html')
+            return render(request,'myApp/ClicktoEditSchedule.html')
     else:
         doctor_form = DoctorForm()
-    return render(request, 'doctor_dataEdit.html', {'doctor_form': doctor_form})
+    return render(request, 'myApp/doctor_dataEdit.html', {'doctor_form': doctor_form})
 
 @login_required
 def DocExp_uploading(request):
@@ -222,10 +267,10 @@ def DocExp_uploading(request):
             doc_expertise_list = request.session.get('doc_expertise_list', [])
             doc_expertise_list.append(doc_expertise_form.cleaned_data)
             request.session['expertise_list'] = doc_expertise_list
-            return render(request,'doctor_dataEdit.html')
+            return render(request,'myApp/doctor_dataEdit.html')
     else:
         expertise_form = ExpertiseForm()
-    return render(request, 'doctor_dataEdit.html', {'expertise_form': expertise_form})
+    return render(request, 'myApp/doctor_dataEdit.html', {'expertise_form': expertise_form})
 
 @login_required
 def workingHour_upload(request):
@@ -235,10 +280,10 @@ def workingHour_upload(request):
             working_hour_list = request.session.get('working_hour_list', [])
             working_hour_list.append(working_hour_form.cleaned_data)
             request.session['working_hour_list'] = working_hour_list
-            return render(request,'ClicktoEditSchedule.html')
+            return render(request,'myApp/ClicktoEditSchedule.html')
     else:
         working_hour_form = WorkingHourForm()
-    return render(request, 'ClicktoEditSchedule.html', {'working_hour_form': working_hour_form})
+    return render(request, 'myApp/ClicktoEditSchedule.html', {'working_hour_form': working_hour_form})
 
 @login_required
 def scheduling_upload(request):
@@ -246,10 +291,10 @@ def scheduling_upload(request):
         schedule_form = SchedulingForm(request.POST)
         if schedule_form.is_valid():
             request.session['schedule_form_data'] = schedule_form.cleaned_data
-            return render(request,'doctor_dataEdit.html')
+            return render(request,'myApp/doctor_dataEdit.html')
     else:
         schedule_form = SchedulingForm()
-    return render(request, 'doctor_dataEdit.html', {'schedule_form': schedule_form})
+    return render(request, 'myApp/doctor_dataEdit.html', {'schedule_form': schedule_form})
 
 @login_required
 def success(request):
@@ -259,7 +304,7 @@ def success(request):
     # Get all doctors associated with this clinic
     doctors = Doctor.objects.filter(clinic=clinic)
     #診所登入(管理/新增醫師)頁面名稱要=doctor_management.html
-    return render(request, 'doctor_management.html', {'doctors': doctors, 'clinic': clinic})
+    return render(request, 'myApp/doctor_management.html', {'doctors': doctors, 'clinic': clinic})
 
 @login_required
 def delete_doctor(request, doctor_email):
@@ -268,9 +313,9 @@ def delete_doctor(request, doctor_email):
 
     if request.method == "POST":
         doctor.delete()#the doctors schedule, expertise records are delete as well(because cascade)
-        return redirect('doctor_management.html')
+        return redirect('myApp/doctor_management.html')
 
-    return render(request, 'doctor_management.html', {'doctor': doctor})
+    return render(request, 'myApp/doctor_management.html', {'doctor': doctor})
 
 def doctor_clinic_search_view(request):
         # Apply the filter
@@ -346,7 +391,7 @@ def doctor_clinic_search_view(request):
             #clinic_list.append(clinic['clinic_id'])
             #request.session['clinic_list'] = clinic_list  # Save session
     
-    return render(request, 'searchPage.html', {
+    return render(request, 'myApp/searchPage.html', {
         'filter': filter,
         'doc_final': doc_final,
         'clinic_final': clinic_final
@@ -414,7 +459,7 @@ def clinic_load(request):
         for reservation in reservations
     ],
     }
-    return render(request, 'clinicPage.html', context)
+    return render(request, 'myApp/clinicPage.html', context)
 
 
 
@@ -427,21 +472,21 @@ def reservationStCF(request, reservation_id):
     # Update the status to "checkin Failed"
     reservation.update_status(1) 
     reservation.save()
-    return render(request,'clinicPage.html')
+    return render(request,'myApp/clinicPage.html')
     
 def reservationStSc(request, reservation_id):
     reservation = Reservation.objects.get(pk=reservation_id)
     # Update the status to "checkin successed"
     reservation.update_status(2) 
     reservation.save()
-    return render(request,'clinicPage.html')
+    return render(request,'myApp/clinicPage.html')
     
 def reservationStIt(request, reservation_id):
     reservation = Reservation.objects.get(pk=reservation_id)
     # Update the status to "in treatment"
     reservation.update_status(3) 
     reservation.save()
-    return render(request,'clinicPage.html')
+    return render(request,'myApp/clinicPage.html')
     
 def reservationStFn(request, reservation_id):
     reservation = Reservation.objects.get(pk=reservation_id)
@@ -449,7 +494,7 @@ def reservationStFn(request, reservation_id):
     reservation.update_status(4) 
     reservation.save()
     #下次預約
-    return render(request,'clinicPage.html')
+    return render(request,'myApp/clinicPage.html')
     
     
 def reservationStCbD(request, reservation_id):
@@ -457,7 +502,7 @@ def reservationStCbD(request, reservation_id):
     # Update the status to "cancelled by doc"
     reservation.update_status(5) 
     reservation.save()
-    return render(request,'clinicPage.html')
+    return render(request,'myApp/clinicPage.html')
 
 #預約此醫生按鈕按下去
 def doctor_reserve_page(request, doc_id):
@@ -490,7 +535,7 @@ def doctor_reserve_page(request, doc_id):
 		#'schedules': doc_schedule_list
 		#'reserved': reservation_list
 	}
-	return render(request, 'doctor_reserve.html', context)
+	return render(request, 'myApp/doctor_reserve.html', context)
 
 
 #診所預約按鈕按下去
@@ -520,7 +565,7 @@ def clinic_reserve_page(request, clinic_id):
         'doctor': doctor_list,
         'clinic': clinic
     }
-    return render(request, 'clinic_reserve.html', context)
+    return render(request, 'myApp/clinic_reserve.html', context)
 
 
 def clinic_reserve_doctor_confirmed(request, doctor_id):
@@ -599,7 +644,7 @@ def doctorPage_loading(request):
         ],
     }
     
-    return render(request, 'doctor_page.html', context)
+    return render(request, 'myApp/doctor_page.html', context)
 
 @login_required        
 def clientRecord_loading(request):
@@ -785,58 +830,58 @@ def waitingToResForC(request):
 
 def home(request):
     context={}
-    return render(request, "searchPage.html", context)
+    return render(request, "myApp/searchPage.html", context)
 
 def clieReserve(request):
     context={}
-    return render(request, "client_reservation.html", context)
+    return render(request, "myApp/client_reservation.html", context)
 
 def cliedataEd(request):
     context={}
-    return render(request, "client_dataEdit.html", context)
+    return render(request, "myApp/client_dataEdit.html", context)
 
 def clinDataEd(request):
     context={}
-    return render(request, "clinic_dataEdit.html", context)
+    return render(request, "myApp/clinic_dataEdit.html", context)
 
 def docDataEd(request):
     context={}
-    return render(request, "doctor_dataEdit.html", context)
+    return render(request, "myApp/doctor_dataEdit.html", context)
 
 
 def clickSchedule(request):
     context={}
-    return render(request, "ClicktoEditSchedule.html", context)
+    return render(request, "myApp/ClicktoEditSchedule.html", context)
 
 
 def login(request):
     context={}
-    return render(request, "login.html", context)
+    return render(request, "myApp/login.html", context)
 
 
 def clinHome(request):
     context={}
-    return render(request, "clinicPage.html", context)
+    return render(request, "myApp/clinicPage.html", context)
 
 
 def docManage(request):
     context={}
-    return render(request, "doctor_management.html", context)
+    return render(request, "myApp/doctor_management.html", context)
 
 
 def docPage(request):
     context={}
-    return render(request, "doctorPage.html", context)
+    return render(request, "myApp/doctorPage.html", context)
 
 
 def clieReserveRecord(request):
     context={}
-    return render(request, "UserAppointmentRecords.html", context)
+    return render(request, "myApp/UserAppointmentRecords.html", context)
 
 
 def dentalLogin(request):
     context={}
-    return render(request, "dentalLogin.html", context)
+    return render(request, "myApp/dentalLogin.html", context)
 
 # 用filter查看所有诊所/醫生/病患的email資料是否已存在
 @csrf_exempt
@@ -928,3 +973,23 @@ def client_info(request):
     else:
         return JsonResponse({'error': 'User is not a client'}, status=400)
 
+def logout_view(request):
+    logout(request)
+    return render(request,'myApp/searchPage.html')
+
+
+def check_reservations(request):
+    now = now()
+    #one_hour_ago = now - timedelta(hours=1)
+
+
+    reservations = Reservation.objects.filter(status=0)
+
+
+    for reservation in reservations:
+        if reservation.time_start < now:
+            reservation.status = 1
+            reservation.save()
+
+
+    return JsonResponse({'message': 'Checked and updated reservations if necessary.'})
