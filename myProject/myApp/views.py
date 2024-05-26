@@ -610,6 +610,7 @@ def clientRecord_loading(request):
     context ={
         'reservation_list': [
         {
+            'id':reservation.id,
             'client_name': reservation.ClientID.name,
             'appointment_date': reservation.time_start.date(),
             'appointment_time': reservation.time_start.strftime('%H:%M'),

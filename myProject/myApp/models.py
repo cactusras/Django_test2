@@ -170,7 +170,7 @@ class Reservation(models.Model):
             raise ValueError("Invalid status value")
         
     def get_status_display(self):
-        return self.Status
+        return dict(self.STATUS_CHOICES).get(self.Status, 'Unknown status')
 
     def WDforFront(self):
         return self.StartDate.weekday() + 1
