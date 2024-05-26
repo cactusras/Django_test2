@@ -124,6 +124,16 @@ class Scheduling(models.Model):
     WorkingHour = models.ForeignKey('WorkingHour', related_name='scheduling', on_delete=models.CASCADE)
     StartDate = models.DateField()
     EndDate = models.DateField()
+    
+    def WDforFront(self):
+        return self.StartDate.weekday() + 1
+    
+    def TimeSlotNumber(self):
+        duration = self.time_end - self.time_start
+        total_hours = int(duration.total_seconds() // 3600)  # Total hours between start and end
+        slot_numbers = [i + 1 for i in range(total_hours)]  # Generate slot numbers for each hour
+        return slot_numbers
+    
      
 class Reservation(models.Model):
     ClientID = models.ForeignKey('Client', related_name='reservations', on_delete=models.CASCADE)
@@ -158,7 +168,19 @@ class Reservation(models.Model):
             self.save()
         else:
             raise ValueError("Invalid status value")
+        
+    def get_status_display(self):
+        return self.Status
 
+    def WDforFront(self):
+        return self.StartDate.weekday() + 1
+    
+    def TimeSlotNumber(self):
+        duration = self.time_end - self.time_start
+        total_hours = int(duration.total_seconds() // 3600)  # Total hours between start and end
+        slot_numbers = [i + 1 for i in range(total_hours)]  # Generate slot numbers for each hour
+        return slot_numbers
+    
 class Waiting(models.Model):
     ClientID = models.ForeignKey('Client', related_name='waitings', on_delete=models.CASCADE)
     SchedulingID = models.ForeignKey('Scheduling', related_name='waitings', on_delete=models.CASCADE)

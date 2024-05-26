@@ -12,6 +12,7 @@ from django.http import JsonResponse
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.timezone import now
 
 
 
@@ -64,8 +65,7 @@ def add_client(request):
     return render(request, 'client_dataEdit.html', {'form': form})
 
 
-def add_Reservation(request):
-    
+def add_Reservation(request):  
 
     if request.user.is_authenticated:
         user_id = request.user.id
@@ -499,27 +499,53 @@ def doctorPage_loading(request):
     #取完doctor reservation
     user = request.user
     doctor = Doctor.objects.filter(id=user.id)
+    WorkingHourDoc = WorkingHour.objects.filter(DoctorID = doctor.id)
     
-    schedules = Scheduling.objects.filter(DocID = doctor.id)
-    #status 0,2,3才是真正在預約狀態中
-    reservations = Reservation.objects.filter(SchedulingID__in=schedules).filter(status__in=[0, 2, 3])
-    empty_list = Reservation.objects.filter(SchedulingID__in=schedules).filter(status__in=[1, 5])
-    #是不是有另一種寫法？
-    #empty 他處已有實現邏輯，之後我抄過來就好
+   
+    today = now().date()
+    start_of_week = today - timedelta(days=today.weekday())  # Monday
+    end_of_week = start_of_week + timedelta(days=6)  # Sunday
+
+    schedules = Scheduling.objects.filter(
+        DoctorID=doctor,
+        StartDate__lte=end_of_week,
+        EndDate__gte=start_of_week
+    ).select_related('WorkingHour')
     
-    context={
+      #status 0,2,3才是真正在預約狀態中
+    reservations = Reservation.objects.filter(
+        SchedulingID__in=schedules,
+        status__in=[0, 2, 3],
+        time_start__date__range=[start_of_week, end_of_week]
+    )
+
+    context = {
+    #已預約時段
     'reservation_list': [
-        {
-            'client_name': reservation.ClientID.name,
-            'appointment_date': reservation.time_start.date(),
-            'appointment_time': reservation.time_start.strftime('%H:%M'),
-            'expertise': reservation.expertiseID.name, 
-            'status': reservation.get_status_display(),  # Use get_status_display() method
-        }
-        for reservation in reservations
-    ]
-    
-        
+    {
+        'client_name': reservation.ClientID.name,
+        'appointment_date': reservation.time_start.date(),
+        'stating': reservation.time_start.strftime('%H:%M'),
+        'expertise': reservation.expertiseID.name, 
+        'ending': reservation.time_end.strftime('%H:%M'),
+        'status': reservation.get_status_display(),
+        'WDforfront': reservation.WDforFront(),  # 注意加上 () 调用方法
+        'OccupiedHour': reservation.TimeSlotNumber(),  # 注意加上 () 调用方法
+    }
+    for reservation in reservations
+    ],
+    #上班時段
+    'schedule_list': [
+            {
+                'work_day': schedule.WorkingHour.get_day_of_week_display(),
+                'work_start_time': schedule.WorkingHour.start_time.strftime('%H:%M'),
+                'work_end_time': schedule.WorkingHour.end_time.strftime('%H:%M'),
+                'valid_from': schedule.StartDate,
+                'valid_to': schedule.EndDate,
+                'WDforfront' : schedule.WDforFront
+            }
+            for schedule in schedules
+        ],
     }
     
     return render(request, 'doctor_page.html', context)
@@ -567,8 +593,8 @@ def available(request):
     # Get doctor_id, date, and expertise_name from the GET request
     doctor_id = request.GET.get('doctor_id')
     date_str = request.GET.get('date')
-    date = datetime.strptime(date_str, '%Y-%m-%d').date()
-    week_day = date.weekday()
+    date_reserve = datetime.strptime(date_str, '%Y-%m-%d').date()
+    week_day = date_reserve.weekday()+1
 
 
     expertise_name = request.GET.get('expertise_name')
@@ -591,7 +617,7 @@ def available(request):
    
     # Filter and prepare the schedule list
     for schedule in schedules:
-        if schedule.EndDate >= date.today():  # Only include future schedules
+        if schedule.EndDate >= now().date():  # Only include future schedules
             status_conditions = Q(status=0) | Q(status=2) | Q(status=3)
             schedule_condition = Q(schedule_id=schedule.id)
             reservations = Reservation.objects.filter(status_conditions & schedule_condition)
@@ -621,7 +647,7 @@ def available(request):
    
     # Filter schedules for the given date
     for schedule in schedule_list:
-        if schedule['start_date'] <= date <= schedule['end_date'] and schedule['day_of_week'] == week_day:
+        if schedule['start_date'] <= date_reserve <= schedule['end_date'] and schedule['day_of_week'] == week_day:
             available = {
                 'start_time': schedule['start_time'],
                 'end_time': schedule['end_time']
@@ -631,7 +657,7 @@ def available(request):
 
     # Remove reserved times from available times
     for reservation in reservation_list:
-        if reservation['date'] == date:
+        if reservation['date'] == date_reserve:
             for available in time_available[:]:
                 if available['start_time'] <= reservation['start_time'] < available['end_time']:
                     last_available_end = available['end_time']
@@ -670,7 +696,6 @@ def available(request):
     return JsonResponse({'reserve_choices': reserve_choices})
 
 #login check身份別，django 自帶，用isinstance分身份
-
 
 #存疑，（應該）現在這邊必須要候補時段跟被取消的預約時段一模一樣才卡的進去
 @login_required
@@ -714,7 +739,6 @@ def waitingToResForC(request):
     # Return the formatted waiting list data as JSON
     return JsonResponse({'waiting_list': waiting_list_data})
 
-
 def home(request):
     context={}
     return render(request, "searchPage.html", context)
@@ -723,16 +747,13 @@ def clieReserve(request):
     context={}
     return render(request, "client_reservation.html", context)
 
-
 def cliedataEd(request):
     context={}
     return render(request, "client_dataEdit.html", context)
 
-
 def clinDataEd(request):
     context={}
     return render(request, "clinic_dataEdit.html", context)
-
 
 def docDataEd(request):
     context={}
