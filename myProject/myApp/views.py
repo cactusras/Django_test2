@@ -64,9 +64,8 @@ def add_client(request):
         form = ClientForm()
     return render(request, 'client_dataEdit.html', {'form': form})
 
-
+@login_required
 def add_Reservation(request):  
-
     if request.user.is_authenticated:
         user_id = request.user.id
 
@@ -142,7 +141,8 @@ def add_Reservation(request):
                 else:
                     return HttpResponse('Form not valid')
 
-        return HttpResponse(f'Your user ID is {user_id}')
+        request.session.flush()
+        return (request,'UserAppointmentRecords.html')
     else:
         return HttpResponse('Login failed')
     
@@ -394,6 +394,7 @@ def clinic_load(request):
     # Additional context variables:
     'clinic_name': clinics[0].name,  # Assuming clinics is a list with a single clinic=?
     #return w1,10:00=>11, w1 11:00=>12...so on
+    #前端需要處理
     'schedule_list': [
         {
             'doctor_name': schedule.DoctorID.name,
@@ -414,6 +415,9 @@ def clinic_load(request):
     ],
     }
     return render(request, 'clinicPage.html', context)
+
+
+
 
 #reservation id required
 #以下為reservation狀態改變
@@ -488,11 +492,58 @@ def doctor_reserve_page(request, doc_id):
 	}
 	return render(request, 'doctor_reserve.html', context)
 
+
 #診所預約按鈕按下去
 def clinic_reserve_page(request, clinic_id):
+    clinic = get_object_or_404(Clinic, id='clinic_id')
+
+
+    doctors = Doctor.objects.filter(clinicID=clinic)
+
+
+    doctor_list = []
+
+
+    for doctor in doctors:
+
+
+        doctor_list.append({
+            'id': doctor.id,
+            'name': doctor.name
+        })
+
+
+    #request.session['doctor_name_list'] = doctor_list
+
+
+    context = {
+        'doctor': doctor_list,
+        'clinic': clinic
+    }
+    return render(request, 'clinic_reserve.html', context)
+
+
+def clinic_reserve_doctor_confirmed(request, doctor_id):
+    request.session['doc_id'] = doctor_id # Save session
+    doctor_expertise = Doc_Expertise.objects.filter(DocID=doctor_id).select_related('Expertise_ID')
+
+
+    # Create a list of dictionaries with expertise name and time
+    doc_expertise_list = []
+   
+    for expertise in doctor_expertise:
+        expertise_dict = {
+            'expertise_name': expertise.Expertise_ID.name,
+            'expertise_time': expertise.Expertise_ID.time
+        }
+        doc_expertise_list.append(expertise_dict)
+
+
+    # Store the expertise list in the session
+    request.session['expertise_list'] = doc_expertise_list
     
-    clinic_details = get_object_or_404(Clinic, id='clinic_id')
-    return render(request, 'clinic_reserve.html', clinic_details)
+    return render(request,'clinic_reserva.html',{doc_expertise_list})
+
 
 @login_required
 def doctorPage_loading(request):
@@ -549,12 +600,13 @@ def doctorPage_loading(request):
     }
     
     return render(request, 'doctor_page.html', context)
-        
+
+@login_required        
 def clientRecord_loading(request):
     user = request.user
     client = Client.objects.filter(id = user.id)
-    reservations = Reservation.objects.filter(ClientID=client.id)
-    waitings = Waiting.objects.filter(ClientID=client.id)
+    reservations = Reservation.objects.filter(ClientID=client.id).order_by('-time_start')
+    
     context ={
         'reservation_list': [
         {
@@ -566,16 +618,7 @@ def clientRecord_loading(request):
         }
         for reservation in reservations
         ],
-         'waiting_list': [
-        {
-            'client_name': waiting.ClientID.name,
-            'appointment_date': waiting.time_start.date(),
-            'appointment_time': waiting.time_start.strftime('%H:%M'),
-            'expertise': waiting.expertiseID.name, 
-            'status': waiting.get_status_display(),  # Use get_status_display() method
-        }
-        for waiting in waitings
-        ],
+    
          
          
     }
@@ -591,7 +634,7 @@ def add_times(time1, duration):
 
 def available(request):
     # Get doctor_id, date, and expertise_name from the GET request
-    doctor_id = request.GET.get('doctor_id')
+    doctor_id = request.session.get('doctor_id')
     date_str = request.GET.get('date')
     date_reserve = datetime.strptime(date_str, '%Y-%m-%d').date()
     week_day = date_reserve.weekday()+1
@@ -832,7 +875,6 @@ def isUniqueEmail_clie(request):
             return JsonResponse({'isUnique': True}, status=200)
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
-
 
 @csrf_exempt
 def isUniqueEmail_doc(request):
