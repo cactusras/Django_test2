@@ -70,6 +70,13 @@
         }
     }
     
+    document.getElementById('experForm').addEventListener('submit', async function(event){
+        event.preventDefault();
+        const expertise = document.getElementById('expertiseSelect').value;
+        const formVlue = document.getElementById('experVlue');
+        formVlue.value = expertise;
+    })
+
     function fetch_info(){
         fetch('/doctor/doctor_info/', {
             method: 'GET'

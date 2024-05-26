@@ -47,6 +47,7 @@
                             <div class="row">
                                 <div class="col">
                                     <label for="name" class="required">專長</label>
+                                    <form method="post" id="experForm" action="{% url "doc_expertise_upload" %}">
                                     <div class="form-floating">
                                         <!--<input type="text" class="form-control" id="expertise" name="expertise" style="width: 50%; margin-right: 30px;">-->
                                         <select class="form-select" id="expertiseSelect">
@@ -59,8 +60,10 @@
                                             <option value="兒童牙科">兒童牙科</option>
                                             <option value="假牙及義齒">假牙及義齒</option>
                                         </select>
+                                        <input type="text" id="experVlue" hidden>
                                         <button id="btnExper"  type="submit">加入專長</button>
                                     </div>
+                                    </form>
                                 </div>
                             </div>
                             <form id="doctorForm" method="post" enctype="multipart/form-data" action="{% url 'doc_upload' %}">

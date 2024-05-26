@@ -731,14 +731,18 @@ def clientRecord_loading(request):
     }
     return render(request,'UserAppointmentRecords.html',context)
 
+#如果是Status = 2或3的話 就不執行而是跳jsonresponse
+#變數名有待確認
 def client_cancel_reservation(request):
-    if request.method == 'POST':
-        time_start = request.POST.get('time_start')
-        expertise_name = request.POST.get('expertise_name')
-        client_name = request.POST.get('client_name')
-        client = get_object_or_404(Client, name=client_name)
-        expertise = get_object_or_404(Expertise, name=expertise_name)
-        reservation = get_object_or_404(Reservation, time_start=time_start, expertiseID=expertise, ClientID=client)
+
+    if request.method == 'GET':
+        reserveID = request.GET.get('reservationID')
+        reservation = get_object_or_404(Reservation, reservationID=reserveID)
+
+        if (reservation.Status == 2 or reservation.Status == 3):
+            return JsonResponse() #不能取消
+        else:
+            return JsonResponse() #可以取消
         
         # 删除预约
         reservation.delete()
@@ -746,20 +750,6 @@ def client_cancel_reservation(request):
     
     return render(request, 'UserAppointmentRecords.html')
 
-def client_cancel_waiting(request):
-    if request.method == 'POST':
-        time_start = request.POST.get('time_start')
-        expertise_name = request.POST.get('expertise_name')
-        client_name = request.POST.get('client_name')
-        client = get_object_or_404(Client, name=client_name)
-        expertise = get_object_or_404(Expertise, name=expertise_name)
-        waiting = get_object_or_404(Waiting, time_start=time_start, expertiseID=expertise, ClientID=client)
-        
-        # 删除预约
-        waiting.delete()
-        
-    
-    return render(request, 'UserAppointmentRecords.html')
 
 #預約頁面日期選下去，計算可預約時間
 
