@@ -12,8 +12,8 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" /> 
         <link href="{% static 'css/styles.css' %}" rel="stylesheet" /> 
 
-<!--         
-        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        
+        <!-- <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
         <link href="css/styles.css" rel="stylesheet" /> -->
             
@@ -109,18 +109,10 @@
                         看診日期<br>
                        <form>
                         
-                            <!-- <label>
-                                開始：
-                                <input type="date" id="date" name="date" min="" style="width: 240px; height: 40px;"/>
-                            </label>
-                            <label>
-                                結束：
-                                <input type="date" id="date" name="date" min="" style="width: 250px; height: 40px;"/>
-                            </label> -->
+                           
                             開始：
                             <input type="date" id="start-date" name="start-date" style="width: 240px; height: 40px;" required />
-                            結束：
-                            <input type="date" id="end-date" name="end-date" style="width: 240px; height: 40px;" required />
+                            
                         </form>
                         <br>
                         <br>
@@ -140,12 +132,12 @@
                             </div>
                             <br>
                         
-                        <select class="form-select" aria-label="Default select example">
+                        <!-- <select class="form-select" aria-label="Default select example">
                             <option selected>顯示(全部)</option>
                             <option value="1">One</option>
                             <option value="2">Two</option>
                             <option value="3">Three</option>
-                        </select>
+                        </select> -->
                         <br>
                         <form class="d-flex">
                             <button id="searchButton" class="btn btn-outline-dark"  type="button" style="font-size: 20px; width: 630px; height: 40px;">
@@ -164,8 +156,8 @@
 
        
                 <!--搜尋結果-->
-                
         <section class="py-5" style="background-color:#FFFFF4;" >
+            <!-- 加入id=target -->
             <div class="container px-4 px-lg-5 mt-5" style="background-color:#FFFFF4;" id="target">
                 <h2 class="fw-bolder mb-4">搜尋結果</h2>
 
@@ -318,31 +310,18 @@
                 });
             }
         }
-            </script>
-          
-          <script>
+          //target 的js
             document.getElementById('searchButton').addEventListener('click', function() {
                 document.getElementById('target').scrollIntoView({ behavior: 'smooth' });
             });
-        </script>
-
-        <script>
+       
+            //日期最小設為今天js
            window.onload = function() {
-        var today = new Date();
-        var minDate = today.toISOString().slice(0, 10);
-        document.getElementById("start-date").min = minDate;
-        document.getElementById("end-date").min = minDate;
+            var today = new Date();
+            var minDate = today.toISOString().slice(0, 10);
+            document.getElementById("start-date").min = minDate;
+         };
 
-        // Add event listener to end date input
-        document.getElementById("end-date").addEventListener("change", function() {
-            var startDate = document.getElementById("start-date").value;
-            var endDate = document.getElementById("end-date").value;
-            if (endDate < startDate) {
-                // If end date is before start date, set it to be equal to start date
-                document.getElementById("end-date").value = startDate;
-            }
-        });
-    };
         </script>
         
             
