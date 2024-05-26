@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>醫生註冊</title>
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="{% static 'myApp/assets/favicon.ico' %}" />
+        <!-- Bootstrap icons-->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="css/styles.css" rel="stylesheet" />
+
+        <!-- <link rel="icon" type="image/x-icon" href="{% static 'myApp/assets/favicon.ico' %}" /> -->
+        <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" /> -->
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <!-- <link href="{% static 'css/styles.css' %}" rel="stylesheet" /> -->
+    </head>
+
+    <body>
+        <!--網頁頭-->
+        <nav class="navbar navbar-expand-lg" style="background-color:#F0EAD6; height: 100px;">
+            <div class="container px-4 px-lg-5">
+                <img src="{% static 'assets/dental.png' %}" alt="DEN Logo">
+                <a class="navbar-brand" href="#!" style="font-size: 24px;">牙醫預約平台</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <div class="ms-auto">
+                        <button class="btn btn-outline-dark" type="submit" style="font-size: 20px;">
+                            <i class="bi bi-person-fill"></i>
+                            登入
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    
+        <!--醫師註冊-->
+        <section class="py-5"  style="background-color:#FFFFF4">
+            <div class="container" >
+                <div class="row row-cols-1">
+                    <div class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:80px; font-size: 20px; ">
+                        註冊
+                    </div>
+                    <div class="col" style="background-color:#fffff0; border: 1px solid #ada089; height:650px; font-size: 20px;">
+
+                        <div class="container">
+                            <div class="row">
+                                <!-- 郵件 -->
+                                <div class="col-sm-6 col-md-5 col-lg-6">
+                                    <br>
+                                    電子郵件<span style="color: red;">*</span>
+                                    <div class="form-floating">
+                                        <input type="email" class="form-control" id="floatingEmail" placeholder="name@example.com" style="width: 400px;" required>
+                                        <label for="floatingEmail" style="color:#808080">請輸入診所電子郵件</label>
+                                    </div>
+                                </div>
+                                <!-- 電話 -->
+                                <div class="col-sm-6 col-md-5 col-lg-6">
+                                    <br>
+                                    電話<span style="color: red;">*</span>
+                                    <div class="form-floating">
+                                        <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea" style="width: 400px;" required></textarea>
+                                        <label for="floatingTextarea" style="color:#808080">請輸入您的電話</label>
+                                    </div>
+                                </div>
+
+                                <!-- 強制換行 -->
+                                <div class="w-100 d-none d-md-block"></div>
+
+                                 <!-- 密碼 -->
+                                 <div class="col-sm-6 col-md-5 col-lg-6">
+                                    <br>
+                                    密碼<span style="color: red;">*</span>
+                                    <div class="form-floating">
+                                        <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea" style="width: 400px;" required></textarea>
+                                        <label for="floatingTextarea" style="color:#808080">請輸入您的密碼</label>
+                                    </div>
+                                </div>
+
+                                <!-- 性別 -->
+                                <div class="col-sm-6 col-md-5 col-lg-6">
+                                    <br>
+                                    性別<span style="color: red;">*</span>
+                                    <br>
+                                    <div class="container">
+                                        <div class="form-group">
+                                            <select class="form-select" id="city" name="city" onchange="updateDistricts()" style="width: 390px;">
+                                                <option selected>--請選擇性別--</option>
+                                                <option value="男">男</option>
+                                                <option value="女">女</option>
+                                                <option value="不公開">不公開</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                    
+
+                               <!-- 強制換行 -->
+                               <div class="w-100 d-none d-md-block"></div>
+
+                               <!-- 名字 -->
+                               <div class="col-sm-6 col-md-5 col-lg-6">
+                                <br>
+                                密碼<span style="color: red;">*</span>
+                                <div class="form-floating">
+                                    <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea" style="width: 400px;" required></textarea>
+                                    <label for="floatingTextarea" style="color:#808080">請輸入您的密碼</label>
+                                </div>
+                            </div>
+
+                                <!-- 地址 -->
+                                <div class="col-sm-6 col-md-5 col-lg-6">
+                                    <br>
+                                    地址
+                                    <div class="form-floating">
+                                        <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea" style="width: 400px;"></textarea>
+                                        <label for="floatingTextarea" style="color:#808080">請輸入您的地址</label>
+                                    </div>
+                                </div>
+
+                                 <!-- 強制換行 -->
+                                 <div class="w-100 d-none d-md-block"></div>
+                                <!-- 班表 -->
+                                 <div class="col-sm-6 col-md-5 col-lg-6">
+                                    <br>
+                                    <form id="timeForm" style="text-align: left;">
+                                        <label for="startTime">開始：</label>
+                                        <input type="date" id="birthdate"/>
+                                    </form>
+                                </div>
+
+                                <!-- 職業 -->
+                                <div class="col-sm-6 col-md-5 col-lg-6">
+                                    <br>
+                                    職業
+                                    <div class="form-floating">
+                                        <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea" style="width: 400px;"></textarea>
+                                        <label for="floatingTextarea" style="color:#808080">請輸入您的職業</label>
+                                    </div>
+                                </div>
+
+                                <!-- 強制換行 -->
+                                <div class="w-100 d-none d-md-block"></div>
+                                <div class="col-sm-6 col-md-5 col-lg-6">
+                                    
+                                    <br>
+                                    是否願意接收通知<span style="color: red;">*</span>
+                                    <br>
+                                    <div class="container">
+                                        <!-- 預防性治療 -->
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox" id="checkboxPrevention" value="預防性治療">
+                                            <label class="form-check-label" for="checkboxPrevention">是</label>
+                                        </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                          <button class="btn btn-outline-dark" type="button" onclick="deleteCheckedRows()" id="deleteButton" style="font-size: 20px; width: 160px; height: 40px;">
+                              <i class="bi bi-calendar-check-fill"></i>
+                              完成
+                          </button>
+                      </div>
+                   </div>
+              </div>
+          </div>
+          <!-- 登出按鈕 -->
+          <br>
+            <div class="d-flex justify-content-center" >
+                <button class="btn btn-outline-dark" type="button" onclick="deleteCheckedRows()" id="deleteButton" style="font-size: 20px; width: 160px; height: 40px;">
+                    登出
+                </button>
+            </div>
+         </section>
+             <!--頁面底-->
+            <footer class="py-5 bg-dark">
+                <div class="container"><p class="m-0 text-center text-white">Copyright &copy; Your Website 2023</p></div>
+            </footer>
+            <!-- Bootstrap core JS-->
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+            <!-- Core theme JS-->
+            <script src="{% static 'js/scripts.js' %}"></script>
+
+
+            <script>
+                function updateSelectedOptions() {
+                    var select = document.getElementById("specialty");
+                    var selectedOption = select.options[select.selectedIndex].text;
+                    var selectedOptionsDiv = document.getElementById("selected-options");
+        
+                    // 檢查選取紀錄是否為初始值，如果是則清除初始文字
+                    if (selectedOptionsDiv.textContent === '選取紀錄:') {
+                        selectedOptionsDiv.textContent = '';
+                    }
+        
+                    // 添加新選取的選項到紀錄
+                    var newRecord = document.createElement("div");
+                    newRecord.textContent = selectedOption;
+                    selectedOptionsDiv.appendChild(newRecord);
+                }
+            </script>
+
+
+        
+    </body>
+</html>
