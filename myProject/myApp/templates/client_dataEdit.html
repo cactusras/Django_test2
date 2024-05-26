@@ -66,16 +66,16 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <label for="phone" class="required">電話</label>
+                                <label for="phone_number" class="required">電話</label>
                                 <div class="form-floating">
-                                    <input type="tel" class="form-control" id="phone" name="phone" required>
+                                    <input type="tel" class="form-control" id="phone_number" name="phone_number" required>
                                 </div>
                             </div>
                         </div>
                         <br>
                         <div class="row">
                             <div class="col">
-                                <label for="password" class="required">密碼</label>
+                                <label for="pw" class="required">密碼</label>
                                 <div class="form-floating">
                                     <input type="password" class="form-control" id="pw" name="pw" required>
                                 </div>
@@ -88,6 +88,7 @@
                                         <option value="male">男</option>
                                         <option value="female">女</option>
                                     </select>
+                                    <input type="text" id="genderInput" name="genderInput" hidden>
                                 </div>
                             </div>
                         </div>
@@ -111,7 +112,7 @@
                         <br>
                         <div class="row">
                             <div class="col">
-                                <label for="birthdate" class="required">生日</label>
+                                <label for="birth_date" class="required">生日</label>
                                 <div class="form-floating">
                                     <input type="date" class="form-control half-width" id="birth_date" name="birth_date" style="width: 575px;" required>
                                     
@@ -126,7 +127,7 @@
                             <div class="col">
                                 <label for="occupation">職業</label>
                                 <div class="form-floating">
-                                    <input type="text" class="form-control half-width" id="occupation" style="width: 575px;">
+                                    <input type="text" class="form-control half-width" id="occupation" name="occupation" style="width: 575px;">
                                 </div>
                             </div>
                             

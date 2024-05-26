@@ -132,7 +132,7 @@
                         <form action="">
                             <label for="date1">日期</label>
                             <div class="input-group date" id='date1'>  
-                                <input type="date" class="form-control" id="dateInput"/>  
+                                <input type="date" class="form-control" id="dateInput" min=new Date().toISOString().split('T')[0]/>  
                                 
                             </div>  
                         </form> 

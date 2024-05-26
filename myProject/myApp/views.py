@@ -705,8 +705,7 @@ def clientRecord_loading(request):
     client = Client.objects.filter(id = user.id)
     reservations = Reservation.objects.filter(ClientID=client.id)
     waitings = Waiting.objects.filter(ClientID=client.id)
-    context ={
-        'reservation_list': [
+    reservation_list = [
         {
             'client_name': reservation.ClientID.name,
             'appointment_date': reservation.time_start.date(),
@@ -715,7 +714,9 @@ def clientRecord_loading(request):
             'status': reservation.get_status_display(),  # Use get_status_display() method
         }
         for reservation in reservations
-        ],
+     ]
+    '''context ={
+        
          'waiting_list': [
         {
             'client_name': waiting.ClientID.name,
@@ -728,8 +729,8 @@ def clientRecord_loading(request):
         ],
          
          
-    }
-    return render(request,'UserAppointmentRecords.html',context)
+    }'''
+    return render(request,'UserAppointmentRecords.html',reservation_list)
 
 #如果是Status = 2或3的話 就不執行而是跳jsonresponse
 #變數名有待確認
@@ -740,12 +741,12 @@ def client_cancel_reservation(request):
         reservation = get_object_or_404(Reservation, reservationID=reserveID)
 
         if (reservation.Status == 2 or reservation.Status == 3):
-            return JsonResponse() #不能取消
+            return JsonResponse({'dlteSuccess': False,}) #不能取消
         else:
-            return JsonResponse() #可以取消
-        
         # 删除预约
-        reservation.delete()
+            reservation.delete()
+            return JsonResponse({'dlteSuccess': True,}) #可以取消
+        
         
     
     return render(request, 'UserAppointmentRecords.html')
@@ -869,7 +870,7 @@ def available(request):
 
 
 #存疑，（應該）現在這邊必須要候補時段跟被取消的預約時段一模一樣才卡的進去
-@login_required
+'''@login_required
 def waitingToResForC(request):
     user = request.user
     # Find the waiting entries for the current user with status=False
@@ -908,4 +909,4 @@ def waitingToResForC(request):
             
     
     # Return the formatted waiting list data as JSON
-    return JsonResponse({'waiting_list': waiting_list_data})
+    return JsonResponse({'waiting_list': waiting_list_data})'''

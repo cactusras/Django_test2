@@ -28,7 +28,7 @@ function fetch_element(){
         clieField['pw'] = document.getElementById('pw').value,
         clieField['address'] = document.getElementById('address').value,
         clieField['birth_date'] = document.getElementById('birth_date').value
-        clieField['gender'] = document.getElementById('gender').value
+        clieField['gender'] = document.getElementById('genderInput').value
         clieField['occupation'] = document.getElementById('occupation').value
         clieField['notify'] = checkVlue();
         console.log('name' + clieField['name']);

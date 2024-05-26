@@ -13,7 +13,6 @@ urlpatterns = [
     path('clinic/home/', views.clinHome, name='clinic_home'),
     path('doctor/manage/', views.docManage, name='doctor_management'),
     path('doctor/page/', views.docPage, name='doctor_page'),
-    path('waitinglist/to/reservation/', views.waitingToResForC, name='waiting_to_reservation'),
     path('available/', views.available, name='available_times'),
     path('doctor/reserve/<int:doc_id>/', views.doctor_reserve_page, name='doctor_reserve_page'),
     path('clinic/reserve/<int:clinic_id>/', views.clinic_reserve_page, name='clinic_reserve_page'),
