@@ -102,10 +102,13 @@ def add_client(request):
             else:
                 message = 'Client updated successfully.'
 
-            return render(request, 'searchPage.html', {'message': message})
+            return render(request, 'home.html', {'message': message})
+        else:
+            return render(request, 'home.html')
     else:
         form = ClientForm()
     return render(request, 'myApp/login.html', {'form': form})
+
 
 
 
@@ -393,7 +396,7 @@ def doctor_clinic_search_view(request):
             #clinic_list.append(clinic['clinic_id'])
             #request.session['clinic_list'] = clinic_list  # Save session
     
-    return render(request, 'myApp/searchPage.html', {
+    return render(request, 'myApp/home.html', {
         'filter': filter,
         'doc_final': doc_final,
         'clinic_final': clinic_final
@@ -832,7 +835,7 @@ def waitingToResForC(request):
 
 def home(request):
     context={}
-    return render(request, "myApp/searchPage.html", context)
+    return render(request, "myApp/home.html", context)
 
 def clieReserve(request):
     context={}
