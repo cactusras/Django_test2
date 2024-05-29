@@ -14,6 +14,7 @@ from django.contrib.auth import authenticate, login,logout
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import now
 from myApp import forms
+from django.shortcuts import render
 
 
 
@@ -54,60 +55,6 @@ def login_view(request):
     #return redirect(request, 'myApp/home.html')
     return render(request, 'myApp/home.html', {'form': form})
 
-from django.shortcuts import render
-from .forms import ClientForm
-from .models import CustomUser, Client
-
-# def add_client(request):
-    
-#     if request.method == 'POST':
-#         form = ClientForm(request.POST)
-#         if form.is_valid():
-#             # Extract cleaned data from the form
-#             cleaned_data = form.cleaned_data
-
-#             # Add the extra fields to the cleaned data
-#             cleaned_data['is_active'] = True
-#             cleaned_data['is_admin'] = False
-
-#             cleaned_data_custom_user = {
-#                 'email': cleaned_data['email'],
-#                 'name': cleaned_data['name'],
-#                 'phone_number': cleaned_data['phone_number'],
-#                 'pw': cleaned_data['pw'],
-#                 'is_active': cleaned_data['is_active'],
-#                 'is_admin': cleaned_data['is_admin']
-#             }
-
-#             cleaned_data_client = {
-#                 'address': cleaned_data['address'],
-#                 'birth_date': cleaned_data['birth_date'],
-#                 'gender': cleaned_data['gender'],
-#                 'occupation': cleaned_data['occupation'],
-#                 'notify': cleaned_data['notify']
-#             }
-
-#             email = cleaned_data.get('email')
-
-#             client, created_client = Client.objects.update_or_create(
-#                 email=email,
-#                 defaults=cleaned_data
-#             )
-
-#             if created_client:
-#                 message = 'Client created successfully.'
-#             else:
-#                 message = 'Client updated successfully.'
-#                 return render(request, 'myApp/login.html', {'message': message})
-
-#             return render(request, 'myApp/home.html', {'message': message})
-#         else:
-#             return render(request, 'myApp/home.html')
-#     else:
-#         form = ClientForm()
-#     return render(request, 'myApp/login.html', {'form': form})
-
-
 def add_client(request):
     if request.method == 'POST':
         try:
@@ -134,22 +81,6 @@ def add_client(request):
 
             cleaned_data['is_active'] = True
             cleaned_data['is_admin'] = False
-            cleaned_data_custom_user = {
-                'email': cleaned_data['email'],
-                'name': cleaned_data['name'],
-                'phone_number': cleaned_data['phone_number'],
-                'pw': cleaned_data['pw'],
-                'is_active': cleaned_data['is_active'],
-                'is_admin': cleaned_data['is_admin']
-            }
-
-            cleaned_data_client = {
-                'address': cleaned_data['address'],
-                'birth_date': cleaned_data['birth_date'],
-                'gender': cleaned_data['gender'],
-                'occupation': cleaned_data['occupation'],
-                'notify': cleaned_data['notify']
-            }
 
             email = cleaned_data.get('email')
 
@@ -157,7 +88,6 @@ def add_client(request):
                 email=email,
                 defaults=cleaned_data
             )
-
 
             if created_client:
                 message = 'Client created successfully.'
@@ -169,8 +99,6 @@ def add_client(request):
             return JsonResponse({'message': 'Invalid form data', 'errors': form.errors, 'status': 'error'})
     else:
         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
-
-
 
 
 @login_required
@@ -257,6 +185,48 @@ def add_Reservation(request):
     
 #clinic posting
 def add_clinic(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)  # 解析 JSON 數據
+        except json.JSONDecodeError:
+            return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
+        
+        # 創建一個包含數據的 QueryDict
+        data = {
+            'email': data.get('email'),
+            'name': data.get('name'),
+            'phone_number': data.get('phone_number'),
+            'pw': data.get('pw'),
+            'license_number': data.get('license_number'),
+            'address': data.get('address'),
+            'introduction': data.get('introduction'),
+            'photo': data.get('photo')
+        }
+
+        form = ClientForm(data)
+        if form.is_valid():
+            cleaned_data = form.cleaned_data
+
+            cleaned_data['is_active'] = True
+            cleaned_data['is_admin'] = False
+
+            email = cleaned_data.get('email')
+
+            client, created_client = Client.objects.update_or_create(
+                email=email,
+                defaults=cleaned_data
+            )
+
+            if created_client:
+                message = 'Client created successfully.'
+            else:
+                message = 'Client updated successfully.'
+
+            return JsonResponse({'message': message, 'status': 'success'})
+        else:
+            return JsonResponse({'message': 'Invalid form data', 'errors': form.errors, 'status': 'error'})
+    else:
+        return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
     if request.method == 'POST':
         form = ClinicForm(request.POST, request.FILES)
         if form.is_valid():
