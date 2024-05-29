@@ -41,8 +41,8 @@ class ClientForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super(ClientForm, self).__init__(*args,**kwargs)
-        self.fields['is_active'].initial = True
-        self.fields['is_admin'].initial = False
+        # self.fields['is_active'].initial = True
+        # self.fields['is_admin'].initial = False
 
 class WorkingHourForm(forms.ModelForm):
     class Meta:

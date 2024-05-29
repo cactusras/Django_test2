@@ -155,11 +155,11 @@ document.getElementById('clinicForm').addEventListener('submit', async function(
                     return;
                 } else {
                     // 要串資料庫把所有的clinic email先找出來      
-                    if (await isUniqueEmail(clinField['email'])) {
+                    if (!await isUniqueEmail(clinField['email'])) {
                         alert("Email already registered");
                         return;
                     }else{
-                        if (await isUniqueLicense(clinField['license_number'])) {
+                        if (!await isUniqueLicense(clinField['license_number'])) {
                             alert("License already registered");
                             return;
                         }else{

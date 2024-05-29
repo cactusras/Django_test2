@@ -69,7 +69,7 @@ async function isUniqueEmail(email){
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
+                //'X-CSRFToken': getCookie('csrftoken')
             },
             body: JSON.stringify({email: email})
         });
@@ -129,7 +129,7 @@ document.getElementById('clientForm').addEventListener('submit', async function(
                     return;
                 } else {
                     // 要串資料庫把所有的clinic email先找出來      
-                    if (await isUniqueEmail(email)) {
+                    if (!await isUniqueEmail(email)) {
                         alert("Email already registered");
                         return;
                     }else{

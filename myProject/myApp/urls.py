@@ -40,5 +40,6 @@ urlpatterns = [
     #path("dentalLogin/", views.dentalLogin, name="dentalLogin"),
     path('login/login_view/', views.login_view, name='login_view'),
     path('clinic_info/', views.clinic_info, name='clinic_info'),
+    path('client_info/', views.client_info, name='client_info'),
     path('check_authentication/', views.check_authentication, name='check_authentication')
 ]

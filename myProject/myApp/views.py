@@ -13,7 +13,7 @@ from .forms import (
 )
 from .filters import docClinicFilter
 from .models import (
-    Clinic, Doctor, Doc_Expertise, Expertise, Scheduling,
+    Clinic, CustomUser, Doctor, Doc_Expertise, Expertise, Scheduling,
     WorkingHour, docClinicSearch, Reservation, Client, Waiting
 )
 from django.db.models import Q
@@ -266,10 +266,51 @@ def add_client(request):
     if request.method == 'POST':
         form = ClientForm(request.POST)
         if form.is_valid():
-            form.save()
-            return render(request,'searchPage.html')
+            # Extract cleaned data from the form
+            cleaned_data = form.cleaned_data
+
+            # Add the extra fields to the cleaned data
+            cleaned_data['is_active'] = True
+            cleaned_data['is_admin'] = False
+
+            cleaned_data_custom_user = {
+                'email': cleaned_data['email'],
+                'name': cleaned_data['name'],
+                'phone_number': cleaned_data['phone_number'],
+                'pw': cleaned_data['pw'],
+                'is_active': cleaned_data['is_active'],
+                'is_admin': cleaned_data['is_admin']
+            }
+
+            cleaned_data_client = {
+                'address': cleaned_data['address'],
+                'birth_date': cleaned_data['birth_date'],
+                'gender': cleaned_data['gender'],
+                'occupation': cleaned_data['occupation'],
+                'notify': cleaned_data['notify']
+            }
+
+            email = cleaned_data.get('email')
+
+            customuser, created_user = CustomUser.objects.update_or_create(
+                email=email,
+                defaults=cleaned_data_custom_user
+            )
+
+            client, created_client = Client.objects.update_or_create(
+                email=email,
+                defaults=cleaned_data_client
+            )
+
+            if created_user or created_client:
+                message = 'Client created successfully.'
+            else:
+                message = 'Client updated successfully.'
+
+            return render(request, 'searchPage.html', {'message': message})
     else:
         form = ClientForm()
+    print(request.POST)
     return render(request, 'client_dataEdit.html', {'form': form})
 
 #判斷使用者是否為登入狀態 
