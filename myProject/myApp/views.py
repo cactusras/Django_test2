@@ -17,6 +17,7 @@ from myApp import forms
 from django.shortcuts import render
 from PIL import Image
 from pathlib import Path
+from django.contrib.auth.hashers import make_password
 
 
 def index(request):
@@ -68,7 +69,7 @@ def add_client(request):
             'email': data.get('email'),
             'name': data.get('name'),
             'phone_number': data.get('phone_number'),
-            'pw': data.get('pw'),
+            'password': make_password(data.get('password')),  # 对密码进行哈希处理
             'address': data.get('address'),
             'birth_date': data.get('birth_date'),
             'gender': data.get('gender'),
@@ -89,6 +90,8 @@ def add_client(request):
                 email=email,
                 defaults=cleaned_data
             )
+
+            # password = cleaned_data['pw']
 
             if created_client:
                 message = 'Client created successfully.'
@@ -221,14 +224,14 @@ def add_clinic(request):
             cleaned_data['is_admin'] = False
             
             photo = cleaned_data['photo']
-            image = Image.open(photo)
-            print("photo opend")
-            # Define the save path using Path from pathlib
-            save_dir = Path('media/uploaded_files')
-            save_dir.mkdir(parents=True, exist_ok=True)  # Create directories if they don't exist
-            save_path = save_dir / photo.name
-            image.save(save_path)
-            print("photo saved")
+            # image = Image.open(photo)
+            # print("photo opend")
+            # # Define the save path using Path from pathlib
+            # save_dir = Path('media/uploaded_files')
+            # save_dir.mkdir(parents=True, exist_ok=True)  # Create directories if they don't exist
+            # save_path = save_dir / photo.name
+            # image.save(save_path)
+            # print("photo saved")
             # Prepare data for update_or_create
             email = cleaned_data.pop('email')
             photo_path = f'uploaded_files/{photo.name}'
