@@ -15,7 +15,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import now
 from myApp import forms
 from django.shortcuts import render
-
+from PIL import Image
+from pathlib import Path
 
 
 def index(request):
@@ -194,7 +195,7 @@ def add_clinic(request):
 
         from django.http import QueryDict
 
-        data_dict = QueryDict('', mutable=True)
+        # data_dict = QueryDict('', mutable=True)
 
         # # 創建一個包含數據的 QueryDict
         # data_dict.update({
@@ -218,9 +219,21 @@ def add_clinic(request):
             print(cleaned_data)
             cleaned_data['is_active'] = True
             cleaned_data['is_admin'] = False
-
-            email = cleaned_data.get('email')
-
+            
+            photo = cleaned_data['photo']
+            image = Image.open(photo)
+            print("photo opend")
+            # Define the save path using Path from pathlib
+            save_dir = Path('media/uploaded_files')
+            save_dir.mkdir(parents=True, exist_ok=True)  # Create directories if they don't exist
+            save_path = save_dir / photo.name
+            image.save(save_path)
+            print("photo saved")
+            # Prepare data for update_or_create
+            email = cleaned_data.pop('email')
+            photo_path = f'uploaded_files/{photo.name}'
+            cleaned_data['photo'] = photo_path
+            print("photo path saved to clean_data")
             clinic, created_clinic = Clinic.objects.update_or_create(
                 email=email,
                 defaults=cleaned_data

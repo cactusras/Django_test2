@@ -108,22 +108,25 @@ document.getElementById('clinicForm').addEventListener('submit', async function 
     event.preventDefault(); // Prevent form submission if validation fails
 
     // Fetch form elements
-    fetch_element();
+    // fetch_element();
+
+    // Use FormData for handling file uploads
+    const formData = new FormData(document.getElementById('clinicForm'));
 
     // Validate form data
-    if (clinField.name.length > 100) {
+    if (formData.get('name').length > 100) {
         alert("Name cannot exceed 100 characters");
         return;
-    } else if (!(/^\d+$/.test(clinField.phone_number))) {
+    } else if (!(/^\d+$/.test(formData.get('phone_number')))) {
         alert("Phone number can only contain digits");
         return;
-    } else if (clinField.phone_number.length > 15) {
+    } else if (formData.get('phone_number').length > 15) {
         alert("Phone number cannot exceed 15 digits");
         return;
-    } else if (!await isUniqueEmail(clinField['email'])) {
+    } else if (!await isUniqueEmail(formData.get('email'))) {
         alert("Email already registered");
         return;
-    } else if (!await isUniqueLicense(clinField['license_number'])) {
+    } else if (!await isUniqueLicense(formData.get('email'))) {
         alert("License already registered");
         return;
     } else {
@@ -131,13 +134,10 @@ document.getElementById('clinicForm').addEventListener('submit', async function 
     }
 
     if (isValid) {
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-        // Use FormData for handling file uploads
-        const formData = new FormData(document.getElementById('clinicForm'));
+        // const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
         // Add additional fields manually
-        formData.append('csrfmiddlewaretoken', csrfToken);
+        // formData.append('csrfmiddlewaretoken', csrfToken);
 
         // Send AJAX request
         fetch('/add/clinic/', {
