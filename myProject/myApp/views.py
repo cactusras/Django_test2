@@ -1,7 +1,7 @@
 import json
 from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponse
-from .forms import DoctorForm,ClinicForm,ClientForm,SchedulingForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm
+from .forms import DoctorForm,ClinicForm,ClientForm,SchedulingForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm, LoginForm
 from django.db.models import Q
 from django.db import connection
 from django.contrib.auth.decorators import login_required
@@ -14,48 +14,76 @@ from django.contrib.auth import authenticate, login,logout
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import now
 from myApp import forms
-from django.shortcuts import render
+from django.contrib import messages
+from django.contrib.auth.hashers import make_password
 from PIL import Image
 from pathlib import Path
-from django.contrib.auth.hashers import make_password
 
 
 def index(request):
     
     context={}
     return render(request, "myApp/index.html", context)
-#login check身份別，django 自帶，用isinstance分身份，此處等migrate完可進行初步測試，看要手動加資料還是把register頁面都弄好一併測試（需要頁面跳轉邏輯）
-def login_view(request):
+# #login check身份別，django 自帶，用isinstance分身份，此處等migrate完可進行初步測試，看要手動加資料還是把register頁面都弄好一併測試（需要頁面跳轉邏輯）
+# def login_view(request):
+#     if request.method == 'POST':
+#         email = request.POST.get('email')
+#         print(f'Email: {email}')
+#         password = request.POST.get('password')
+#         print(f'Password: {password}')
+#         #user = CustomUser.objects.filter(email=email,passw=password)
+#         user = authenticate(request, email=email, password=password)
+#         print(user) 
+#         if user is not None:
+#             login(request, user)
+#             print(user) 
+#             # 登入成功，根據用戶身份導向不同的頁面
+#             if hasattr(user, 'client'):  # 检查是否是客户
+#                 print('client')
+#                 return redirect('home')
+#             elif hasattr(user, 'clinic'):  # 检查是否是诊所
+#                 print('clinic')
+#                 return redirect('doctor')
+#             elif hasattr(user, 'experience'):  # 检查是否是医生
+#                 print('doctor')
+#                 return redirect('home_doctor')
+#             else:
+#                 return render(request, 'myApp/login.html', {'error_message': 'Unknown user type'})
+            
+#         else:
+#             #登入失敗
+#             return render(request, 'myApp/login.html', {'error_message': 'Invalid login credentials'})
+#     else:
+#         return render(request, 'myApp/login.html')
+    
+@csrf_exempt
+def user_login(request):
     if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
+        form = LoginForm(request.POST)
         if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+            user = authenticate(request, email=email, password=password)
             if user is not None:
-                login(request, user)
-                
-                user_type = None
-                if isinstance(user, Client):
-                    user_type = 'Client'
-                    return redirect('myApp/home.html')  
-                elif isinstance(user, Clinic):
-                    user_type = 'Clinic'
-                elif isinstance(user, Doctor):
-                    user_type = 'Doctor'
-
-                response = {
-                    'status': 'success',
-                    'message': 'User is logged in',
-                    'user_type': user_type,
-                    'username': user.username,
-                    'email': user.email
-                }
-                return JsonResponse(response)
+                login(request, user)  # Ensure the user object is passed correctly
+                # 登入成功，根據用戶身份導向不同的頁面
+                if hasattr(user, 'client'):  # 检查是否是客户
+                    print('client')
+                    return JsonResponse({'message': 'Login successful_client', 'status': 'success'})
+                elif hasattr(user, 'clinic'):  # 检查是否是诊所
+                    print('clinic')
+                    return JsonResponse({'message': 'Login successful_clinic', 'status': 'success'})
+                elif hasattr(user, 'experience'):  # 检查是否是医生
+                    print('doctor')
+                    return JsonResponse({'message': 'Login successful_doctor', 'status': 'success'})
+                else:
+                    return JsonResponse({'message': 'Login successful_unknown', 'status': 'success'})
+            else:
+                return JsonResponse({'message': 'Invalid email or password', 'status': 'error'})
+        else:
+            return JsonResponse({'message': 'Invalid form data', 'errors': form.errors, 'status': 'error'})
     else:
-        form = AuthenticationForm()
-    #return redirect(request, 'myApp/home.html')
-    return render(request, 'myApp/home.html', {'form': form})
+        return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
 def add_client(request):
     if request.method == 'POST':
@@ -191,56 +219,40 @@ def add_Reservation(request):
 def add_clinic(request):
     if request.method == 'POST':
         try:
-            # data = json.loads(request.body)  # 解析 JSON 數據
             form = ClinicForm(request.POST, request.FILES)
         except json.JSONDecodeError:
             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
-
-        from django.http import QueryDict
-
-        # data_dict = QueryDict('', mutable=True)
-
-        # # 創建一個包含數據的 QueryDict
-        # data_dict.update({
-        #     'email': data.get('email'),
-        #     'name': data.get('name'),
-        #     'phone_number': data.get('phone_number'),
-        #     'pw': data.get('pw'),
-        #     'license_number': data.get('license_number'),
-        #     'address': data.get('address'),
-        #     'introduction': data.get('introduction'),
-        #     'photo': data.get('photo')
-        # })
-
-        # # Handle file upload
-        # photo = request.FILES.get('photo')
-        # # Initialize form with data and files
-        # form = ClinicForm(data_dict, {'photo': photo})
 
         if form.is_valid():
             cleaned_data = form.cleaned_data
             print(cleaned_data)
             cleaned_data['is_active'] = True
             cleaned_data['is_admin'] = False
-            
-            photo = cleaned_data['photo']
-            # image = Image.open(photo)
-            # print("photo opend")
-            # # Define the save path using Path from pathlib
-            # save_dir = Path('media/uploaded_files')
-            # save_dir.mkdir(parents=True, exist_ok=True)  # Create directories if they don't exist
-            # save_path = save_dir / photo.name
-            # image.save(save_path)
-            # print("photo saved")
+            cleaned_data['password'] = make_password(cleaned_data['password'])
+
+            if cleaned_data['photo'] is not None:
+                # photo = cleaned_data.pop('photo')
+                photo = cleaned_data['photo']
+                image = Image.open(photo)
+                print("photo opend")
+                # Define the save path using Path from pathlib
+                save_dir = Path('media/uploaded_files')
+                save_dir.mkdir(parents=True, exist_ok=True)  # Create directories if they don't exist
+                save_path = save_dir / photo.name
+                image.save(save_path)
+                print("photo saved")
+                photo_path = f'uploaded_files/{photo.name}'
+                cleaned_data['photo'] = photo_path
+                print("photo path saved to clean_data")
+
             # Prepare data for update_or_create
             email = cleaned_data.pop('email')
-            photo_path = f'uploaded_files/{photo.name}'
-            cleaned_data['photo'] = photo_path
-            print("photo path saved to clean_data")
             clinic, created_clinic = Clinic.objects.update_or_create(
                 email=email,
                 defaults=cleaned_data
             )
+            # clinic.photo = photo
+            # clinic.save()
 
             if created_clinic:
                 message = 'Client created successfully.'
@@ -905,7 +917,7 @@ def clickSchedule(request):
     return render(request, "myApp/ClicktoEditSchedule.html", context)
 
 
-def login(request):
+def loginP(request):
     context={}
     return render(request, "myApp/login.html", context)
 
