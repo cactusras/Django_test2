@@ -24,37 +24,6 @@ def index(request):
     
     context={}
     return render(request, "myApp/index.html", context)
-# #login check身份別，django 自帶，用isinstance分身份，此處等migrate完可進行初步測試，看要手動加資料還是把register頁面都弄好一併測試（需要頁面跳轉邏輯）
-# def login_view(request):
-#     if request.method == 'POST':
-#         email = request.POST.get('email')
-#         print(f'Email: {email}')
-#         password = request.POST.get('password')
-#         print(f'Password: {password}')
-#         #user = CustomUser.objects.filter(email=email,passw=password)
-#         user = authenticate(request, email=email, password=password)
-#         print(user) 
-#         if user is not None:
-#             login(request, user)
-#             print(user) 
-#             # 登入成功，根據用戶身份導向不同的頁面
-#             if hasattr(user, 'client'):  # 检查是否是客户
-#                 print('client')
-#                 return redirect('home')
-#             elif hasattr(user, 'clinic'):  # 检查是否是诊所
-#                 print('clinic')
-#                 return redirect('doctor')
-#             elif hasattr(user, 'experience'):  # 检查是否是医生
-#                 print('doctor')
-#                 return redirect('home_doctor')
-#             else:
-#                 return render(request, 'myApp/login.html', {'error_message': 'Unknown user type'})
-            
-#         else:
-#             #登入失敗
-#             return render(request, 'myApp/login.html', {'error_message': 'Invalid login credentials'})
-#     else:
-#         return render(request, 'myApp/login.html')
     
 @csrf_exempt
 def user_login(request):
@@ -251,8 +220,6 @@ def add_clinic(request):
                 email=email,
                 defaults=cleaned_data
             )
-            # clinic.photo = photo
-            # clinic.save()
 
             if created_clinic:
                 message = 'Client created successfully.'

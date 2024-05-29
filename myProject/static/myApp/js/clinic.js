@@ -134,28 +134,24 @@ document.getElementById('clinicForm').addEventListener('submit', async function 
     }
 
     if (isValid) {
-        // const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-        // Add additional fields manually
-        // formData.append('csrfmiddlewaretoken', csrfToken);
 
         // Send AJAX request
         fetch('/add/clinic/', {
             method: 'POST',
             body: formData
         })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    alert(data.message);
-                    window.location.href = '/loginP/';
-                } else {
-                    alert(data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again.');
-            });
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert(data.message);
+                window.location.href = '/loginP/';
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        });
     }
 });

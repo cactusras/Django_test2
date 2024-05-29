@@ -31,7 +31,7 @@
 <body>
     <div class="container">
         <h2 class="mt-5">Login</h2>
-        <form method="post" action="{% url 'login' %}">
+        <form id= 'loginForm' method="post" action="{% url 'login' %}">
             {% csrf_token %}
             <div class="form-group">
                 <label for="email">Email:</label>
