@@ -35,6 +35,7 @@ def login_view(request):
                 user_type = None
                 if isinstance(user, Client):
                     user_type = 'Client'
+                    return redirect('myApp/home.html')  
                 elif isinstance(user, Clinic):
                     user_type = 'Clinic'
                 elif isinstance(user, Doctor):
@@ -50,24 +51,89 @@ def login_view(request):
                 return JsonResponse(response)
     else:
         form = AuthenticationForm()
-
-    return render(request, 'myApp/login.html', {'form': form})
+    #return redirect(request, 'myApp/home.html')
+    return render(request, 'myApp/home.html', {'form': form})
 
 from django.shortcuts import render
 from .forms import ClientForm
 from .models import CustomUser, Client
 
+# def add_client(request):
+    
+#     if request.method == 'POST':
+#         form = ClientForm(request.POST)
+#         if form.is_valid():
+#             # Extract cleaned data from the form
+#             cleaned_data = form.cleaned_data
+
+#             # Add the extra fields to the cleaned data
+#             cleaned_data['is_active'] = True
+#             cleaned_data['is_admin'] = False
+
+#             cleaned_data_custom_user = {
+#                 'email': cleaned_data['email'],
+#                 'name': cleaned_data['name'],
+#                 'phone_number': cleaned_data['phone_number'],
+#                 'pw': cleaned_data['pw'],
+#                 'is_active': cleaned_data['is_active'],
+#                 'is_admin': cleaned_data['is_admin']
+#             }
+
+#             cleaned_data_client = {
+#                 'address': cleaned_data['address'],
+#                 'birth_date': cleaned_data['birth_date'],
+#                 'gender': cleaned_data['gender'],
+#                 'occupation': cleaned_data['occupation'],
+#                 'notify': cleaned_data['notify']
+#             }
+
+#             email = cleaned_data.get('email')
+
+#             client, created_client = Client.objects.update_or_create(
+#                 email=email,
+#                 defaults=cleaned_data
+#             )
+
+#             if created_client:
+#                 message = 'Client created successfully.'
+#             else:
+#                 message = 'Client updated successfully.'
+#                 return render(request, 'myApp/login.html', {'message': message})
+
+#             return render(request, 'myApp/home.html', {'message': message})
+#         else:
+#             return render(request, 'myApp/home.html')
+#     else:
+#         form = ClientForm()
+#     return render(request, 'myApp/login.html', {'form': form})
+
+
 def add_client(request):
     if request.method == 'POST':
-        form = ClientForm(request.POST)
+        try:
+            data = json.loads(request.body)  # 解析 JSON 數據
+        except json.JSONDecodeError:
+            return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
+        
+        # 創建一個包含數據的 QueryDict
+        data = {
+            'email': data.get('email'),
+            'name': data.get('name'),
+            'phone_number': data.get('phone_number'),
+            'pw': data.get('pw'),
+            'address': data.get('address'),
+            'birth_date': data.get('birth_date'),
+            'gender': data.get('gender'),
+            'occupation': data.get('occupation'),
+            'notify': data.get('notify')
+        }
+
+        form = ClientForm(data)
         if form.is_valid():
-            # Extract cleaned data from the form
             cleaned_data = form.cleaned_data
 
-            # Add the extra fields to the cleaned data
             cleaned_data['is_active'] = True
             cleaned_data['is_admin'] = False
-
             cleaned_data_custom_user = {
                 'email': cleaned_data['email'],
                 'name': cleaned_data['name'],
@@ -87,29 +153,22 @@ def add_client(request):
 
             email = cleaned_data.get('email')
 
-            # customuser, created_user = CustomUser.objects.update_or_create(
-            #     email=email,
-            #     defaults=cleaned_data_custom_user
-            # )
-
             client, created_client = Client.objects.update_or_create(
                 email=email,
                 defaults=cleaned_data
             )
+
 
             if created_client:
                 message = 'Client created successfully.'
             else:
                 message = 'Client updated successfully.'
 
-            return render(request, 'home.html', {'message': message})
+            return JsonResponse({'message': message, 'status': 'success'})
         else:
-            return render(request, 'home.html')
+            return JsonResponse({'message': 'Invalid form data', 'errors': form.errors, 'status': 'error'})
     else:
-        form = ClientForm()
-    return render(request, 'myApp/login.html', {'form': form})
-
-
+        return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
 
 
@@ -835,7 +894,7 @@ def waitingToResForC(request):
 
 def home(request):
     context={}
-    return render(request, "myApp/home.html", context)
+    return render(request, "myApp/searchPage.html", context)
 
 def clieReserve(request):
     context={}

@@ -28,10 +28,11 @@ function fetch_element(){
         clieField['pw'] = document.getElementById('pw').value,
         clieField['address'] = document.getElementById('address').value,
         clieField['birth_date'] = document.getElementById('birth_date').value
-        clieField['gender'] = document.getElementById('genderInput').value
+        clieField['gender'] = document.getElementById('gender').value
         clieField['occupation'] = document.getElementById('occupation').value
         clieField['notify'] = checkVlue();
-        console.log('name' + clieField['name']);
+        console.log('notify' + clieField['notify']);
+        console.log('gender' + clieField['gender']);
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -52,7 +53,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 })
 
-
+/*function navBtn_listener(event){
+    event.preventDefault();
+    if (window.isLogin) {
+        console.log("Navigating to clinic_dataEdit.html");
+        window.location.href = "/client/data/edit";
+    } else {
+        console.log("login.html after 2 seconds");
+        window.location.href = "/login";
+    }
+}*/
 
 async function isUniqueEmail(email){
     try {
@@ -101,37 +111,61 @@ function fetch_info(){
 document.getElementById('clientForm').addEventListener('submit', async function(event){
     let isValid = false;
     console.log("clicked regis")
-    //event.preventDefault(); // 防止user沒填必填資料
+    event.preventDefault(); // 防止user沒填必填資料
     
     //在這裡處理這些attribute的限制(不能default vlue.length...)
     //有任一項不符合就進到return; 不會繼續往下
     fetch_element();
     //email格式在html的type = 'email'就確認了
-    // if (clieField.name.length > 100) {
-    //     alert("Name cannot exceed 100 characters");
-    //     return;
-    // } else {
-    //         if (!(/^\d+$/.test(clieField.phone_number))) {
-    //             alert("Phone number can only contain digits");
-    //             return;
-    //         } else {
-    //             if (clieField.phone_number.length > 15) {
-    //                 alert("Phone number cannot exceed 15 digits");
-    //                 return;
-    //             } else {
-    //                 // 要串資料庫把所有的clinic email先找出來      
-    //                 if (!await isUniqueEmail(email)) {
-    //                     alert("Email already registered");
-    //                     return;
-    //                 }else{
-    //                     isValid = true;
-    //                 }
-    //             }
-    //         }
-    // }    
-    // if (isValid) {
-        this.submit();
-    //}
+    if (clieField.name.length > 100) {
+        alert("Name cannot exceed 100 characters");
+        return;
+    } else {
+            if (!(/^\d+$/.test(clieField.phone_number))) {
+                alert("Phone number can only contain digits");
+                return;
+            } else {
+                if (clieField.phone_number.length > 15) {
+                    alert("Phone number cannot exceed 15 digits");
+                    return;
+                } else {
+                    // 要串資料庫把所有的clinic email先找出來      
+                    if (!await isUniqueEmail(email)) {
+                        alert("Email already registered");
+                        return;
+                    }else{
+                        isValid = true;
+                    }
+                }
+            }
+    }  
+    
+    if(isValid){
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // 發送 AJAX 請求
+        fetch('/add/client/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify(clieField)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert(data.message);
+                window.location.href = '/home';
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        });
+    }
 
    /* const clientForm = new FormData(document.getElementById("clientForm"));
 
