@@ -187,37 +187,46 @@ def add_Reservation(request):
 def add_clinic(request):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)  # 解析 JSON 數據
+            # data = json.loads(request.body)  # 解析 JSON 數據
+            form = ClinicForm(request.POST, request.FILES)
         except json.JSONDecodeError:
             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
-        
-        # 創建一個包含數據的 QueryDict
-        data = {
-            'email': data.get('email'),
-            'name': data.get('name'),
-            'phone_number': data.get('phone_number'),
-            'pw': data.get('pw'),
-            'license_number': data.get('license_number'),
-            'address': data.get('address'),
-            'introduction': data.get('introduction'),
-            'photo': data.get('photo')
-        }
 
-        form = ClientForm(data)
+        from django.http import QueryDict
+
+        data_dict = QueryDict('', mutable=True)
+
+        # # 創建一個包含數據的 QueryDict
+        # data_dict.update({
+        #     'email': data.get('email'),
+        #     'name': data.get('name'),
+        #     'phone_number': data.get('phone_number'),
+        #     'pw': data.get('pw'),
+        #     'license_number': data.get('license_number'),
+        #     'address': data.get('address'),
+        #     'introduction': data.get('introduction'),
+        #     'photo': data.get('photo')
+        # })
+
+        # # Handle file upload
+        # photo = request.FILES.get('photo')
+        # # Initialize form with data and files
+        # form = ClinicForm(data_dict, {'photo': photo})
+
         if form.is_valid():
             cleaned_data = form.cleaned_data
-
+            print(cleaned_data)
             cleaned_data['is_active'] = True
             cleaned_data['is_admin'] = False
 
             email = cleaned_data.get('email')
 
-            client, created_client = Client.objects.update_or_create(
+            clinic, created_clinic = Clinic.objects.update_or_create(
                 email=email,
                 defaults=cleaned_data
             )
 
-            if created_client:
+            if created_clinic:
                 message = 'Client created successfully.'
             else:
                 message = 'Client updated successfully.'
@@ -227,14 +236,6 @@ def add_clinic(request):
             return JsonResponse({'message': 'Invalid form data', 'errors': form.errors, 'status': 'error'})
     else:
         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
-    if request.method == 'POST':
-        form = ClinicForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return render(request, 'myApp/clinic_dataEdit.html')
-    else:
-        form = ClinicForm()
-    return render(request, 'myApp/clinic_dataEdit.html', {'form': form})
 
 
 @login_required

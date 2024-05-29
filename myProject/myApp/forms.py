@@ -31,8 +31,6 @@ class ClinicForm(forms.ModelForm):
         fields = ['email', 'name','phone_number','pw','license_number','address','introduction','photo']
     def __init__(self, *args, **kwargs):
         super(ClinicForm, self).__init__(*args,**kwargs)
-        self.fields['is_active'].initial = True
-        self.fields['is_admin'].initial = False
         
 class ClientForm(forms.ModelForm):
     class Meta:

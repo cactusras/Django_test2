@@ -156,7 +156,7 @@ document.getElementById('clientForm').addEventListener('submit', async function(
         .then(data => {
             if (data.status === 'success') {
                 alert(data.message);
-                window.location.href = '/home';
+                window.location.href = 'login/';
             } else {
                 alert(data.message);
             }
