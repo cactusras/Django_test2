@@ -74,22 +74,20 @@ def login_view(request):
         print(user) 
         if user is not None:
             login(request, user)
+            print(user) 
             # 登入成功，根據用戶身份導向不同的頁面
-            if isinstance(user, Client):
+            if hasattr(user, 'client'):  # 检查是否是客户
+                print('client')
                 return redirect('home')
-            elif isinstance(user, Clinic):
-                return redirect('home_clinic')
-            elif isinstance(user, Doctor):
+            elif hasattr(user, 'clinic'):  # 检查是否是诊所
+                print('clinic')
+                return redirect('doctor')
+            elif hasattr(user, 'experience'):  # 检查是否是医生
+                print('doctor')
                 return redirect('home_doctor')
-            # if user.is_client:
-            #     print('client')
-            #     return redirect('home')
-            # if user.is_clinic:
-            #      return redirect('clinic_dataEdit')
-            # if user.is_doctor:
-            #     return redirect('doctor_dashboard')
-            print('logged in')
-           
+            else:
+                return render(request, 'myApp/login.html', {'error_message': 'Unknown user type'})
+            
         else:
             #登入失敗
             return render(request, 'myApp/login.html', {'error_message': 'Invalid login credentials'})
