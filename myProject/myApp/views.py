@@ -15,6 +15,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import now
 from myApp import forms
 from django.contrib import messages
+from django.contrib.auth.hashers import make_password
+
 
 
 def index(request):
@@ -69,18 +71,25 @@ def login_view(request):
         print(f'Password: {password}')
         #user = CustomUser.objects.filter(email=email,passw=password)
         user = authenticate(request, username=email,password=password)
+        print(user) 
         if user is not None:
-            #login(request, user)
+            login(request, user)
             # 登入成功，根據用戶身份導向不同的頁面
-            if user.is_client:
-                print('client')
+            if isinstance(user, Client):
                 return redirect('home')
-            if user.is_clinic:
-                 return redirect('clinic_dataEdit')
-            if user.is_doctor:
-                return redirect('doctor_dashboard')
+            elif isinstance(user, Clinic):
+                return redirect('home_clinic')
+            elif isinstance(user, Doctor):
+                return redirect('home_doctor')
+            # if user.is_client:
+            #     print('client')
+            #     return redirect('home')
+            # if user.is_clinic:
+            #      return redirect('clinic_dataEdit')
+            # if user.is_doctor:
+            #     return redirect('doctor_dashboard')
             print('logged in')
-            return redirect('home')
+           
         else:
             #登入失敗
             return render(request, 'myApp/login.html', {'error_message': 'Invalid login credentials'})
@@ -99,7 +108,7 @@ def add_client(request):
             'email': data.get('email'),
             'name': data.get('name'),
             'phone_number': data.get('phone_number'),
-            'password': data.get('password'),
+            'password': make_password(data.get('password')),  # 对密码进行哈希处理
             'address': data.get('address'),
             'birth_date': data.get('birth_date'),
             'gender': data.get('gender'),
