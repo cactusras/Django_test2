@@ -14,7 +14,7 @@ from django.contrib.auth import authenticate, login,logout
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import now
 from myApp import forms
-
+from django.contrib import messages
 
 
 def index(request):
@@ -22,91 +22,70 @@ def index(request):
     context={}
     return render(request, "myApp/index.html", context)
 #login check身份別，django 自帶，用isinstance分身份，此處等migrate完可進行初步測試，看要手動加資料還是把register頁面都弄好一併測試（需要頁面跳轉邏輯）
+
+# def login_view(request):
+#     if request.method == 'GET':
+#         try:
+#             data = json.loads(request.body)  # 解析 JSON 數據
+#         except json.JSONDecodeError:
+#             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
+        
+#         form = AuthenticationForm(request, data=data)
+#         if form.is_valid():
+#             email = form.cleaned_data.get('username')
+#             password = form.cleaned_data.get('password')
+#             user_type = data.get('user_type')
+
+#             user = None
+#             if user_type == 'client':
+#                 user = authenticate(request, username=email, password=password)
+#             elif user_type == 'clinic':
+#                 user = authenticate(request, username=email, password=password)
+#             elif user_type == 'doctor':
+#                 user = authenticate(request, username=email, password=password)
+
+#             if user is not None:
+#                 login(request, user)
+#                 if user_type == 'client':
+#                     redirect_url = 'home'
+#                 elif user_type == 'clinic':
+#                     redirect_url = 'clinic_home'
+#                 elif user_type == 'doctor':
+#                     redirect_url = 'doctor_home'
+
+#                 return JsonResponse({'message': 'User logged in successfully.', 'redirect_url': redirect_url, 'status': 'success'})
+#             else:
+#                 return JsonResponse({'message': 'Invalid credentials', 'status': 'error'})
+#         else:
+#             return JsonResponse({'message': 'Invalid form data', 'errors': form.errors, 'status': 'error'})
+#     else:
+#         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
+
 def login_view(request):
     if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                login(request, user)
-                
-                user_type = None
-                if isinstance(user, Client):
-                    user_type = 'Client'
-                    return redirect('myApp/home.html')  
-                elif isinstance(user, Clinic):
-                    user_type = 'Clinic'
-                elif isinstance(user, Doctor):
-                    user_type = 'Doctor'
-
-                response = {
-                    'status': 'success',
-                    'message': 'User is logged in',
-                    'user_type': user_type,
-                    'username': user.username,
-                    'email': user.email
-                }
-                return JsonResponse(response)
+        email = request.POST.get('email')
+        print(f'Email: {email}')
+        password = request.POST.get('password')
+        print(f'Password: {password}')
+        #user = CustomUser.objects.filter(email=email,passw=password)
+        user = authenticate(request, username=email,password=password)
+        if user is not None:
+            #login(request, user)
+            # 登入成功，根據用戶身份導向不同的頁面
+            if user.is_client:
+                print('client')
+                return redirect('home')
+            if user.is_clinic:
+                 return redirect('clinic_dataEdit')
+            if user.is_doctor:
+                return redirect('doctor_dashboard')
+            print('logged in')
+            return redirect('home')
+        else:
+            #登入失敗
+            return render(request, 'myApp/login.html', {'error_message': 'Invalid login credentials'})
     else:
-        form = AuthenticationForm()
-    #return redirect(request, 'myApp/home.html')
-    return render(request, 'myApp/home.html', {'form': form})
-
-from django.shortcuts import render
-from .forms import ClientForm
-from .models import CustomUser, Client
-
-# def add_client(request):
-    
-#     if request.method == 'POST':
-#         form = ClientForm(request.POST)
-#         if form.is_valid():
-#             # Extract cleaned data from the form
-#             cleaned_data = form.cleaned_data
-
-#             # Add the extra fields to the cleaned data
-#             cleaned_data['is_active'] = True
-#             cleaned_data['is_admin'] = False
-
-#             cleaned_data_custom_user = {
-#                 'email': cleaned_data['email'],
-#                 'name': cleaned_data['name'],
-#                 'phone_number': cleaned_data['phone_number'],
-#                 'pw': cleaned_data['pw'],
-#                 'is_active': cleaned_data['is_active'],
-#                 'is_admin': cleaned_data['is_admin']
-#             }
-
-#             cleaned_data_client = {
-#                 'address': cleaned_data['address'],
-#                 'birth_date': cleaned_data['birth_date'],
-#                 'gender': cleaned_data['gender'],
-#                 'occupation': cleaned_data['occupation'],
-#                 'notify': cleaned_data['notify']
-#             }
-
-#             email = cleaned_data.get('email')
-
-#             client, created_client = Client.objects.update_or_create(
-#                 email=email,
-#                 defaults=cleaned_data
-#             )
-
-#             if created_client:
-#                 message = 'Client created successfully.'
-#             else:
-#                 message = 'Client updated successfully.'
-#                 return render(request, 'myApp/login.html', {'message': message})
-
-#             return render(request, 'myApp/home.html', {'message': message})
-#         else:
-#             return render(request, 'myApp/home.html')
-#     else:
-#         form = ClientForm()
-#     return render(request, 'myApp/login.html', {'form': form})
-
+        return render(request, 'myApp/login.html')
 
 def add_client(request):
     if request.method == 'POST':
@@ -120,7 +99,7 @@ def add_client(request):
             'email': data.get('email'),
             'name': data.get('name'),
             'phone_number': data.get('phone_number'),
-            'pw': data.get('pw'),
+            'password': data.get('password'),
             'address': data.get('address'),
             'birth_date': data.get('birth_date'),
             'gender': data.get('gender'),
@@ -134,11 +113,14 @@ def add_client(request):
 
             cleaned_data['is_active'] = True
             cleaned_data['is_admin'] = False
+            
+            #password = cleaned_data.pop('password', None)
+            
             cleaned_data_custom_user = {
                 'email': cleaned_data['email'],
                 'name': cleaned_data['name'],
                 'phone_number': cleaned_data['phone_number'],
-                'pw': cleaned_data['pw'],
+                'password': cleaned_data['password'],
                 'is_active': cleaned_data['is_active'],
                 'is_admin': cleaned_data['is_admin']
             }
@@ -157,6 +139,10 @@ def add_client(request):
                 email=email,
                 defaults=cleaned_data
             )
+            
+            # password = cleaned_data.get('password')
+            # client_user.set_password(password)
+            # client_user.save()
 
 
             if created_client:
@@ -912,15 +898,14 @@ def docDataEd(request):
     context={}
     return render(request, "myApp/doctor_dataEdit.html", context)
 
-
 def clickSchedule(request):
     context={}
     return render(request, "myApp/ClicktoEditSchedule.html", context)
 
 
-def login(request):
-    context={}
-    return render(request, "myApp/login.html", context)
+def loginP(request):
+     context={}
+     return render(request, "myApp/login.html", context)
 
 
 def clinHome(request):
@@ -1011,7 +996,7 @@ def doctor_info(request):
             'email': user.email,
             'name': user.name,
             'phone_number': user.phone_number,
-            'password': user.pw,
+            'password': user.password,
             'photo_url': user.doctor.photo.url,
             'experience': user.doctor.experience,
         }
@@ -1026,7 +1011,7 @@ def client_info(request):
             'email': user.email,
             'name': user.name,
             'phone_number': user.phone_number,
-            'password': user.pw,
+            'password': user.password,
             'address': user.client.address,
             'birth_date': user.client.birth_date,
             'gender': user.client.gender,

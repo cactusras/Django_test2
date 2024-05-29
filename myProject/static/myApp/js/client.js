@@ -2,7 +2,7 @@ var clieField = {
     email:"",
     name: "",
     phone_number: "",
-    pw: "",
+    password: "",
     address: "",
     birth_date: new Date(),
     gender: "",
@@ -25,7 +25,7 @@ function fetch_element(){
         clieField['email'] = document.getElementById('email').value
         clieField['name'] = document.getElementById('name').value,
         clieField['phone_number'] = document.getElementById('phone_number').value,
-        clieField['pw'] = document.getElementById('pw').value,
+        clieField['password'] = document.getElementById('password').value,
         clieField['address'] = document.getElementById('address').value,
         clieField['birth_date'] = document.getElementById('birth_date').value
         clieField['gender'] = document.getElementById('gender').value
