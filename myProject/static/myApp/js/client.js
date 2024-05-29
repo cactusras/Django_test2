@@ -28,10 +28,11 @@ function fetch_element(){
         clieField['pw'] = document.getElementById('pw').value,
         clieField['address'] = document.getElementById('address').value,
         clieField['birth_date'] = document.getElementById('birth_date').value
-        clieField['gender'] = document.getElementById('genderInput').value
+        clieField['gender'] = document.getElementById('gender').value
         clieField['occupation'] = document.getElementById('occupation').value
         clieField['notify'] = checkVlue();
-        console.log('name' + clieField['name']);
+        console.log('notify' + clieField['notify']);
+        console.log('gender' + clieField['gender']);
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -137,9 +138,33 @@ document.getElementById('clientForm').addEventListener('submit', async function(
                     }
                 }
             }
-    }    
-    if (isValid) {
-        document.getElementById('clientForm').submit();
+    }  
+    
+    if(isValid){
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // 發送 AJAX 請求
+        fetch('/add/client/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify(clieField)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert(data.message);
+                window.location.href = '/home';
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        });
     }
 
    /* const clientForm = new FormData(document.getElementById("clientForm"));

@@ -1,133 +1,145 @@
 import json
-import datetime
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse, JsonResponse
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import authenticate, login
-from django.db import connection
-from .forms import (
-    DoctorForm, ClinicForm, ClientForm, SchedulingForm,
-    WorkingHourForm, ExpertiseForm, ReservationForm, WaitingForm
-)
-from .filters import docClinicFilter
-from .models import (
-    Clinic, CustomUser, Doctor, Doc_Expertise, Expertise, Scheduling,
-    WorkingHour, docClinicSearch, Reservation, Client, Waiting
-)
+from django.shortcuts import render,redirect, get_object_or_404
+from django.http import HttpResponse
+from .forms import DoctorForm,ClinicForm,ClientForm,SchedulingForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm
 from django.db.models import Q
+from django.db import connection
+from django.contrib.auth.decorators import login_required
+from .filters import docClinicFilter
+from .models import Clinic, Doctor, Doc_Expertise, Expertise, Scheduling, WorkingHour,docClinicSearch,Reservation,Client,Waiting,CustomUser
+from datetime import datetime, timedelta
+from django.http import JsonResponse
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import authenticate, login,logout
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.timezone import now
+from myApp import forms
+import json
+from django.contrib.auth import authenticate, login
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .forms import AuthenticationForm
+from .models import Client, Clinic, Doctor
+from django.shortcuts import render
+from .forms import ClientForm
+from .models import CustomUser, Client
 
 
-def home(request):
-    context={}
-    return render(request, "searchPage.html", context)
-
-def clieReserve(request):
-    context={}
-    return render(request, "client_reservation.html", context)
-
-def clinReserve(request):
-    context={}
-    return render(request, "clinic_reserve.html", context)
-
-def docReserve(request):
-    context={}
-    return render(request, "doctor_reserve.html", context)
-
-def cliedataEd(request):
-    context={}
-    return render(request, "client_dataEdit.html", context)
-
-def clinDataEd(request):
-    context={}
-    return render(request, "clinic_dataEdit.html", context)
-
-def docDataEd(request):
-    context={}
-    return render(request, "doctor_dataEdit.html", context)
-
-def clickSchedule(request):
-    context={}
-    return render(request, "ClicktoEditSchedule.html", context)
-
-def login(request):
-    context={}
-    return render(request, "login.html", context)
-
-def clinHome(request):
-    context={}
-    return render(request, "clinicPage.html", context)
-
-def docManage(request):
-    context={}
-    return render(request, "doctor_management.html", context)
-
-def docPage(request):
-    context={}
-    return render(request, "doctorPage.html", context)
-
-def clieReserveRecord(request):
-    context={}
-    return render(request, "UserAppointmentRecords.html", context)
-
-def dentalLogin(request):
-    context={}
-    return render(request, "dentalLogin.html", context)
-
-
-# 用filter查看所有诊所/醫生/病患的email資料是否已存在
-@csrf_exempt
-def isUniqueEmail_clin(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        email = data.get('email')
-        if Clinic.objects.filter(email=email).exists():
-            return JsonResponse({'isUnique': False}, status=200)
-        else:
-            return JsonResponse({'isUnique': True}, status=200)
-    else:
-        return JsonResponse({'error': 'Invalid request method'}, status=405)
-
-@csrf_exempt
-def isUniqueLicense_clin(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        license_number = data.get('license_number')
-        if Clinic.objects.filter(license_number=license_number).exists():
-            return JsonResponse({'isUnique': False}, status=200)
-        else:
-            return JsonResponse({'isUnique': True}, status=200)
-    else:
-        return JsonResponse({'error': 'Invalid request method'}, status=405)
-
-@csrf_exempt
-def isUniqueEmail_clie(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        email = data.get('email')
-        if Client.objects.filter(email=email).exists():
-            return JsonResponse({'isUnique': False}, status=200)
-        else:
-            return JsonResponse({'isUnique': True}, status=200)
-    else:
-        return JsonResponse({'error': 'Invalid request method'}, status=405)
-
-@csrf_exempt
-def isUniqueEmail_doc(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        email = data.get('email')
-        if Doctor.objects.filter(email=email).exists():
-            return JsonResponse({'isUnique': False}, status=200)
-        else:
-            return JsonResponse({'isUnique': True}, status=200)
-    else:
-        return JsonResponse({'error': 'Invalid request method'}, status=405)
-
-def add_Reservation(request):
+def index(request):
     
+    context={}
+    return render(request, "myApp/index.html", context)
 
+#login check身份別，django 自帶，用isinstance分身份，此處等migrate完可進行初步測試，看要手動加資料還是把register頁面都弄好一併測試（需要頁面跳轉邏輯）
+@csrf_exempt
+def login_view(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
+        
+        form = AuthenticationForm(request, data)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                
+                user_type = None
+                if isinstance(user, Client):
+                    user_type = 'Client'
+                elif isinstance(user, Clinic):
+                    user_type = 'Clinic'
+                elif isinstance(user, Doctor):
+                    user_type = 'Doctor'
+
+                response = {
+                    'status': 'success',
+                    'message': 'User is logged in',
+                    'user_type': user_type,
+                    'username': user.username,
+                    #'email': user.email
+                }
+                return JsonResponse(response)
+            else:
+                return JsonResponse({'message': 'Invalid credentials', 'status': 'error'})
+        else:
+            return JsonResponse({'message': 'Invalid form data', 'errors': form.errors, 'status': 'error'})
+    else:
+        return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
+
+
+def add_client(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)  # 解析 JSON 數據
+        except json.JSONDecodeError:
+            return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
+        
+        # 創建一個包含數據的 QueryDict
+        data = {
+            'email': data.get('email'),
+            'name': data.get('name'),
+            'phone_number': data.get('phone_number'),
+            'pw': data.get('pw'),
+            'address': data.get('address'),
+            'birth_date': data.get('birth_date'),
+            'gender': data.get('gender'),
+            'occupation': data.get('occupation'),
+            'notify': data.get('notify')
+        }
+
+        form = ClientForm(data)
+        if form.is_valid():
+            cleaned_data = form.cleaned_data
+
+            cleaned_data['is_active'] = True
+            cleaned_data['is_admin'] = False
+
+            cleaned_data_custom_user = {
+                'email': cleaned_data['email'],
+                'name': cleaned_data['name'],
+                'phone_number': cleaned_data['phone_number'],
+                'pw': cleaned_data['pw'],
+                'is_active': cleaned_data['is_active'],
+                'is_admin': cleaned_data['is_admin']
+            }
+
+            cleaned_data_client = {
+                'address': cleaned_data['address'],
+                'birth_date': cleaned_data['birth_date'],
+                'gender': cleaned_data['gender'],
+                'occupation': cleaned_data['occupation'],
+                'notify': cleaned_data['notify']
+            }
+
+            email = cleaned_data.get('email')
+
+            client, created_client = Client.objects.update_or_create(
+                email=email,
+                defaults=cleaned_data
+            )
+
+            if created_client:
+                message = 'Client created successfully.'
+            else:
+                message = 'Client updated successfully.'
+
+            return JsonResponse({'message': message, 'status': 'success'})
+        else:
+            return JsonResponse({'message': 'Invalid form data', 'errors': form.errors, 'status': 'error'})
+    else:
+        return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
+
+
+
+
+
+
+@login_required
+def add_Reservation(request):  
     if request.user.is_authenticated:
         user_id = request.user.id
 
@@ -154,7 +166,7 @@ def add_Reservation(request):
             # Fetch the expertise duration
             try:
                 expertise = Expertise.objects.get(id=ExpID)
-                expertise_duration = datetime.timedelta(hours=expertise.time.hour, minutes=expertise.time.minute)
+                expertise_duration = timedelta(hours=expertise.time.hour, minutes=expertise.time.minute)
             except Expertise.DoesNotExist:
                 return HttpResponse('Expertise not found')
             #可預約，邏輯參考avaliable
@@ -203,11 +215,24 @@ def add_Reservation(request):
                 else:
                     return HttpResponse('Form not valid')
 
-        return HttpResponse(f'Your user ID is {user_id}')
+        request.session.flush()
+        return (request,'myApp/UserAppointmentRecords.html')
     else:
         return HttpResponse('Login failed')
+    
+#clinic posting
+def add_clinic(request):
+    if request.method == 'POST':
+        form = ClinicForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return render(request, 'myApp/clinic_dataEdit.html')
+    else:
+        form = ClinicForm()
+    return render(request, 'myApp/clinic_dataEdit.html', {'form': form})
 
-#add doctor不需要設自動登入(finished)
+
+@login_required
 def add_doctor(request):
     if request.method == 'POST':
         doctor_form_data = request.session.get('doctor_form_data')
@@ -216,7 +241,7 @@ def add_doctor(request):
         working_hour_list = request.session.get('working_hour_list', [])
 
         if not (doctor_form_data and expertise_list and schedule_form_data and working_hour_list):
-            return render(request,'doctor_dataEdit.html')
+            return render(request,'myApp/doctor_dataEdit.html')
 
         clinic = Clinic.objects.get(user=request.user)
         # Add clinic to the doctor form data
@@ -248,174 +273,21 @@ def add_doctor(request):
             )
 
         request.session.flush()
-        return JsonResponse({'success': True}, status=200)
+        return redirect('success')
 
-    return render(request,'doctor_dataEdit.html')
+    return render(request,'myApp/doctor_dataEdit.html')
 
-def add_clinic(request):
-    if request.method == 'POST':
-        form = ClinicForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return render(request, 'clinic_dataEdit.html')
-    else:
-        form = ClinicForm()
-    return render(request, 'clinic_dataEdit.html', {'form': form})
-
-def add_client(request):
-    if request.method == 'POST':
-        form = ClientForm(request.POST)
-        if form.is_valid():
-            # Extract cleaned data from the form
-            cleaned_data = form.cleaned_data
-
-            # Add the extra fields to the cleaned data
-            cleaned_data['is_active'] = True
-            cleaned_data['is_admin'] = False
-
-            cleaned_data_custom_user = {
-                'email': cleaned_data['email'],
-                'name': cleaned_data['name'],
-                'phone_number': cleaned_data['phone_number'],
-                'pw': cleaned_data['pw'],
-                'is_active': cleaned_data['is_active'],
-                'is_admin': cleaned_data['is_admin']
-            }
-
-            cleaned_data_client = {
-                'address': cleaned_data['address'],
-                'birth_date': cleaned_data['birth_date'],
-                'gender': cleaned_data['gender'],
-                'occupation': cleaned_data['occupation'],
-                'notify': cleaned_data['notify']
-            }
-
-            email = cleaned_data.get('email')
-
-            customuser, created_user = CustomUser.objects.update_or_create(
-                email=email,
-                defaults=cleaned_data_custom_user
-            )
-
-            client, created_client = Client.objects.update_or_create(
-                email=email,
-                defaults=cleaned_data_client
-            )
-
-            if created_user or created_client:
-                message = 'Client created successfully.'
-            else:
-                message = 'Client updated successfully.'
-
-            return render(request, 'searchPage.html', {'message': message})
-    else:
-        form = ClientForm()
-    print(request.POST)
-    return render(request, 'client_dataEdit.html', {'form': form})
-
-#判斷使用者是否為登入狀態 
-def check_authentication(request):
-    if request.user.is_authenticated:
-        return JsonResponse({'is_authenticated': True})
-    else:
-        return JsonResponse({'is_authenticated': False})
-
-#fetch出user的資料(在dataEdit頁面顯示)   
-def doctor_info(request):
-    if hasattr(request.user, 'doctor'):
-        user = request.user
-        info = {
-            'email': user.email,
-            'name': user.name,
-            'phone_number': user.phone_number,
-            'password': user.pw,
-            'photo_url': user.doctor.photo.url,
-            'experience': user.doctor.experience,
-        }
-        return JsonResponse(info)
-    else:
-        return JsonResponse({'error': 'User is not a doctor'}, status=400)
-    
-def client_info(request):
-    if hasattr(request.user, 'client'):
-        user = request.user
-        info = {
-            'email': user.email,
-            'name': user.name,
-            'phone_number': user.phone_number,
-            'password': user.pw,
-            'address': user.client.address,
-            'birth_date': user.client.birth_date,
-            'gender': user.client.gender,
-            'occupation': user.client.occupation,
-            'notify': user.client.notify,
-        }
-        return JsonResponse(info)
-    else:
-        return JsonResponse({'error': 'User is not a client'}, status=400)
-
-def clinic_info(request):
-    if hasattr(request.user, 'clinic'):
-        user = request.user
-        info = {
-            'email': user.email,
-            'name': user.name,
-            'phone_number': user.phone_number,
-            'password': user.pw,
-            'photo': user.clinic.photo.url,
-            'license_number': user.clinic.license_number,
-            'address': user.clinic.address,
-            'introduction': user.clinic.introduction,
-        }
-        return JsonResponse(info)
-    else:
-        return JsonResponse({'error': 'User is not a clinic admin'}, status=400)
-    
-def login_view(request):
-    if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                login(request, user)
-                
-                user_type = None
-                if isinstance(user, Client):
-                    user_type = 'Client'
-                elif isinstance(user, Clinic):
-                    user_type = 'Clinic'
-                elif isinstance(user, Doctor):
-                    user_type = 'Doctor'
-
-                response = {
-                    'status': 'success',
-                    'message': 'User is logged in',
-                    'user_type': user_type,
-                }
-
-                return JsonResponse(response)
-
-    else:
-        form = AuthenticationForm()
-
-    return render(request, 'login.html', {'form': form})
-
-
-#醫生的其他資料(new step2)(finished)
 @login_required    
 def Doc_uploading(request):
     if request.method == 'POST':
         doctor_form = DoctorForm(request.POST, request.FILES)
         if doctor_form.is_valid():
             request.session['doctor_form_data'] = doctor_form.cleaned_data
-            return render(request,'ClicktoEditSchedule.html')
+            return render(request,'myApp/ClicktoEditSchedule.html')
     else:
         doctor_form = DoctorForm()
-    return render(request, 'doctor_dataEdit.html', {'doctor_form': doctor_form})
+    return render(request, 'myApp/doctor_dataEdit.html', {'doctor_form': doctor_form})
 
-#(醫生註冊)expertise的確認btn
 @login_required
 def DocExp_uploading(request):
     if request.method == 'POST':
@@ -424,12 +296,11 @@ def DocExp_uploading(request):
             doc_expertise_list = request.session.get('doc_expertise_list', [])
             doc_expertise_list.append(doc_expertise_form.cleaned_data)
             request.session['expertise_list'] = doc_expertise_list
-            return render(request,'doctor_dataEdit.html')
+            return render(request,'myApp/doctor_dataEdit.html')
     else:
         expertise_form = ExpertiseForm()
-    return render(request, 'doctor_dataEdit.html', {'expertise_form': expertise_form})
+    return render(request, 'myApp/doctor_dataEdit.html', {'expertise_form': expertise_form})
 
-#每次新增時段跳出視窗的新增function(finished)
 @login_required
 def workingHour_upload(request):
     if request.method == 'POST':
@@ -438,24 +309,22 @@ def workingHour_upload(request):
             working_hour_list = request.session.get('working_hour_list', [])
             working_hour_list.append(working_hour_form.cleaned_data)
             request.session['working_hour_list'] = working_hour_list
-            return render(request,'ClicktoEditSchedule.html')
+            return render(request,'myApp/ClicktoEditSchedule.html')
     else:
         working_hour_form = WorkingHourForm()
-    return render(request, 'ClicktoEditSchedule.html', {'working_hour_form': working_hour_form})
+    return render(request, 'myApp/ClicktoEditSchedule.html', {'working_hour_form': working_hour_form})
 
-#要篩日期大小順序(finished)
 @login_required
 def scheduling_upload(request):
     if request.method == 'POST':
-        scheduling_form = SchedulingForm(request.POST)
-        if scheduling_form.is_valid():
-            request.session['schedule_form_data'] = scheduling_form.cleaned_data
-            return render(request,'doctor_dataEdit.html')
+        schedule_form = SchedulingForm(request.POST)
+        if schedule_form.is_valid():
+            request.session['schedule_form_data'] = schedule_form.cleaned_data
+            return render(request,'myApp/doctor_dataEdit.html')
     else:
         schedule_form = SchedulingForm()
-    return render(request, 'ClicktoEditSchedule.html', {'scheduling_form': scheduling_form})
+    return render(request, 'myApp/doctor_dataEdit.html', {'schedule_form': schedule_form})
 
-#(finished)
 @login_required
 def success(request):
     # Get the clinic associated with the logged-in user
@@ -464,9 +333,8 @@ def success(request):
     # Get all doctors associated with this clinic
     doctors = Doctor.objects.filter(clinic=clinic)
     #診所登入(管理/新增醫師)頁面名稱要=doctor_management.html
-    return render(request, 'doctor_management.html', {'doctors': doctors, 'clinic': clinic})
+    return render(request, 'myApp/doctor_management.html', {'doctors': doctors, 'clinic': clinic})
 
-#(finished)
 @login_required
 def delete_doctor(request, doctor_email):
     # Get the doctor object by email, or return a 404 error if not found
@@ -474,9 +342,9 @@ def delete_doctor(request, doctor_email):
 
     if request.method == "POST":
         doctor.delete()#the doctors schedule, expertise records are delete as well(because cascade)
-        return redirect('doctor_management.html')
+        return redirect('myApp/doctor_management.html')
 
-    return render(request, 'doctor_management.html', {'doctor': doctor})
+    return render(request, 'myApp/doctor_management.html', {'doctor': doctor})
 
 def doctor_clinic_search_view(request):
         # Apply the filter
@@ -552,17 +420,17 @@ def doctor_clinic_search_view(request):
             #clinic_list.append(clinic['clinic_id'])
             #request.session['clinic_list'] = clinic_list  # Save session
     
-    return render(request, 'searchPage.html', {
+    return render(request, 'myApp/home/', {
         'filter': filter,
         'doc_final': doc_final,
         'clinic_final': clinic_final
     })
     
-#schedule timeslot(輸入start time end time，每一小時割一次)
+#schedule tomeslot(輸入start time end time，每一小時割一次)
 def get_time_slots(schedule):
     start_time = schedule.WorkingHour.start_time
     end_time = schedule.WorkingHour.end_time
-    time_delta = datetime.timedelta(minutes=60)  # Adjust as needed (e.g., 60 for hourly slots)
+    time_delta = timedelta(minutes=60)  # Adjust as needed (e.g., 60 for hourly slots)
 
     time_slots = []
     current_time = start_time
@@ -575,7 +443,7 @@ def get_time_slots(schedule):
 
     return time_slots
 
-#clinic 載入頁(finished)
+#clinic 載入頁
 @login_required
 def clinic_load(request):
     #return clinic main page
@@ -592,17 +460,7 @@ def clinic_load(request):
     schedules = Scheduling.objects.filter(clinic=clinics)
     #注意回傳值
     reservations = Reservation.objects.filter(schedulesID = schedules)
-    reservation_list = [
-        {
-            'client_name': reservation.ClientID.name,
-            'appointment_date': reservation.time_start.date(),
-            'appointment_time': reservation.time_start.strftime('%H:%M'),
-            'expertise': reservation.expertiseID.name,  # 假设 Expertise 有一个 'name' 字段
-            'status': reservation.get_status_display(),  # 使用 get_status_display() 方法获取状态显示
-        }
-        for reservation in reservations
-    ]
-    '''context = {
+    context = {
        
     'clinic': clinics,
     'schedules': schedules,
@@ -610,6 +468,7 @@ def clinic_load(request):
     # Additional context variables:
     'clinic_name': clinics[0].name,  # Assuming clinics is a list with a single clinic=?
     #return w1,10:00=>11, w1 11:00=>12...so on
+    #前端需要處理
     'schedule_list': [
         {
             'doctor_name': schedule.DoctorID.name,
@@ -628,8 +487,11 @@ def clinic_load(request):
         }
         for reservation in reservations
     ],
-    }'''
-    return render(request, 'clinicPage.html', {'reservation_list': reservation_list})
+    }
+    return render(request, 'myApp/clinicPage.html', context)
+
+
+
 
 #reservation id required
 #以下為reservation狀態改變
@@ -639,21 +501,21 @@ def reservationStCF(request, reservation_id):
     # Update the status to "checkin Failed"
     reservation.update_status(1) 
     reservation.save()
-    return render(request,'clinicPage.html')
+    return render(request,'myApp/clinicPage.html')
     
 def reservationStSc(request, reservation_id):
     reservation = Reservation.objects.get(pk=reservation_id)
     # Update the status to "checkin successed"
     reservation.update_status(2) 
     reservation.save()
-    return render(request,'clinicPage.html')
+    return render(request,'myApp/clinicPage.html')
     
 def reservationStIt(request, reservation_id):
     reservation = Reservation.objects.get(pk=reservation_id)
     # Update the status to "in treatment"
     reservation.update_status(3) 
     reservation.save()
-    return render(request,'clinicPage.html')
+    return render(request,'myApp/clinicPage.html')
     
 def reservationStFn(request, reservation_id):
     reservation = Reservation.objects.get(pk=reservation_id)
@@ -661,7 +523,7 @@ def reservationStFn(request, reservation_id):
     reservation.update_status(4) 
     reservation.save()
     #下次預約
-    return render(request,'clinicPage.html')
+    return render(request,'myApp/clinicPage.html')
     
     
 def reservationStCbD(request, reservation_id):
@@ -669,7 +531,7 @@ def reservationStCbD(request, reservation_id):
     # Update the status to "cancelled by doc"
     reservation.update_status(5) 
     reservation.save()
-    return render(request,'clinicPage.html')
+    return render(request,'myApp/clinicPage.html')
 
 #預約此醫生按鈕按下去
 def doctor_reserve_page(request, doc_id):
@@ -702,52 +564,127 @@ def doctor_reserve_page(request, doc_id):
 		#'schedules': doc_schedule_list
 		#'reserved': reservation_list
 	}
-	return render(request, 'doctor_reserve.html', context)
+	return render(request, 'myApp/doctor_reserve.html', context)
+
 
 #診所預約按鈕按下去
 def clinic_reserve_page(request, clinic_id):
-    
-    clinic_details = get_object_or_404(Clinic, id='clinic_id')
-    return render(request, 'clinic_reserve.html', clinic_details)
+    clinic = get_object_or_404(Clinic, id='clinic_id')
 
-#(finished)
+
+    doctors = Doctor.objects.filter(clinicID=clinic)
+
+
+    doctor_list = []
+
+
+    for doctor in doctors:
+
+
+        doctor_list.append({
+            'id': doctor.id,
+            'name': doctor.name
+        })
+
+
+    #request.session['doctor_name_list'] = doctor_list
+
+
+    context = {
+        'doctor': doctor_list,
+        'clinic': clinic
+    }
+    return render(request, 'myApp/clinic_reserve.html', context)
+
+
+def clinic_reserve_doctor_confirmed(request, doctor_id):
+    request.session['doc_id'] = doctor_id # Save session
+    doctor_expertise = Doc_Expertise.objects.filter(DocID=doctor_id).select_related('Expertise_ID')
+
+
+    # Create a list of dictionaries with expertise name and time
+    doc_expertise_list = []
+   
+    for expertise in doctor_expertise:
+        expertise_dict = {
+            'expertise_name': expertise.Expertise_ID.name,
+            'expertise_time': expertise.Expertise_ID.time
+        }
+        doc_expertise_list.append(expertise_dict)
+
+
+    # Store the expertise list in the session
+    request.session['expertise_list'] = doc_expertise_list
+    
+    return render(request,'clinic_reserva.html',{doc_expertise_list})
+
+
 @login_required
 def doctorPage_loading(request):
     #取完doctor reservation
     user = request.user
     doctor = Doctor.objects.filter(id=user.id)
+    WorkingHourDoc = WorkingHour.objects.filter(DoctorID = doctor.id)
     
-    schedules = Scheduling.objects.filter(DocID = doctor.id)
-    #status 0,2,3才是真正在預約狀態中
-    reservations = Reservation.objects.filter(SchedulingID__in=schedules).filter(status__in=[0, 2, 3])
-    empty_list = Reservation.objects.filter(SchedulingID__in=schedules).filter(status__in=[1, 5])
-    #是不是有另一種寫法？
-    #empty 他處已有實現邏輯，之後我抄過來就好
+   
+    today = now().date()
+    start_of_week = today - timedelta(days=today.weekday())  # Monday
+    end_of_week = start_of_week + timedelta(days=6)  # Sunday
+
+    schedules = Scheduling.objects.filter(
+        DoctorID=doctor,
+        StartDate__lte=end_of_week,
+        EndDate__gte=start_of_week
+    ).select_related('WorkingHour')
     
-    #context={
-    reservation_list = [
-        {
-            'client_name': reservation.ClientID.name,
-            'appointment_date': reservation.time_start.date(),
-            'appointment_time': reservation.time_start.strftime('%H:%M'),
-            'expertise': reservation.expertiseID.name, 
-            'status': reservation.get_status_display(),  # Use get_status_display() method
-        }
-        for reservation in reservations
-    ]
+      #status 0,2,3才是真正在預約狀態中
+    reservations = Reservation.objects.filter(
+        SchedulingID__in=schedules,
+        status__in=[0, 2, 3],
+        time_start__date__range=[start_of_week, end_of_week]
+    )
+
+    context = {
+    #已預約時段
+    'reservation_list': [
+    {
+        'client_name': reservation.ClientID.name,
+        'appointment_date': reservation.time_start.date(),
+        'stating': reservation.time_start.strftime('%H:%M'),
+        'expertise': reservation.expertiseID.name, 
+        'ending': reservation.time_end.strftime('%H:%M'),
+        'status': reservation.get_status_display(),
+        'WDforfront': reservation.WDforFront(),  # 注意加上 () 调用方法
+        'OccupiedHour': reservation.TimeSlotNumber(),  # 注意加上 () 调用方法
+    }
+    for reservation in reservations
+    ],
+    #上班時段
+    'schedule_list': [
+            {
+                'work_day': schedule.WorkingHour.get_day_of_week_display(),
+                'work_start_time': schedule.WorkingHour.start_time.strftime('%H:%M'),
+                'work_end_time': schedule.WorkingHour.end_time.strftime('%H:%M'),
+                'valid_from': schedule.StartDate,
+                'valid_to': schedule.EndDate,
+                'WDforfront' : schedule.WDforFront
+            }
+            for schedule in schedules
+        ],
+    }
     
-        
-    #}
-    
-    return render(request, 'doctorPage.html', reservation_list)
-        
+    return render(request, 'myApp/doctor_page.html', context)
+
+@login_required        
 def clientRecord_loading(request):
     user = request.user
     client = Client.objects.filter(id = user.id)
-    reservations = Reservation.objects.filter(ClientID=client.id)
-    waitings = Waiting.objects.filter(ClientID=client.id)
-    reservation_list = [
+    reservations = Reservation.objects.filter(ClientID=client.id).order_by('-time_start')
+    
+    context ={
+        'reservation_list': [
         {
+            'id':reservation.id,
             'client_name': reservation.ClientID.name,
             'appointment_date': reservation.time_start.date(),
             'appointment_time': reservation.time_start.strftime('%H:%M'),
@@ -755,43 +692,12 @@ def clientRecord_loading(request):
             'status': reservation.get_status_display(),  # Use get_status_display() method
         }
         for reservation in reservations
-     ]
-    '''context ={
-        
-         'waiting_list': [
-        {
-            'client_name': waiting.ClientID.name,
-            'appointment_date': waiting.time_start.date(),
-            'appointment_time': waiting.time_start.strftime('%H:%M'),
-            'expertise': waiting.expertiseID.name, 
-            'status': waiting.get_status_display(),  # Use get_status_display() method
-        }
-        for waiting in waitings
         ],
-         
-         
-    }'''
-    return render(request,'UserAppointmentRecords.html',reservation_list)
-
-#如果是Status = 2或3的話 就不執行而是跳jsonresponse
-#變數名有待確認
-def client_cancel_reservation(request):
-
-    if request.method == 'GET':
-        reserveID = request.GET.get('reservationID')
-        reservation = get_object_or_404(Reservation, reservationID=reserveID)
-
-        if (reservation.Status == 2 or reservation.Status == 3):
-            return JsonResponse({'dlteSuccess': False,}) #不能取消
-        else:
-        # 删除预约
-            reservation.delete()
-            return JsonResponse({'dlteSuccess': True,}) #可以取消
-        
-        
     
-    return render(request, 'UserAppointmentRecords.html')
-
+         
+         
+    }
+    return render(request,'UserAppointmentRecords.html',context)
 
 #預約頁面日期選下去，計算可預約時間
 
@@ -803,10 +709,10 @@ def add_times(time1, duration):
 
 def available(request):
     # Get doctor_id, date, and expertise_name from the GET request
-    doctor_id = request.GET.get('doctor_id')
+    doctor_id = request.session.get('doctor_id')
     date_str = request.GET.get('date')
-    date = datetime.strptime(date_str, '%Y-%m-%d').date()
-    week_day = date.weekday()
+    date_reserve = datetime.strptime(date_str, '%Y-%m-%d').date()
+    week_day = date_reserve.weekday()+1
 
 
     expertise_name = request.GET.get('expertise_name')
@@ -829,7 +735,7 @@ def available(request):
    
     # Filter and prepare the schedule list
     for schedule in schedules:
-        if schedule.EndDate >= date.today():  # Only include future schedules
+        if schedule.EndDate >= now().date():  # Only include future schedules
             status_conditions = Q(status=0) | Q(status=2) | Q(status=3)
             schedule_condition = Q(schedule_id=schedule.id)
             reservations = Reservation.objects.filter(status_conditions & schedule_condition)
@@ -859,7 +765,7 @@ def available(request):
    
     # Filter schedules for the given date
     for schedule in schedule_list:
-        if schedule['start_date'] <= date <= schedule['end_date'] and schedule['day_of_week'] == week_day:
+        if schedule['start_date'] <= date_reserve <= schedule['end_date'] and schedule['day_of_week'] == week_day:
             available = {
                 'start_time': schedule['start_time'],
                 'end_time': schedule['end_time']
@@ -869,7 +775,7 @@ def available(request):
 
     # Remove reserved times from available times
     for reservation in reservation_list:
-        if reservation['date'] == date:
+        if reservation['date'] == date_reserve:
             for available in time_available[:]:
                 if available['start_time'] <= reservation['start_time'] < available['end_time']:
                     last_available_end = available['end_time']
@@ -896,11 +802,11 @@ def available(request):
 
     # Consider expertise time to modify time_available
     reserve_choices = []
-    expertise_duration = datetime.timedelta(hours=expertise_time.hour, minutes=expertise_time.minute, seconds=expertise_time.second)
+    expertise_duration = timedelta(hours=expertise_time.hour, minutes=expertise_time.minute, seconds=expertise_time.second)
     for available in consolidated_time_available:
         start = available['start_time']
         while add_times(start, expertise_duration) <= available['end_time']:
-            reserve_choices.append(start.strftime('%H:%M'))
+            reserve_choices.append(start.strftime('%H:%M:%S'))
             start = add_times(start, expertise_duration)
 
 
@@ -909,9 +815,8 @@ def available(request):
 
 #login check身份別，django 自帶，用isinstance分身份
 
-
 #存疑，（應該）現在這邊必須要候補時段跟被取消的預約時段一模一樣才卡的進去
-'''@login_required
+@login_required
 def waitingToResForC(request):
     user = request.user
     # Find the waiting entries for the current user with status=False
@@ -950,4 +855,189 @@ def waitingToResForC(request):
             
     
     # Return the formatted waiting list data as JSON
-    return JsonResponse({'waiting_list': waiting_list_data})'''
+    return JsonResponse({'waiting_list': waiting_list_data})
+
+def home(request):
+    context={}
+    return render(request, "myApp/searchPage.html", context)
+
+def clieReserve(request):
+    context={}
+    return render(request, "myApp/client_reservation.html", context)
+
+def cliedataEd(request):
+    context={}
+    return render(request, "myApp/client_dataEdit.html", context)
+
+def clinDataEd(request):
+    context={}
+    return render(request, "myApp/clinic_dataEdit.html", context)
+
+def docDataEd(request):
+    context={}
+    return render(request, "myApp/doctor_dataEdit.html", context)
+
+
+def clickSchedule(request):
+    context={}
+    return render(request, "myApp/ClicktoEditSchedule.html", context)
+
+
+def login(request):
+    context={}
+    return render(request, "myApp/login.html", context)
+
+
+def clinHome(request):
+    context={}
+    return render(request, "myApp/clinicPage.html", context)
+
+
+def docManage(request):
+    context={}
+    return render(request, "myApp/doctor_management.html", context)
+
+
+def docPage(request):
+    context={}
+    return render(request, "myApp/doctorPage.html", context)
+
+
+def clieReserveRecord(request):
+    context={}
+    return render(request, "myApp/UserAppointmentRecords.html", context)
+
+
+def dentalLogin(request):
+    context={}
+    return render(request, "myApp/dentalLogin.html", context)
+
+# 用filter查看所有诊所/醫生/病患的email資料是否已存在
+@csrf_exempt
+def isUniqueEmail_clin(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        email = data.get('email')
+        if Clinic.objects.filter(email=email).exists():
+            return JsonResponse({'isUnique': False}, status=200)
+        else:
+            return JsonResponse({'isUnique': True}, status=200)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+@csrf_exempt
+def isUniqueLicense_clin(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        license_number = data.get('license_number')
+        if Clinic.objects.filter(license_number=license_number).exists():
+            return JsonResponse({'isUnique': False}, status=200)
+        else:
+            return JsonResponse({'isUnique': True}, status=200)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+@csrf_exempt
+def isUniqueEmail_clie(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        email = data.get('email')
+        if Client.objects.filter(email=email).exists():
+            return JsonResponse({'isUnique': False}, status=200)
+        else:
+            return JsonResponse({'isUnique': True}, status=200)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+@csrf_exempt
+def isUniqueEmail_doc(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        email = data.get('email')
+        if Doctor.objects.filter(email=email).exists():
+            return JsonResponse({'isUnique': False}, status=200)
+        else:
+            return JsonResponse({'isUnique': True}, status=200)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+def check_authentication(request):
+    if request.user.is_authenticated:
+        return JsonResponse({'is_authenticated': True})
+    else:
+        return JsonResponse({'is_authenticated': False})
+def doctor_info(request):
+    if hasattr(request.user, 'doctor'):
+        user = request.user
+        info = {
+            'email': user.email,
+            'name': user.name,
+            'phone_number': user.phone_number,
+            'password': user.pw,
+            'photo_url': user.doctor.photo.url,
+            'experience': user.doctor.experience,
+        }
+        return JsonResponse(info)
+    else:
+        return JsonResponse({'error': 'User is not a doctor'}, status=400)
+   
+def client_info(request):
+    if hasattr(request.user, 'client'):
+        user = request.user
+        info = {
+            'email': user.email,
+            'name': user.name,
+            'phone_number': user.phone_number,
+            'password': user.pw,
+            'address': user.client.address,
+            'birth_date': user.client.birth_date,
+            'gender': user.client.gender,
+            'occupation': user.client.occupation,
+            'notify': user.client.notify,
+        }
+        return JsonResponse(info)
+    else:
+        return JsonResponse({'error': 'User is not a client'}, status=400)
+
+def logout_view(request):
+    logout(request)
+    return render(request,'myApp/searchPage.html')
+
+
+def check_reservations(request):
+    now = now()
+    #one_hour_ago = now - timedelta(hours=1)
+
+
+    reservations = Reservation.objects.filter(status=0)
+
+
+    for reservation in reservations:
+        if reservation.time_start < now:
+            reservation.status = 1
+            reservation.save()
+
+
+    return JsonResponse({'message': 'Checked and updated reservations if necessary.'})
+
+#如果是Status = 2或3的話 就不執行而是跳jsonresponse
+#變數名有待確認
+def client_cancel_reservation(request):
+
+    if request.method == 'GET':
+        reserveID = request.GET.get('reservationID')
+        reservation = get_object_or_404(Reservation, reservationID=reserveID)
+
+        if (reservation.Status == 2 or reservation.Status == 3):
+            return JsonResponse({'dlteSuccess': False,}) #不能取消
+        else:
+        # 删除预约
+            reservation.delete()
+            return JsonResponse({'dlteSuccess': True,}) #可以取消
+        
+        
+    
+    return render(request, 'UserAppointmentRecords.html')

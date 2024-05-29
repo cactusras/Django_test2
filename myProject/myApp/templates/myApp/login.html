@@ -119,7 +119,7 @@
     <div class="limiter">
         <div class="container-login100">
             <div class="wrap-login100">
-                <form id="loginForm" method="post" class="login100-form validate-form">
+                <form id="loginForm" class="login100-form validate-form">
                   {% csrf_token %}
                    <fieldset>
                     <legend class="login100-form-title p-b-26">
@@ -155,7 +155,7 @@
                     <div class="container-login100-form-btn">
                         <div class="wrap-login100-form-btn">
                             <div class="login100-form-bgbtn"></div>
-                            <button class="login100-form-btn" type="submit" onclick="login(event)">
+                            <button class="login100-form-btn" type="submit">
                                 Login
                             </button>
                         </div>
@@ -213,28 +213,35 @@
             "another@example.com": "password456",
         };
     
-        function login(event){
+        document.getElementById('loginForm').addEventListener('submit', function login(event){
             event.preventDefault(); // 阻止默認表單提交
             
-            const form = document.getElementById('loginForm');
-            const formData = new FormData(form);
-        
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            const loginData = {
+                username: username,
+                password: password
+            };
+
             fetch("/login/login_view/", {
                 method: 'POST',
-                body: formData,
                 headers: {
+                    'Content-Type': 'application/json',
                     'X-CSRFToken': '{{ csrf_token }}'
                 }
+                body: JSON.stringify(loginData)
             })
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
                     if (data.user_type === 'Client') {
-                        window.location.href = '/searchPage';
+                        window.location.href = '/home';
                     } else if (data.user_type === 'Clinic') {
-                        window.location.href = '/clinicPage';
+                        window.location.href = '/clinic/home';
                     } else if (data.user_type === 'Doctor') {
-                        window.location.href = '/doctorPage';
+                        window.location.href = '/doctor/page';
                     }
                 } else {
                     console.log('Login failed');
@@ -245,7 +252,7 @@
                 console.log('Error:', error);
                 // 處理錯誤情況
             });
-        }
+        });
 
         /*function login(event) {
             let emailInput = document.querySelector("input[name='useremail']");

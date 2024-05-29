@@ -1,11 +1,10 @@
-from . import views
 from django.urls import path
+from . import views
 
 urlpatterns = [
-    path("", views.home, name="home"),
+    path('home/',views.home, name = 'home'),
+    path('login/', views.login, name='login'),
     path('client/reserve/', views.clieReserve, name='client_reservation'),
-    path('doctor/reserve/', views.docReserve, name='doctor_reserve'),
-    path('clinic/reserve/', views.clinReserve, name='clinic_reserve'),
     path('client/data/edit/', views.cliedataEd, name='client_data_edit'),
     path('clinic/data/edit/', views.clinDataEd, name='clinic_data_edit'),
     path('doctor/data/edit/', views.docDataEd, name='doctor_data_edit'),
@@ -13,6 +12,7 @@ urlpatterns = [
     path('clinic/home/', views.clinHome, name='clinic_home'),
     path('doctor/manage/', views.docManage, name='doctor_management'),
     path('doctor/page/', views.docPage, name='doctor_page'),
+    path('waitinglist/to/reservation/', views.waitingToResForC, name='waiting_to_reservation'),
     path('available/', views.available, name='available_times'),
     path('doctor/reserve/<int:doc_id>/', views.doctor_reserve_page, name='doctor_reserve_page'),
     path('clinic/reserve/<int:clinic_id>/', views.clinic_reserve_page, name='clinic_reserve_page'),
@@ -34,12 +34,18 @@ urlpatterns = [
     path('workingHour/upload/', views.workingHour_upload, name='working_hour_upload'),
     path('scheduling/upload/', views.scheduling_upload, name='scheduling_upload'),
     path('success/', views.success, name='success'),
-    path('doctor/delete/', views.delete_doctor, name='delete_doctor'),
-    path('client/delete/reserve/', views.client_cancel_reservation, name='client_cancel_reservation'),
-    path("login/", views.login, name="login"),
-    #path("dentalLogin/", views.dentalLogin, name="dentalLogin"),
-    path('login/login_view/', views.login_view, name='login_view'),
-    path('clinic_info/', views.clinic_info, name='clinic_info'),
+    path('clieReserveRecord/', views.clieReserveRecord, name='clieReserveRecord'),
+    path('dentalLogin/', views.dentalLogin, name='dentalLogin'),
+    path('isUniqueEmail_clin/', views.isUniqueEmail_clin, name='isUniqueEmail_clin'),
+    path('isUniqueLicense_clin/', views.isUniqueLicense_clin, name='isUniqueLicense_clin'),
+    path('isUniqueEmail_clie/', views.isUniqueEmail_clie, name='isUniqueEmail_clie'),
+    path('isUniqueEmail_doc/', views.isUniqueEmail_doc, name='isUniqueEmail_doc'),
+    path('check_authentication/', views.check_authentication, name='check_authentication'),
+    path('doctor_info/', views.doctor_info, name='doctor_info'),
     path('client_info/', views.client_info, name='client_info'),
-    path('check_authentication/', views.check_authentication, name='check_authentication')
+    path('clinic/doctor/<int:doctor_id>/reserve/', views.clinic_reserve_doctor_confirmed, name='clinic_reserve_doctor_confirmed'),
+    path('login/login_view/', views.login_view, name='login_view'),
+    path('logout/', views.logout_view, name='logout_view'),
+    path('check_reservations/', views.check_reservations, name='check_reservations'),
+    path('client/delete/reserve/', views.client_cancel_reservation, name='client_cancel_reservation'),
 ]
