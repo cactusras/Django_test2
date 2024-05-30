@@ -38,15 +38,15 @@ def user_login(request):
                 # 登入成功，根據用戶身份導向不同的頁面
                 if hasattr(user, 'client'):  # 检查是否是客户
                     print('client')
-                    return JsonResponse({'message': 'Login successful_client', 'status': 'success'})
+                    return JsonResponse({'message': 'client', 'status': 'success'})
                 elif hasattr(user, 'clinic'):  # 检查是否是诊所
                     print('clinic')
-                    return JsonResponse({'message': 'Login successful_clinic', 'status': 'success'})
+                    return JsonResponse({'message': 'clinic', 'status': 'success'})
                 elif hasattr(user, 'experience'):  # 检查是否是医生
                     print('doctor')
-                    return JsonResponse({'message': 'Login successful_doctor', 'status': 'success'})
+                    return JsonResponse({'message': 'doctor', 'status': 'success'})
                 else:
-                    return JsonResponse({'message': 'Login successful_unknown', 'status': 'success'})
+                    return JsonResponse({'message': 'unknown', 'status': 'success'})
             else:
                 return JsonResponse({'message': 'Invalid email or password', 'status': 'error'})
         else:
