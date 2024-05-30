@@ -11,7 +11,7 @@ from django.utils import timezone
 
 # 定義自定義的使用者管理器
 class CustomUserManager(BaseUserManager):
-    def create_user(self, email, name, phone_number, pw=None):
+    def create_user(self, email, name, phone_number, password=None):
         if not email:
             raise ValueError('The Email field must be set')
         user = self.model(
@@ -19,16 +19,16 @@ class CustomUserManager(BaseUserManager):
             name=name,
             phone_number=phone_number,
         )
-        user.set_password(pw)
+        user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, name, phone_number, pw=None):
+    def create_superuser(self, email, name, phone_number, password=None):
         user = self.create_user(
             email=email,
             name=name,
             phone_number=phone_number,
-            pw=pw,
+            password=password,
         )
         user.is_admin = True
         user.save(using=self._db)

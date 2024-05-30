@@ -130,3 +130,7 @@ class AuthenticationForm(forms.Form):
 		if self.user_cache:
 			return self.user_cache.id
 		return None
+     
+class LoginForm(forms.Form):
+    email = forms.EmailField()
+    password = forms.CharField(widget=forms.PasswordInput)

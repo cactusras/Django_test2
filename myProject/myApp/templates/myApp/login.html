@@ -228,7 +228,7 @@
             console.log('loginData:', loginData);
             console.log('csrfToken:', csrfToken);
 
-            fetch("/login/login_view/", {
+            fetch("/loginP/login_view/", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -240,13 +240,17 @@
             .then( 
             data => {
                 if (data.status === 'success') {
-                    if (data.user_type === 'Client') {
+                    console.log("data.status = success")
+                    setUserType(data.user_type)
+                    setUserName(data.username)
+                    if (data.user_type === 'client') {
                         window.location.href = '/home';
-                    } else if (data.user_type === 'Clinic') {
+                    } else if (data.user_type === 'clinic') {
                         window.location.href = '/clinic/home';
-                    } else if (data.user_type === 'Doctor') {
+                    } else if (data.user_type === 'doctor') {
                         window.location.href = '/doctor/page';
                     }
+                    
                 } else {
                     console.log('Login failed');
                     // 處理登錄失敗情況，例如顯示錯誤消息

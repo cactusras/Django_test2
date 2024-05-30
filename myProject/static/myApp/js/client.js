@@ -88,19 +88,17 @@ function fetch_info(){
     fetch('/client_info/', {
         method: 'GET'
     })
-    .then(response => {
+    .then(async response => {
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
-        return response.json(); // 解析 JSON 响应
-    })
-    .then(infoDic =>{
-        username = infoDic['name'];
-        for (var key in infoDic) {
-            if (infoDic.hasOwnProperty(key)) {
-                //
-                clieField[key] = infoDic[key];
-            }
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            const doctorInfo = data.info;
+            fillForm(doctorInfo);
+        } else {
+            console.error(data.error);
         }
     })   
     .catch(error => {

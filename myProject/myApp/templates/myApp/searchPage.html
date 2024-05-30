@@ -55,7 +55,7 @@
                         地圖
                     </div>
                     <!--搜尋左半部-->
-                    <form method="post" id="searchForm" action="<{% url "doctor_clinic_search" %}">
+                    <form id="searchForm">
                     <div class="col" style="background-color:#fffff0; border: 1px solid #ada089; height:450px; font-size: 20px;">
                         縣市地區<br>
                         <div class="row">
@@ -244,9 +244,9 @@
                     const form = {
                         doc_name: document.getElementById('docNameInput').value,
                         clinic_name: document.getElementById('clinicNameInput').value,
-                        clinic_address: addrVlue;
+                        clinic_address: addrVlue,
                         appointed_date: document.getElementById('inputDate').value,
-                        exp_name: experVlue;
+                        exp_name: experVlue,
                     };
                     fetch('/doctor/clinic/search/', {
                         method: 'POST',

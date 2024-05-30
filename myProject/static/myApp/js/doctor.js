@@ -17,7 +17,7 @@
             docField['password'] = document.getElementById('password').value,
             docField['experience'] = document.getElementById('experience').value,
             docField['photo'] = document.getElementById('photo').files[0]
-            console.log('name' + docField['name']);
+            console.log('email' + docField['email']);
     }
 
     /*function toSchedule(event){
@@ -42,10 +42,10 @@
             }
                 
             //canva11進入canva12   
-            if (window.isLogin){
+            if (getIsLogin()){
                 barTitle.innerText = '醫生資料'
                 btnRegis.addEventListener('click', function(){
-                    window.location.href = "clinicPage.html"
+                    window.location.href = "/clinic/home"
                 })
                 fetch_info();
             }else{
@@ -66,7 +66,7 @@
     
     async function isUniqueEmail(email){
         try {
-            const response = await fetch('/clinic/isUniqueEmail_clin/', {
+            const response = await fetch('/isUniqueEmail_doc', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -83,7 +83,7 @@
         }
     }
    
-    
+   
     document.getElementById('experForm').addEventListener('submit', async function(event){
         event.preventDefault();
         const expertise = document.getElementById('expertiseSelect').value;
@@ -109,6 +109,9 @@
             // 处理成功响应，例如显示成功消息或重定向
             alert('Expertise added successfully!');
             expExist.push(expertise);
+
+            console.log("expExist = " + expExist + expExist.length);
+            console.log(data.exp)
             //window.location.href = '/doctor/data/edit';
         })
         .catch(error => {
@@ -117,7 +120,7 @@
         });
     })
 
-    document.getElementById('timePopForm').addEventListener('submit', async function(event){
+    /*document.getElementById('timePopForm').addEventListener('submit', async function(event){
         event.preventDefault();
         const day_of_week = document.getElementById('daySelect').value;
         const start_time = document.getElementById('start_time').value;
@@ -184,7 +187,7 @@
             console.error('Error fetching scheduling list:', error);
             // 处理错误情况
         });
-    })
+    })*/
 
     //登入狀態從後端抓資料放到dataEdit
     function fetch_info(){
@@ -279,13 +282,22 @@
                         alert("Phone number cannot exceed 15 digits");
                         return;
                     } else {
-                        // 要串資料庫把所有的clinic email先找出來      
-                        if (!await isUniqueEmail(email)) {
-                            alert("Email already registered");
-                            return;
+                        if(expExist.length == 0){
+                            alert("Please first key in your expertise(s)")
                         }else{
                             isValid = true;
                         }
+                        // 要串資料庫把所有的clinic email先找出來      
+                        /*if (!await isUniqueEmail(docField.email)) {
+                            alert("Email already registered");
+                            return;
+                        }else{
+                            if(expExist.length == 0){
+                                alert("Please first key in your expertise(s)")
+                            }else{
+                                isValid = true;
+                            }
+                        }*/
                     }
                 }
         }    
@@ -304,6 +316,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
+                    setTimeout(function(){console.log(data.info)}, 2000) 
                     alert(data.message);
                     window.location.href = '/click/schedule';
                 } else {

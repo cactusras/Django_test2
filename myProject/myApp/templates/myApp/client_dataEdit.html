@@ -139,7 +139,7 @@
                     </div>
 
                     <!--設定登出按鈕-->
-                    <button class="logout-button" onclick="redirectToPage()">登出</button>
+                    <button class="logout-button" id="logoutButton" onclick="redirectToPage()">登出</button>
                         <!--要轉跳到註冊頁面-->
                         <script>
                         function redirectToPage() {
@@ -170,6 +170,6 @@
             <!-- Core theme JS-->
             <script src="{% static 'myApp/js/scripts.js' %}"></script>
             <script src="{% static 'myApp/js/client.js' %}"></script>
-        
+            <script src="{% static 'myApp/js/logout.js' %}"></script>
     </body>
 </html>

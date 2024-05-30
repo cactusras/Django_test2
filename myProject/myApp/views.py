@@ -3,7 +3,7 @@ from pathlib import Path
 from PIL import Image
 from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponse
-from .forms import DoctorForm,ClinicForm,ClientForm,SchedulingForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm
+from .forms import DoctorForm,ClinicForm,ClientForm, LoginForm,SchedulingForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm
 from django.db.models import Q
 from django.db import connection
 from django.contrib.auth.decorators import login_required
@@ -54,6 +54,7 @@ def login_view(request):
         if user is not None:
             login(request, user)
             print(user)
+            username = user.name
             user_type = None
 
             if hasattr(user, 'client'):
@@ -66,12 +67,22 @@ def login_view(request):
                 print('doctor')
                 user_type = 'doctor'
             print('user_type = ', user_type)
-            return JsonResponse({'status': 'success', 'user_type': user_type})
+            return JsonResponse({'status': 'success','username': username,  'user_type': user_type})
         else:
             print("User is none")
             return JsonResponse({'status': 'error', 'message': 'Invalid login credentials'})
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+    
+'''def fetch_userType(request):
+    global userType
+    isLogin = request.user.is_authenticated
+    if isLogin:
+        print('login yes , type = ', userType)
+        return JsonResponse({'isLogin': 'success', 'user_type': userType})
+    else:
+        print('login no')
+        return JsonResponse({'isLogin': 'failed', 'user_type': None})'''
 
 
 def add_client(request):
@@ -230,26 +241,31 @@ def add_clinic(request):
             form = ClinicForm(request.POST, request.FILES)
         except json.JSONDecodeError:
             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
+
         if form.is_valid():
             cleaned_data = form.cleaned_data
             print(cleaned_data)
             cleaned_data['is_active'] = True
             cleaned_data['is_admin'] = False
-            
-            photo = cleaned_data['photo']
-            image = Image.open(photo)
-            print("photo opend")
-            # Define the save path using Path from pathlib
-            save_dir = Path('media/uploaded_files')
-            save_dir.mkdir(parents=True, exist_ok=True)  # Create directories if they don't exist
-            save_path = save_dir / photo.name
-            image.save(save_path)
-            print("photo saved")
+            cleaned_data['password'] = make_password(cleaned_data['password'])
+
+            if cleaned_data['photo'] is not None:
+                # photo = cleaned_data.pop('photo')
+                photo = cleaned_data['photo']
+                image = Image.open(photo)
+                print("photo opend")
+                # Define the save path using Path from pathlib
+                save_dir = Path('media/uploaded_files')
+                save_dir.mkdir(parents=True, exist_ok=True)  # Create directories if they don't exist
+                save_path = save_dir / photo.name
+                image.save(save_path)
+                print("photo saved")
+                photo_path = f'uploaded_files/{photo.name}'
+                cleaned_data['photo'] = photo_path
+                print("photo path saved to clean_data")
+
             # Prepare data for update_or_create
             email = cleaned_data.pop('email')
-            photo_path = f'uploaded_files/{photo.name}'
-            cleaned_data['photo'] = photo_path
-            print("photo path saved to clean_data")
             clinic, created_clinic = Clinic.objects.update_or_create(
                 email=email,
                 defaults=cleaned_data
@@ -374,44 +390,38 @@ def add_doctor(request):
 def Doc_uploading(request):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)  # 解析 JSON 数据
+            doctor_form = DoctorForm(request.POST, request.FILES)
         except json.JSONDecodeError:
             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
-
-        doctor_form = DoctorForm(data, request.FILES)
         if doctor_form.is_valid():
             request.session['doctor_form_data'] = doctor_form.cleaned_data
             print('succeed adding', doctor_form)
             doc_expertise_list = request.session.get('doc_expertise_list', None)
-            if not doc_expertise_list:
-                return JsonResponse({'message': 'Please choose your expertise(s)', 'status': 'error'})
-            else:
-                return JsonResponse({'message': 'Doctor Session added', 'status': 'success'})
+            return JsonResponse({'message': 'Doctor Session added', 'status': 'success'})
         else:
             return JsonResponse({'message': 'Invalid form data', 'errors': doctor_form.errors, 'status': 'error'})
     else:
         doctor_form = DoctorForm()
-    
     return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
 
 def DocExp_uploading(request):
+    
     if request.method == 'POST':
         try:
             data = json.loads(request.body)  # 解析 JSON 数据
             expertise = data.get('expertise')  # 获取 expertise 值
-            doc_expertise_form = ExpertiseForm({'expertise': expertise})
+            doc_expertise_form = ExpertiseForm({'name': expertise})
             
         except json.JSONDecodeError:
-            print('post error')
             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
 
         if doc_expertise_form.is_valid():
             doc_expertise_list = request.session.get('doc_expertise_list', [])
             doc_expertise_list.append(doc_expertise_form.cleaned_data)
+            print("clean = ", doc_expertise_form.cleaned_data)
             request.session['doc_expertise_list'] = doc_expertise_list  # 更新 session
-            print('succeed adding', doc_expertise_list)
-            return JsonResponse({'message': 'Expertise data added successfully', 'status': 'success'})
+            return JsonResponse({'message': 'Expertise data added successfully', 'status': 'success', 'exp': doc_expertise_form.cleaned_data})
         else:
             return JsonResponse({'message': 'Invalid form data', 'errors': doc_expertise_form.errors, 'status': 'error'})
     else:
@@ -1151,14 +1161,31 @@ def doctor_info(request):
             'email': user.email,
             'name': user.name,
             'phone_number': user.phone_number,
-            'password': user.pw,
+            'password': user.password,
             'photo_url': user.doctor.photo.url,
             'experience': user.doctor.experience,
         }
-        return JsonResponse(info)
+        return JsonResponse({'status': 'success', 'data': info}, status=200)
     else:
-        return JsonResponse({'error': 'User is not a doctor'}, status=400)
+        return JsonResponse({'status': 'error', 'error': 'User is not a doctor'}, status=400)
    
+def clinic_info(request):
+    if hasattr(request.user, 'clinic'):
+        user = request.user
+        info = {
+            'email': user.email,
+            'name': user.name,
+            'phone_number': user.phone_number,
+            'password': user.password,
+            'address': user.clinic.address,
+            'license_number': user.clinic.license_number,
+            'photo_url': user.clinic.photo.url,
+            'introduction': user.clinic.introduction,
+        }
+        return JsonResponse({'status': 'success', 'data': info}, status=200)
+    else:
+        return JsonResponse({'status': 'error', 'error': 'User is not a clinic'}, status=400)
+
 def client_info(request):
     if hasattr(request.user, 'client'):
         user = request.user
@@ -1166,16 +1193,16 @@ def client_info(request):
             'email': user.email,
             'name': user.name,
             'phone_number': user.phone_number,
-            'password': user.pw,
+            'password': user.password,
             'address': user.client.address,
             'birth_date': user.client.birth_date,
             'gender': user.client.gender,
             'occupation': user.client.occupation,
             'notify': user.client.notify,
         }
-        return JsonResponse(info)
+        return JsonResponse({'status': 'success', 'data': info}, status=200)
     else:
-        return JsonResponse({'error': 'User is not a client'}, status=400)
+        return JsonResponse({'status': 'error', 'error': 'User is not a client'}, status=400)
 
 def logout_view(request):
     logout(request)
@@ -1216,3 +1243,12 @@ def client_cancel_reservation(request):
         
     
     return render(request, 'UserAppointmentRecords.html')
+
+@csrf_exempt
+def user_logout(request):
+    if request.method == 'POST':
+        logout(request)
+        print('logged out')
+        return JsonResponse({'message': 'Logged out successfully', 'status': 'success'})
+    else:
+        return JsonResponse({'message': 'Invalid request method', 'status': 'error'})

@@ -39,10 +39,44 @@ $('#date1').datetimepicker({
 
   //fetch使用者是否登入了 並設window變數(整個project都可取得)
 window.isLogin = "";
+window.user_type = "";
 window.username = "";
+
+function getIsLogin() {
+  return window.isLogin;
+}
+
+function setIsLogin(value) {
+  console.log('Setting isLogin:', value);
+  window.isLogin = value;
+}
+
+// Getter and setter for user_type
+function getUserType() {
+  return window.user_type;
+}
+
+function setUserType(value) {
+  console.log('Setting user_type:', value);
+  window.user_type = value;
+}
+
+// Getter and setter for username
+function getUsername() {
+  return window.username;
+}
+
+function setUsername(value) {
+  console.log('Setting username:', value);
+  window.username = value;
+}
 
 document.addEventListener('DOMContentLoaded', function() {
   const btnNav = document.getElementById('nav_btn');
+  const barTitle = document.getElementById('barTitle');
+  //const btnDocManage = document.getElementById('btnDocManage')
+  const btnLogout = document.getElementById('logoutButton')
+
   fetch('/check_authentication/')
   .then(response => {
       if (response.ok) {
@@ -53,13 +87,19 @@ document.addEventListener('DOMContentLoaded', function() {
   })
   .then(data => {
       if (data.is_authenticated) {
-        window.isLogin = true;
+        setIsLogin(true);
         console.log("isLogin = true");
-        btnNav.innerText = username;
+        btnNav.innerText = getUsername();
+        //barTitle.innerText = "診所資料";
+        //btnDocManage.hidden = false;
+        btnLogout.hidden = false;
       }else{
-        window.isLogin = false;
+        setIsLogin(false)
         console.log("isLogin = false");
         btnNav.innerText = '登入';
+        barTitle.innerText = "註冊"
+        //btnDocManage.hidden = true;
+        btnLogout.hidden = true;
       }
       document.dispatchEvent(new CustomEvent('authChecked', { detail: window.isLogin }));
   })
@@ -70,7 +110,20 @@ document.addEventListener('DOMContentLoaded', function() {
   
 function navBtn_listener(event){
   event.preventDefault();
-  fetch('/login/login_view/')
+  console.log("click nav_btn")
+  console.log("getUserType = " + getUserType() + "  getIsLogin = " + getIsLogin())
+  if (getIsLogin()) {
+    if(getUserType() == 'client'){
+      window.location.href = '/client/data/edit'
+    }else if(getUserType() == 'clinic'){
+      window.location.href = '/clinic/data/edit'
+    }else if(getUserType() == 'doctor'){
+      window.location.href = '/doctor/data/edit'
+    }
+  }else{
+    window.location.href = '/loginP'
+  }
+  /*fetch('/fetch/user_type/')
   .then(response => {
       if (response.ok) {
           return response.json();
@@ -79,19 +132,19 @@ function navBtn_listener(event){
       }
   })
   .then(data => {
-      if (window.isLogin) {
-        if(data.user_type == 'Client'){
-          window.location.href = 'searchPage.html'
-        }else if(data.user_type == 'Clinic'){
-          window.location.href = '/clinic/home/'
-        }else if(data.user_type == 'Doctor'){
-          window.location.href = '/doctor/page/'
+      if (data.isLogin == 'success') {
+        if(data.user_type == 'client'){
+          window.location.href = '/client/data/edit'
+        }else if(data.user_type == 'clinic'){
+          window.location.href = '/clinic/data/edit'
+        }else if(data.user_type == 'doctor'){
+          window.location.href = '/doctor/data/edit'
         }
       }else{
-        window.location.href = '/login'
+        window.location.href = '/loginP'
       }
   })
   .catch(error => {
       console.log('Error checking authentication:', error);
-  });
+  });*/
 }

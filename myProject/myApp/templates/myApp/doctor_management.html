@@ -60,7 +60,7 @@
                                 <td>{{ doctor.phone_number }}</td>
                                 <td>{{ doctor.experience }}</td>
                                 <td>
-                                    <form method="post" action="{% url 'delete_doctor' doctor.email %}">
+                                    <form method="post" id="" action="{% url 'delete_doctor' doctor.email %}">
                                         {% csrf_token %}
                                         <div>
                                             <button type="submit" class="rectangle-button">刪除</button>
@@ -300,9 +300,23 @@
     <!-- Core theme JS-->
     <script src="{% static 'myApp/js/scripts.js' %}"></script>
     <script>
+        document.addEventListener("DOMContentLoaded", function(){
+            if(window.isLogin){
+                document.getElementById('btnClinPage').innerText = "回到主頁"
+            }else{
+                document.getElementById('btnClinPage').innerText = "完成"
+            }
+        })
+        
+
         function clinPage(event){
             event.preventDefault();
-            window.location.href = '/clinic/home/'
+            if(window.isLogin){
+                 window.location.href = '/clinic/home/'
+            }else{
+                window.location.href = '/loginP'
+            }
+           
         }
 
         function addDocPage(event){
