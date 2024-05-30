@@ -281,60 +281,112 @@ def add_doctor(request):
 @login_required    
 def Doc_uploading(request):
     if request.method == 'POST':
-        doctor_form = DoctorForm(request.POST, request.FILES)
+        try:
+            doctor_form = DoctorForm(request.POST, request.FILES)
+        except json.JSONDecodeError:
+            return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
         if doctor_form.is_valid():
             request.session['doctor_form_data'] = doctor_form.cleaned_data
-            return render(request,'myApp/ClicktoEditSchedule.html')
+            print('succeed adding', doctor_form)
+            doc_expertise_list = request.session.get('doc_expertise_list', None)
+            if not doc_expertise_list:
+                return JsonResponse({'message': 'Please choose your expertise(s)', 'status': 'error'})
+            else:
+                return JsonResponse({'message': 'Doctor Session added', 'status': 'success'})
+        else:
+            return JsonResponse({'message': 'Invalid form data', 'errors': doctor_form.errors, 'status': 'error'})
     else:
         doctor_form = DoctorForm()
-    return render(request, 'myApp/doctor_dataEdit.html', {'doctor_form': doctor_form})
+    return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
+
 
 @login_required
 def DocExp_uploading(request):
     if request.method == 'POST':
-        doc_expertise_form = ExpertiseForm(request.POST)
+        try:
+            doc_expertise_form = ExpertiseForm(request.POST)
+        except json.JSONDecodeError:
+            print('post error')
+            return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
+
         if doc_expertise_form.is_valid():
             doc_expertise_list = request.session.get('doc_expertise_list', [])
             doc_expertise_list.append(doc_expertise_form.cleaned_data)
             request.session['expertise_list'] = doc_expertise_list
-            return render(request,'myApp/doctor_dataEdit.html')
+            print('succeed adding', doc_expertise_list)
+            return JsonResponse({'message': 'Expertise data added successfully', 'status': 'success'})
+        else:
+            return JsonResponse({'message': 'Invalid form data', 'errors': doc_expertise_form.errors, 'status': 'error'})
     else:
-        expertise_form = ExpertiseForm()
-    return render(request, 'myApp/doctor_dataEdit.html', {'expertise_form': expertise_form})
+        return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
 @login_required
 def workingHour_upload(request):
     if request.method == 'POST':
-        working_hour_form = WorkingHourForm(request.POST)
+        try:
+            working_hour_form = WorkingHourForm(request.POST)
+        except json.JSONDecoderError:
+            print('post failed')
+            return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
+
         if working_hour_form.is_valid():
             working_hour_list = request.session.get('working_hour_list', [])
             working_hour_list.append(working_hour_form.cleaned_data)
             request.session['working_hour_list'] = working_hour_list
-            return render(request,'myApp/ClicktoEditSchedule.html')
+            return JsonResponse({'message': 'Working hour data added successfully', 'status': 'success'})
+        else:
+            return JsonResponse({'message': 'Invalid form data', 'errors': working_hour_form.errors, 'status': 'error'})
     else:
         working_hour_form = WorkingHourForm()
-    return render(request, 'myApp/ClicktoEditSchedule.html', {'working_hour_form': working_hour_form})
+    return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
 @login_required
 def scheduling_upload(request):
     if request.method == 'POST':
-        schedule_form = SchedulingForm(request.POST)
+        try:
+            schedule_form = SchedulingForm(request.POST)
+        except json.JSONDecodeError:
+            return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
+
         if schedule_form.is_valid():
             request.session['schedule_form_data'] = schedule_form.cleaned_data
-            return render(request,'myApp/doctor_dataEdit.html')
+            return JsonResponse({'message': 'Scheduling data added successfully', 'status': 'success'})
+        else:
+            return JsonResponse({'message': 'Invalid form data', 'errors': schedule_form.errors, 'status': 'error'})
     else:
         schedule_form = SchedulingForm()
-    return render(request, 'myApp/doctor_dataEdit.html', {'schedule_form': schedule_form})
+    return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
+
+def doc_session(request):
+    doctor_form_data = request.session.get('doctor_form_data', {})
+    expertise_list = request.session.get('expertise_list', [])
+    schedule_form_data = request.session.get('schedule_form_data', {})
+    working_hour_list = request.session.get('working_hour_list', [])
+
+    response_data = {
+        'doctor_form_data': doctor_form_data,
+        'expertise_list': expertise_list,
+        'schedule_form_data': schedule_form_data,
+        'working_hour_list': working_hour_list,
+    }
+    return JsonResponse(response_data, status=200)
 
 @login_required
 def success(request):
-    # Get the clinic associated with the logged-in user
     clinic = Clinic.objects.get(user=request.user)
-
-    # Get all doctors associated with this clinic
     doctors = Doctor.objects.filter(clinic=clinic)
     #診所登入(管理/新增醫師)頁面名稱要=doctor_management.html
-    return render(request, 'myApp/doctor_management.html', {'doctors': doctors, 'clinic': clinic})
+    data = {
+        'clinic': {
+            'id': clinic.id,
+            'name': clinic.name,
+            'phone_number': clinic.phone_number,
+            'address': clinic.address,
+            # 添加其他需要的字段
+        },
+        'doctors': list(doctors),  # 将 QuerySet 转为列表
+    }
+    return JsonResponse(data)
 
 @login_required
 def delete_doctor(request, doctor_email):
@@ -343,9 +395,8 @@ def delete_doctor(request, doctor_email):
 
     if request.method == "POST":
         doctor.delete()#the doctors schedule, expertise records are delete as well(because cascade)
-        return redirect('myApp/doctor_management.html')
-
-    return render(request, 'myApp/doctor_management.html', {'doctor': doctor})
+        return JsonResponse({'message': 'Doctor deleted successfully', 'status': 'success'})
+    return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
 def doctor_clinic_search_view(request):
         # Apply the filter

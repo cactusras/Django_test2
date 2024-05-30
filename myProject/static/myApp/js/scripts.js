@@ -70,7 +70,7 @@ $('#date1').datetimepicker({
     
   function navBtn_listener(event){
     event.preventDefault();
-    fetch('/login/login_view/')
+    fetch('/login/')
     .then(response => {
         if (response.ok) {
             return response.json();
