@@ -370,7 +370,7 @@ def add_doctor(request):
 
     return render(request,'myApp/doctor_dataEdit.html')'''
 
-@login_required    
+   
 def Doc_uploading(request):
     if request.method == 'POST':
         try:
@@ -381,6 +381,7 @@ def Doc_uploading(request):
         doctor_form = DoctorForm(data, request.FILES)
         if doctor_form.is_valid():
             request.session['doctor_form_data'] = doctor_form.cleaned_data
+            print('succeed adding', doctor_form)
             doc_expertise_list = request.session.get('doc_expertise_list', None)
             if not doc_expertise_list:
                 return JsonResponse({'message': 'Please choose your expertise(s)', 'status': 'error'})
@@ -393,27 +394,30 @@ def Doc_uploading(request):
     
     return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
-@login_required
+
 def DocExp_uploading(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)  # 解析 JSON 数据
             expertise = data.get('expertise')  # 获取 expertise 值
             doc_expertise_form = ExpertiseForm({'expertise': expertise})
+            
         except json.JSONDecodeError:
+            print('post error')
             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
 
         if doc_expertise_form.is_valid():
             doc_expertise_list = request.session.get('doc_expertise_list', [])
             doc_expertise_list.append(doc_expertise_form.cleaned_data)
             request.session['doc_expertise_list'] = doc_expertise_list  # 更新 session
+            print('succeed adding', doc_expertise_list)
             return JsonResponse({'message': 'Expertise data added successfully', 'status': 'success'})
         else:
             return JsonResponse({'message': 'Invalid form data', 'errors': doc_expertise_form.errors, 'status': 'error'})
     else:
         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
-@login_required
+
 def workingHour_upload(request):
     if request.method == 'POST':
         try:
@@ -446,7 +450,7 @@ def workingHour_upload(request):
     
     return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
-@login_required
+
 def scheduling_upload(request):
     if request.method == 'POST':
         try:

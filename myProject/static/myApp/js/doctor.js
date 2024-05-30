@@ -87,6 +87,7 @@
     document.getElementById('experForm').addEventListener('submit', async function(event){
         event.preventDefault();
         const expertise = document.getElementById('expertiseSelect').value;
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
         const data = {
             expertise: expertise
@@ -96,6 +97,7 @@
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
             },
             body: JSON.stringify(data)
         })
@@ -107,7 +109,7 @@
             // 处理成功响应，例如显示成功消息或重定向
             alert('Expertise added successfully!');
             expExist.push(expertise);
-            window.location.href = '/doctor/data/edit';
+            //window.location.href = '/doctor/data/edit';
         })
         .catch(error => {
             console.error('Error fetching expertise list:', error);
