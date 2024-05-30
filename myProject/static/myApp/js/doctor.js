@@ -2,16 +2,19 @@
         email:"",
         name: "",
         phone_number: "",
-        pw: "",
+        password: "",
         photo: null,
         experience: ""
     };
-    
+
+    //存已經選過的 讓他disabled
+    var expExist = [];
+
     function fetch_element(){
             docField['email'] = document.getElementById('email').value
             docField['name'] = document.getElementById('name').value,
             docField['phone_number'] = document.getElementById('phone_number').value,
-            docField['pw'] = document.getElementById('pw').value,
+            docField['password'] = document.getElementById('password').value,
             docField['experience'] = document.getElementById('experience').value,
             docField['photo'] = document.getElementById('photo').files[0]
             console.log('name' + docField['name']);
@@ -27,7 +30,17 @@
             const btnRegis = document.getElementById('btnDocRegis');
             const barTitle = document.getElementById('barTitle');
             fetch_element();
-    
+
+            //將該醫生選過的expertises設為disabled
+            if(expExist.length > 0){
+                console.log(expExist);
+                expExist.forEach(element => {
+                    const optionToDisable = document.querySelector(`#experSelect option[value="${element}"]`);
+                    optionToDisable.disabled = true;
+                    console.log('Option disabled:', optionToDisable);
+                });
+            }
+                
             //canva11進入canva12   
             if (window.isLogin){
                 barTitle.innerText = '醫生資料'
@@ -57,7 +70,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
+                    //'X-CSRFToken': getCookie('csrftoken')
                 },
                 body: JSON.stringify({email: email})
             });
@@ -69,16 +82,109 @@
             return false;
         }
     }
+   
     
     document.getElementById('experForm').addEventListener('submit', async function(event){
         event.preventDefault();
         const expertise = document.getElementById('expertiseSelect').value;
-        const formVlue = document.getElementById('experVlue');
-        formVlue.value = expertise;
 
-        this.submit();
+        const data = {
+            expertise: expertise
+        };
+
+        fetch(`/doc/expertise/upload/`,{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(async response => {
+            if (!response.ok) {
+                throw new Error('Failed to add doctor');
+            }
+            const data = await response.json();
+            // 处理成功响应，例如显示成功消息或重定向
+            alert('Expertise added successfully!');
+            expExist.push(expertise);
+            window.location.href = '/doctor/data/edit';
+        })
+        .catch(error => {
+            console.error('Error fetching expertise list:', error);
+            // 处理错误情况
+        });
     })
 
+    document.getElementById('timePopForm').addEventListener('submit', async function(event){
+        event.preventDefault();
+        const day_of_week = document.getElementById('daySelect').value;
+        const start_time = document.getElementById('start_time').value;
+        const end_time = document.getElementById('end_time').value;
+
+        const data = {
+            day_of_week: day_of_week,
+            start_time: start_time,
+            end_time: end_time
+        };
+
+        fetch(`/workingHour/upload/`,{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(async response => {
+            if (!response.ok) {
+                throw new Error('Failed to add doctor');
+            }
+            const data = await response.json();
+            // 处理成功响应，例如显示成功消息或重定向
+            alert('working_hour added successfully!');
+            expExist.push(expertise);
+            //window.location.href = '/click/schedule';
+        })
+        .catch(error => {
+            console.error('Error fetching working_hour list:', error);
+            // 处理错误情况
+        });
+    })
+
+    document.getElementById('schedulingForm').addEventListener('submit', async function(event){
+        event.preventDefault();
+        const StartDate = document.getElementById('StartDate').value;
+        const EndDate = document.getElementById('EndDate').value;
+
+        const data = {
+            StartDate: StartDate,
+            EndDate: EndDate
+        };
+
+        fetch(`/scheduling/upload/`,{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(async response => {
+            if (!response.ok) {
+                throw new Error('Failed to add doctor');
+            }
+            const data = await response.json();
+            // 处理成功响应，例如显示成功消息或重定向
+            alert('scheduling added successfully!');
+            window.location.href = '/doctor/data/edit';
+            //回註冊頁後 顯示醫生剛剛填的資料(不確定)
+            info_before_regis();
+        })
+        .catch(error => {
+            console.error('Error fetching scheduling list:', error);
+            // 处理错误情况
+        });
+    })
+
+    //登入狀態從後端抓資料放到dataEdit
     function fetch_info(){
         fetch('/doctor/doctor_info/', {
             method: 'GET'
@@ -103,6 +209,30 @@
         });
     }
     
+    //編輯完班表之後回到醫生註冊頁會出現的資料
+    function info_before_regis(){
+        fetch('/doc/session/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            const doctorForm = document.getElementById('doctorForm');
+            const doctorFormData = data.doctor_form_data;
+            for (const [key, value] of Object.entries(doctorFormData)) {
+                const field = doctorForm.querySelector(`[name="${key}"]`);
+                if (field) {
+                    field.value = value;
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching session data:', error);
+        });
+    }
+
     async function clickRegis(){
         fetch('/add/doctor/', {
             method: 'POST',
@@ -158,8 +288,30 @@
                 }
         }    
         if (isValid) {
-            document.getElementById('doctorForm').submit();
-            window.location.href = '/click/schedule'
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            // 發送 AJAX 請求
+            fetch('/doc/upload/', {
+                method: 'POST',
+                headers: {
+                    //'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: new FormData(this)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    window.location.href = '/click/schedule';
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
         }
     
         /*const doctorForm = new FormData(document.getElementById("doctorForm"));

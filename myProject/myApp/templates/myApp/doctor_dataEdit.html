@@ -47,26 +47,44 @@
                             <div class="row">
                                 <div class="col">
                                     <label for="name" class="required">專長</label>
-                                    <form method="post" id="experForm" action="{% url "doc_expertise_upload" %}">
+                                    <form id="experForm">
                                     <div class="form-floating">
                                         <!--<input type="text" class="form-control" id="expertise" name="expertise" style="width: 50%; margin-right: 30px;">-->
-                                        <select class="form-select" id="expertiseSelect">
-                                            <option value="預防性治療">預防性治療</option>
-                                            <option value="修復性治療">修復性治療</option>
-                                            <option value="美學治療">美學治療</option>
-                                            <option value="牙齒矯正">牙齒矯正</option>
-                                            <option value="口腔外科">口腔外科</option>
-                                            <option value="牙周治療">牙周治療</option>
-                                            <option value="兒童牙科">兒童牙科</option>
-                                            <option value="假牙及義齒">假牙及義齒</option>
+                                        <select id="expertiseSelect" name="expertiseSelect">
+                                            <option value="預防性治療-洗牙">預防性治療-洗牙</option>
+                                            <option value="預防性治療-塗氟">預防性治療-塗氟</option>
+                                            <option value="預防性治療-牙齒矯正評估">預防性治療-牙齒矯正評估</option>
+                                            <option value="修復性治療-補牙">修復性治療-補牙</option>
+                                            <option value="修復性治療-根管治療">修復性治療-根管治療</option>
+                                            <option value="修復性治療-牙冠修復">修復性治療-牙冠修復</option>
+                                            <option value="修復性治療-牙橋">修復性治療-牙橋</option>
+                                            <option value="美學治療-牙齒美白">美學治療-牙齒美白</option>
+                                            <option value="美學治療-貼片">美學治療-貼片</option>
+                                            <option value="美學治療-美容冠">美學治療-美容冠</option>
+                                            <option value="牙齒矯正-傳統矯正">牙齒矯正-傳統矯正</option>
+                                            <option value="牙齒矯正-隱形矯正">牙齒矯正-隱形矯正</option>
+                                            <option value="牙齒矯正-舌側矯正">牙齒矯正-舌側矯正</option>
+                                            <option value="口腔外科-拔牙">口腔外科-拔牙</option>
+                                            <option value="口腔外科-智齒拔除">口腔外科-智齒拔除</option>
+                                            <option value="口腔外科-牙齦手術">口腔外科-牙齦手術</option>
+                                            <option value="口腔外科-植牙">口腔外科-植牙</option>
+                                            <option value="牙周治療-牙周病治療">牙周治療-牙周病治療</option>
+                                            <option value="牙周治療-牙周手術">牙周治療-牙周手術</option>
+                                            <option value="兒童牙科-兒童補牙">兒童牙科-兒童補牙</option>
+                                            <option value="兒童牙科-兒童矯正">兒童牙科-兒童矯正</option>
+                                            <option value="兒童牙科-兒童預防性治療">兒童牙科-兒童預防性治療</option>
+                                            <option value="假牙及義齒-全口假牙">假牙及義齒-全口假牙</option>
+                                            <option value="假牙及義齒-局部假牙">假牙及義齒-局部假牙</option>
+                                            <option value="假牙及義齒-活動義齒">假牙及義齒-活動義齒</option>
+                                            <option value="假牙及義齒-固定義齒">假牙及義齒-固定義齒</option>
                                         </select>
-                                        <input type="text" id="experVlue" name="experVlue" hidden>
+                                        
                                         <button id="btnExper"  type="submit">加入專長</button>
                                     </div>
                                     </form>
                                 </div>
                             </div>
-                            <form id="doctorForm" method="post" enctype="multipart/form-data" action="{% url 'doc_upload' %}">
+                            <form id="doctorForm" enctype="multipart/form-data">
                                 {% csrf_token %}
                                     <fieldset>
                             <div class="row">
@@ -92,9 +110,9 @@
                                     </div>
                                 </div>
                                 <div class="col">
-                                    <label for="pw" class="required">密碼</label>
+                                    <label for="password" class="required">密碼</label>
                                     <div class="form-floating">
-                                        <input type="password" class="form-control" id="pw" name="pw" required>
+                                        <input type="password" class="form-control" id="password" name="password" required>
                                     </div>
                                 </div>
                             </div>

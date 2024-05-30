@@ -39,7 +39,7 @@
         <section class="py-5"  style="background-color:#FFFFF4">
             <div class="container" style="border: 1px solid #F0EAD6;">
                 <div class="row row-cols-1">
-                    <form id="clinicForm" method="post" enctype="multipart/form-data" action="{% url 'add_clinic' %}">
+                    <form id="clinicForm"  enctype="multipart/form-data">
                      {% csrf_token %}
                         <fieldset>
                       <legend id="barTitle" class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:76px; font-size: 20px; ">
@@ -66,9 +66,9 @@
                         <br>
                         <div class="row">
                             <div class="col">
-                                <label for="pw" class="required">密碼</label>
+                                <label for="password" class="required">密碼</label>
                                 <div class="form-floating">
-                                    <input type="password" class="form-control half-width" id="pw" name="pw" required>
+                                    <input type="password" class="form-control half-width" id="password" name="password" required>
                                 </div>
                             </div>
                             <div class="col">

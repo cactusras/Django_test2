@@ -25,7 +25,7 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
      
                 <form class="d-flex">
-                    <button class="btn btn-outline-dark" type="submit" style="font-size: 20px;" id="nav_btn">
+                    <button class="btn btn-outline-dark" type="submit" style="font-size: 20px;" id="nav_btn" onclick="navBtn_listener(event)">
                         <i class="bi bi-person-fill"></i>
                         登入
                     </button>
@@ -47,7 +47,7 @@
                             時段
                         </button>
                         <!--時段按鈕的彈跳視窗-->
-                        <form id="timePopForm" method="post" action="<{% url 'working_hour_upload' %}">
+                        <form id="timePopForm">
                         {% csrf_token %}
                         <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered">
@@ -57,8 +57,8 @@
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <select class="form-select" id="daySelect" aria-label="Default select example">
-                                            <option selected>選擇星期</option>
+                                        <select class="form-select" id="daySelect" name="daySelect" aria-label="Default select example" required>
+                                            <option selected disabled value="">選擇星期</option>
                                             <option value="1">週一</option>
                                             <option value="2">週二</option>
                                             <option value="3">週三</option>
@@ -71,10 +71,10 @@
                         
                                         <div style="text-align: left;">
                                            
-                                            <label for="startTime">開始：</label>
-                                            <input type="time" id="startTime" min="10:00" max="21:00" step="3600" />
-                                            <label for="endTime">結束：</label>
-                                            <input type="time" id="endTime" min="10:00" max="21:00" step="3600" />
+                                            <label for="start_time">開始：</label>
+                                            <input type="time" id="start_time" name="start_time" min="10:00" max="21:00" step="3600" required/>
+                                            <label for="end_time">結束：</label>
+                                            <input type="time" id="end_time" name="end_time" min="10:00" max="21:00" step="3600" required/>
                                         </div>
                                     </div>
                                     <div class="modal-footer">
@@ -86,14 +86,14 @@
                             </div>
                         </div>
                         </form>
-                        <form id="schedulingForm" method="post" action="<{% url 'scheduling_upload' %}">
+                        <form id="schedulingForm">
                         <div style="border: 20px solid #fffff0; ">
                             <!--選擇第幾週-->
                            <!--選擇天數-->
                            開始：
-                           <input type="date"  min="2024-05-20" id="startDate" required />
+                           <input type="date"  min="2024-05-20" id="StartDate" name="StartDate"/>
                            結束：
-                           <input type="date"  min="2024-05-20" id="endDate"  required />
+                           <input type="date"  min="2024-05-20" id="EndDate" name="EndDate"/>
                         </div>
 
                         <table class="table table-bordered" style="border: 1px solid #ada089;">
@@ -164,6 +164,8 @@
     <!-- Bootstrap core JS-->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Core theme JS-->
+    <script src="{% static 'myApp/js/scripts.js' %}"></script>
+    <script src="{% static 'myApp/js/doctor.js' %}"></script>
     <!-- Custom JS to handle adding time slots -->
     <script>
         var timePopForm = document.getElementById('timePopForm');
@@ -180,14 +182,16 @@
                 alert('選擇的時間範圍無效。請選擇以下區間段之一：10:00-14:00，15:00-18:00，19:00-21:00。');
             }else if(checkVlue == 'timeWrong'){
                 alert('請選擇正確的開始和結束時間。結束時間必須晚於開始時間。');
-            }          
+            }  else if(checkVlue == 'dayNotExist'){
+                alert('請選擇星期幾。');
+            }        
         });
 
         var scheduleForm = document.getElementById('schedulingForm');
         scheduleForm.addEventListener('submit', function(event){
             event.preventDefault();
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value
+            const startDate = document.getElementById('StartDate').value;
+            const endDate = document.getElementById('EndDate').value
             if(startDate < endDate){
                scheduleForm.submit()
             }else{
@@ -207,57 +211,61 @@
 
 
         // Listen for changes on time inputs
-        document.getElementById('startTime').addEventListener('change', function() {
+        document.getElementById('start_time').addEventListener('change', function() {
             adjustTimeToHour(this);
         });
 
-        document.getElementById('endTime').addEventListener('change', function() {
+        document.getElementById('end_time').addEventListener('change', function() {
             adjustTimeToHour(this);
         });
 
         function checkTime() {
             console.log('checkTime');
             const daySelect = document.getElementById('daySelect');
-            const startTime = document.getElementById('startTime').value;
-            const endTime = document.getElementById('endTime').value;
+            const startTime = document.getElementById('start_time').value;
+            const endTime = document.getElementById('end_time').value;
             const selectedDay = daySelect.value;
-
+            console.log("st = "+startTime+"  et = "+endTime+"  sDay = "+selectedDay)
             // Validate the times
-            if (startTime && endTime && endTime > startTime) {
-                // Check if the time range fits within any of the allowed intervals
-                const validIntervals = [
-                    {start: '10:00', end: '14:00'},
-                    {start: '15:00', end: '18:00'},
-                    {start: '19:00', end: '21:00'}
-                ];
-                const isValid = validIntervals.some(interval => startTime >= interval.start && endTime <= interval.end);
+            if(selectedDay != ""){
+                if (startTime && endTime && endTime > startTime) {
+                    // Check if the time range fits within any of the allowed intervals
+                    const validIntervals = [
+                        {start: '10:00', end: '14:00'},
+                        {start: '15:00', end: '18:00'},
+                        {start: '19:00', end: '21:00'}
+                    ];
+                    const isValid = validIntervals.some(interval => startTime >= interval.start && endTime <= interval.end);
 
-                if (isValid) {
-                    // Get the table and the row based on the selected times
-                    const table = document.querySelector('table tbody');
-                    let row;
-                    if (startTime >= '10:00' && endTime <= '14:00') {
-                        row = table.rows[0];
-                    } else if (startTime >= '15:00' && endTime <= '18:00') {
-                        row = table.rows[1];
-                    } else if (startTime >= '19:00' && endTime <= '21:00') {
-                        row = table.rows[2];
-                    }
+                    if (isValid) {
+                        // Get the table and the row based on the selected times
+                        const table = document.querySelector('table tbody');
+                        let row;
+                        if (startTime >= '10:00' && endTime <= '14:00') {
+                            row = table.rows[0];
+                        } else if (startTime >= '15:00' && endTime <= '18:00') {
+                            row = table.rows[1];
+                        } else if (startTime >= '19:00' && endTime <= '21:00') {
+                            row = table.rows[2];
+                        }
 
-                    if (row) {
-                        const cell = row.cells[selectedDay];
-                        cell.textContent = `${startTime} - ${endTime}`;
+                        if (row) {
+                            const cell = row.cells[selectedDay];
+                            cell.textContent = `${startTime} - ${endTime}`;
+                        }
+                        return "success";
+                        
+                    } else {
+                        return "timeInvalid"
+                        //alert('選擇的時間範圍無效。請選擇以下區間段之一：10:00-14:00，15:00-18:00，19:00-21:00。');
                     }
-                    return "success";
-                    
                 } else {
-                    return "timeInvalid"
-                    //alert('選擇的時間範圍無效。請選擇以下區間段之一：10:00-14:00，15:00-18:00，19:00-21:00。');
-                }
-            } else {
-                return "timeWrong";
-               // alert('請選擇正確的開始和結束時間。結束時間必須晚於開始時間。');
+                    return "timeWrong";
+                // alert('請選擇正確的開始和結束時間。結束時間必須晚於開始時間。');
 
+                }
+            }else{
+                return "dayNotExist"
             }
         };
     </script>

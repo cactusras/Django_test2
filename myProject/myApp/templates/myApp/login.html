@@ -132,7 +132,7 @@
                         <p>Identity</p>
                         <div class="wrap-input100 dropdown">
                             <select class="input100" name="userType">
-                                <option value="Dentist">患者</option>
+                                <option value="Doctor">患者</option>
                                 <option value="Client">醫生</option>
                                 <option value="Clinic">診所</option>
                             </select>
@@ -140,7 +140,7 @@
                     </div>
                     
                     <div class="wrap-input100 validate-input">
-                            <input class="input100" type="email" name="username" id="username" autocomplete="email">
+                            <input class="input100" type="email" name="email" id="email" autocomplete="email">
                             <span class="focus-input100" data-placeholder="Email"></span>
                     </div>
                     
@@ -160,6 +160,8 @@
                             </button>
                         </div>
                     </div>
+                   </fieldset> 
+                </form>
 
                 <br>
 
@@ -177,8 +179,6 @@
                           </div>
                         </div>
                       </div>
-                   </fieldset> 
-                </form>
             </div>
         </div>
     </div>
@@ -207,34 +207,38 @@
             window.location.href = "/clinic/data/edit";
         }
 
-        /* 加入email */
+        /* 加入email 
         let data = {
             "example@example.com": "password123",
             "another@example.com": "password456",
-        };
+        };*/
     
-        document.getElementById('loginForm').addEventListener('submit', function login(event){
+        document.getElementById('loginForm').addEventListener('submit', function(event){
             event.preventDefault(); // 阻止默認表單提交
             
-            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
             const loginData = {
-                username: username,
+                email: email,
                 password: password
             };
+
+            console.log('loginData:', loginData);
+            console.log('csrfToken:', csrfToken);
 
             fetch("/login/login_view/", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                }
+                    'X-CSRFToken':  csrfToken
+                },
                 body: JSON.stringify(loginData)
             })
             .then(response => response.json())
-            .then(data => {
+            .then( 
+            data => {
                 if (data.status === 'success') {
                     if (data.user_type === 'Client') {
                         window.location.href = '/home';

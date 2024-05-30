@@ -48,7 +48,6 @@ class Migration(migrations.Migration):
                 ('email', models.EmailField(max_length=254, unique=True)),
                 ('name', models.CharField(max_length=100)),
                 ('phone_number', models.CharField(max_length=35)),
-                ('pw', models.CharField(max_length=128)),
                 ('is_active', models.BooleanField(default=True)),
                 ('is_admin', models.BooleanField(default=False)),
             ],

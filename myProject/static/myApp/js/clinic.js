@@ -4,7 +4,7 @@ var clinField = {
     name: "",
     phone_number: "",
     license_number: "",
-    pw: "",
+    password: "",
     introduction: "",
     address: "",
     photo: null,
@@ -15,7 +15,7 @@ function fetch_element(){
         clinField['name'] = document.getElementById('name').value,
         clinField['phone_number'] = document.getElementById('phone_number').value,
         clinField['license_number'] = document.getElementById('license_number').value,
-        clinField['pw'] = document.getElementById('pw').value,
+        clinField['password'] = document.getElementById('password').value,
         clinField['introduction'] = document.getElementById('introduction').value
         clinField['address'] = document.getElementById('address').value,
         clinField['photo'] = document.getElementById('photo').files[0]
@@ -63,7 +63,7 @@ async function isUniqueLicense(license_number){
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
+                //'X-CSRFToken': getCookie('csrftoken')
             },
             body: JSON.stringify({email: email})
         });
@@ -81,7 +81,7 @@ async function isUniqueEmail(email){
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
+                //'X-CSRFToken': getCookie('csrftoken')
             },
             body: JSON.stringify({email: email})
         });
@@ -170,7 +170,30 @@ document.getElementById('clinicForm').addEventListener('submit', async function(
             }
     }    
     if (isValid) {
-        document.getElementById('clinicForm').submit();
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // 發送 AJAX 請求
+        fetch('/add/clinic/', {
+            method: 'POST',
+            headers: {
+                //'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: new FormData(this)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert(data.message);
+                window.location.href = '/doctor/manage';
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        });
     }
 
     /*const clinicForm = new FormData(document.getElementById("clinicForm"));

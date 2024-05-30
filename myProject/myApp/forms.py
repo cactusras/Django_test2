@@ -12,32 +12,32 @@ from django.contrib.auth import authenticate
 class CustomUserForm(forms.ModelForm):
     class Meta:
         model = CustomUser
-        fields = ['email', 'name', 'phone_number', 'pw']
+        fields = ['email', 'name', 'phone_number', 'password']
 
 
 class DoctorForm(forms.ModelForm):
     class Meta:
         model = Doctor
-        fields = ['email', 'name','phone_number','pw','photo' ]
+        fields = ['email', 'name','phone_number','password','photo' ]
     def __init__(self, *args, **kwargs):
         super(DoctorForm, self).__init__(*args,**kwargs)
-        self.fields['is_active'].initial = True
-        self.fields['is_admin'].initial = False
+        #self.fields['is_active'].initial = True
+        #self.fields['is_admin'].initial = False
         
 class ClinicForm(forms.ModelForm):
     class Meta:
         model = Clinic
         #fields = ['name', 'license_number','phone_number','address','introduction','photo','email','pw' ]
-        fields = ['email', 'name','phone_number','pw','license_number','address','introduction','photo']
+        fields = ['email', 'name','phone_number','password','license_number','address','introduction','photo']
     def __init__(self, *args, **kwargs):
         super(ClinicForm, self).__init__(*args,**kwargs)
-        self.fields['is_active'].initial = True
-        self.fields['is_admin'].initial = False
+        #self.fields['is_active'].initial = True
+        #self.fields['is_admin'].initial = False
         
 class ClientForm(forms.ModelForm):
     class Meta:
         model = Client
-        fields = [ 'email','name','phone_number','pw','address','birth_date','gender','occupation','notify']
+        fields = [ 'email','name','phone_number','password','address','birth_date','gender','occupation','notify']
     
     def __init__(self, *args, **kwargs):
         super(ClientForm, self).__init__(*args,**kwargs)

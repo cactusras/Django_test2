@@ -78,7 +78,7 @@
                         <li class="nav-item"><a class="nav-link" href="#!" style="font-size: 20px;">Q&A</a></li>
                     </ul>
                     <form class="d-flex" style="text-align: right; margin-right: 10px;">
-                        <button class="btn btn-outline-dark" type="submit"  style="font-size: 20px;" id="nav_btn">
+                        <button class="btn btn-outline-dark" type="submit"  onclick="navBtn_listener(event)" style="font-size: 20px;" id="nav_btn">
                             <i class="bi bi-person-fill"></i>
                             登入
                         </button>
@@ -92,10 +92,7 @@
                 <div class="row row-cols-1">
                     <div class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:80px; font-size: 20px; ">
                         <select id="doctorSelect" class="form-select" aria-label="Default select example" style="width: 320px; height: 40px; font-size: 16px;">
-                            <option selected>醫生</option>
-                            <option value="docName1">docName1</option>
-                            <option value="docName2">docName2</option>
-                            <option value="docName3">docName3</option>
+                            
                         </select>
                         {% for clinic in clinic_details %}
                         <span>{{ clinic.name}} 診所</span>
@@ -191,6 +188,39 @@
                          <!-- 確認預約 -->
                          <script>
                             document.addEventListener('DOMContentLoaded', () => {
+                                fetch(`/clinic/reserve/<int:clinic_id>/`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    // 清空现有的 options
+                                    const select = document.getElementById('doctorSelect');
+                                    select.innerHTML = '';
+
+                                    // 添加新的 options
+                                    data.doctors.forEach(doctor => {
+                                        const option = document.createElement('option');
+                                        option.value = doctor.id;
+                                        option.textContent = doctor.name;
+                                        select.appendChild(option);
+                                    });
+                                })
+                                .catch(error => {
+                                    console.error('Error fetching doctor list:', error);
+                                    // 处理错误情况
+                                });
+
+                                doctorSelect.addEventListener('change', () => {
+                                    // 清空现有的 options
+                                    expertiseSelect.innerHTML = '';
+                                    expertise_doc = expertiseChange(event);
+                                    // 添加新的 options 到 expertiseSelect
+                                    expertise_doc.forEach(expertise => {
+                                        const option = document.createElement('option');
+                                        option.value = expertise.expertise_name;
+                                        option.textContent = expertise.expertise_name;
+                                        expertiseSelect.appendChild(option);
+                                    });
+                                }
+
                                 timeBtns = document.querySelectorAll('timeBtn')
                                 /*const doctorName = document.getElementById('doctorLabel').value;
 
@@ -238,6 +268,24 @@
                                 document.getElementById('doctorSelect').addEventListener('change', selectOrInputHandler);
                                 document.getElementById('dateInput').addEventListener('change', selectOrInputHandler);
                             });
+
+                            function expertiseChange(event){
+                                event.preventDefault();
+                                fetch(`/clinic/doctor/<int:doctor_id>/reserve/`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    // 清空现有的 options
+                                    const select = document.getElementById('experSelect');
+                                    select.innerHTML = '';
+
+                                    // 添加新的 options
+                                    return data.doc_expertise_list;
+                                })
+                                .catch(error => {
+                                    console.error('Error fetching doctor list:', error);
+                                    // 处理错误情况
+                                });
+                            }
 
                             let currentButtonId = null;
                             const confirmedButtons = new Set();

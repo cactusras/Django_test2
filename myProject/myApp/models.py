@@ -39,7 +39,7 @@ class CustomUser(AbstractBaseUser):
     email = models.EmailField(unique=True)
     name = models.CharField(max_length=100)
     phone_number = models.CharField(max_length=35)
-    pw = models.CharField(max_length=128)
+    password = models.CharField(max_length=128)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
 
