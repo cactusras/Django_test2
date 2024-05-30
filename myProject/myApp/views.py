@@ -1,7 +1,7 @@
 import json
 from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponse
-from .forms import DoctorForm,ClinicForm,ClientForm,SchedulingForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm
+from .forms import DoctorForm,ClinicForm,ClientForm,SchedulingForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm, LoginForm
 from django.db.models import Q
 from django.db import connection
 from django.contrib.auth.decorators import login_required
@@ -16,83 +16,43 @@ from django.utils.timezone import now
 from myApp import forms
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password
-
+from PIL import Image
+from pathlib import Path
 
 
 def index(request):
     
     context={}
     return render(request, "myApp/index.html", context)
-#login check身份別，django 自帶，用isinstance分身份，此處等migrate完可進行初步測試，看要手動加資料還是把register頁面都弄好一併測試（需要頁面跳轉邏輯）
-
-# def login_view(request):
-#     if request.method == 'GET':
-#         try:
-#             data = json.loads(request.body)  # 解析 JSON 數據
-#         except json.JSONDecodeError:
-#             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
-        
-#         form = AuthenticationForm(request, data=data)
-#         if form.is_valid():
-#             email = form.cleaned_data.get('username')
-#             password = form.cleaned_data.get('password')
-#             user_type = data.get('user_type')
-
-#             user = None
-#             if user_type == 'client':
-#                 user = authenticate(request, username=email, password=password)
-#             elif user_type == 'clinic':
-#                 user = authenticate(request, username=email, password=password)
-#             elif user_type == 'doctor':
-#                 user = authenticate(request, username=email, password=password)
-
-#             if user is not None:
-#                 login(request, user)
-#                 if user_type == 'client':
-#                     redirect_url = 'home'
-#                 elif user_type == 'clinic':
-#                     redirect_url = 'clinic_home'
-#                 elif user_type == 'doctor':
-#                     redirect_url = 'doctor_home'
-
-#                 return JsonResponse({'message': 'User logged in successfully.', 'redirect_url': redirect_url, 'status': 'success'})
-#             else:
-#                 return JsonResponse({'message': 'Invalid credentials', 'status': 'error'})
-#         else:
-#             return JsonResponse({'message': 'Invalid form data', 'errors': form.errors, 'status': 'error'})
-#     else:
-#         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
-
-def login_view(request):
+    
+@csrf_exempt
+def user_login(request):
     if request.method == 'POST':
-        email = request.POST.get('email')
-        print(f'Email: {email}')
-        password = request.POST.get('password')
-        print(f'Password: {password}')
-        #user = CustomUser.objects.filter(email=email,passw=password)
-        user = authenticate(request, username=email,password=password)
-        print(user) 
-        if user is not None:
-            login(request, user)
-            print(user) 
-            # 登入成功，根據用戶身份導向不同的頁面
-            if hasattr(user, 'client'):  # 检查是否是客户
-                print('client')
-                return redirect('home')
-            elif hasattr(user, 'clinic'):  # 检查是否是诊所
-                print('clinic')
-                return redirect('doctor')
-            elif hasattr(user, 'experience'):  # 检查是否是医生
-                print('doctor')
-                return redirect('home_doctor')
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+            user = authenticate(request, email=email, password=password)
+            if user is not None:
+                login(request, user)  # Ensure the user object is passed correctly
+                # 登入成功，根據用戶身份導向不同的頁面
+                if hasattr(user, 'client'):  # 检查是否是客户
+                    print('client')
+                    return JsonResponse({'message': 'client', 'status': 'success'})
+                elif hasattr(user, 'clinic'):  # 检查是否是诊所
+                    print('clinic')
+                    return JsonResponse({'message': 'clinic', 'status': 'success'})
+                elif hasattr(user, 'experience'):  # 检查是否是医生
+                    print('doctor')
+                    return JsonResponse({'message': 'doctor', 'status': 'success'})
+                else:
+                    return JsonResponse({'message': 'unknown', 'status': 'success'})
             else:
-                return render(request, 'myApp/login.html', {'error_message': 'Unknown user type'})
-            
+                return JsonResponse({'message': 'Invalid email or password', 'status': 'error'})
         else:
-            #登入失敗
-            return render(request, 'myApp/login.html', {'error_message': 'Invalid login credentials'})
+            return JsonResponse({'message': 'Invalid form data', 'errors': form.errors, 'status': 'error'})
     else:
-        return render(request, 'myApp/login.html')
+        return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
 def add_client(request):
     if request.method == 'POST':
@@ -120,25 +80,6 @@ def add_client(request):
 
             cleaned_data['is_active'] = True
             cleaned_data['is_admin'] = False
-            
-            #password = cleaned_data.pop('password', None)
-            
-            cleaned_data_custom_user = {
-                'email': cleaned_data['email'],
-                'name': cleaned_data['name'],
-                'phone_number': cleaned_data['phone_number'],
-                'password': cleaned_data['password'],
-                'is_active': cleaned_data['is_active'],
-                'is_admin': cleaned_data['is_admin']
-            }
-
-            cleaned_data_client = {
-                'address': cleaned_data['address'],
-                'birth_date': cleaned_data['birth_date'],
-                'gender': cleaned_data['gender'],
-                'occupation': cleaned_data['occupation'],
-                'notify': cleaned_data['notify']
-            }
 
             email = cleaned_data.get('email')
 
@@ -146,11 +87,8 @@ def add_client(request):
                 email=email,
                 defaults=cleaned_data
             )
-            
-            # password = cleaned_data.get('password')
-            # client_user.set_password(password)
-            # client_user.save()
 
+            # password = cleaned_data['pw']
 
             if created_client:
                 message = 'Client created successfully.'
@@ -162,8 +100,6 @@ def add_client(request):
             return JsonResponse({'message': 'Invalid form data', 'errors': form.errors, 'status': 'error'})
     else:
         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
-
-
 
 
 @login_required
@@ -251,13 +187,50 @@ def add_Reservation(request):
 #clinic posting
 def add_clinic(request):
     if request.method == 'POST':
-        form = ClinicForm(request.POST, request.FILES)
+        try:
+            form = ClinicForm(request.POST, request.FILES)
+        except json.JSONDecodeError:
+            return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
+
         if form.is_valid():
-            form.save()
-            return render(request, 'myApp/clinic_dataEdit.html')
+            cleaned_data = form.cleaned_data
+            print(cleaned_data)
+            cleaned_data['is_active'] = True
+            cleaned_data['is_admin'] = False
+            cleaned_data['password'] = make_password(cleaned_data['password'])
+
+            if cleaned_data['photo'] is not None:
+                # photo = cleaned_data.pop('photo')
+                photo = cleaned_data['photo']
+                image = Image.open(photo)
+                print("photo opend")
+                # Define the save path using Path from pathlib
+                save_dir = Path('media/uploaded_files')
+                save_dir.mkdir(parents=True, exist_ok=True)  # Create directories if they don't exist
+                save_path = save_dir / photo.name
+                image.save(save_path)
+                print("photo saved")
+                photo_path = f'uploaded_files/{photo.name}'
+                cleaned_data['photo'] = photo_path
+                print("photo path saved to clean_data")
+
+            # Prepare data for update_or_create
+            email = cleaned_data.pop('email')
+            clinic, created_clinic = Clinic.objects.update_or_create(
+                email=email,
+                defaults=cleaned_data
+            )
+
+            if created_clinic:
+                message = 'Client created successfully.'
+            else:
+                message = 'Client updated successfully.'
+
+            return JsonResponse({'message': message, 'status': 'success'})
+        else:
+            return JsonResponse({'message': 'Invalid form data', 'errors': form.errors, 'status': 'error'})
     else:
-        form = ClinicForm()
-    return render(request, 'myApp/clinic_dataEdit.html', {'form': form})
+        return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
 
 @login_required
@@ -905,14 +878,15 @@ def docDataEd(request):
     context={}
     return render(request, "myApp/doctor_dataEdit.html", context)
 
+
 def clickSchedule(request):
     context={}
     return render(request, "myApp/ClicktoEditSchedule.html", context)
 
 
 def loginP(request):
-     context={}
-     return render(request, "myApp/login.html", context)
+    context={}
+    return render(request, "myApp/login.html", context)
 
 
 def clinHome(request):
@@ -1003,7 +977,7 @@ def doctor_info(request):
             'email': user.email,
             'name': user.name,
             'phone_number': user.phone_number,
-            'password': user.password,
+            'password': user.pw,
             'photo_url': user.doctor.photo.url,
             'experience': user.doctor.experience,
         }
@@ -1018,7 +992,7 @@ def client_info(request):
             'email': user.email,
             'name': user.name,
             'phone_number': user.phone_number,
-            'password': user.password,
+            'password': user.pw,
             'address': user.client.address,
             'birth_date': user.client.birth_date,
             'gender': user.client.gender,
@@ -1049,3 +1023,13 @@ def check_reservations(request):
 
 
     return JsonResponse({'message': 'Checked and updated reservations if necessary.'})
+
+
+@csrf_exempt
+def user_logout(request):
+    if request.method == 'POST':
+        logout(request)
+        print('logged out')
+        return JsonResponse({'message': 'Logged out successfully', 'status': 'success'})
+    else:
+        return JsonResponse({'message': 'Invalid request method', 'status': 'error'})

@@ -137,13 +137,13 @@
                       </fieldset>
                      </form>
                     </div>
-
+                    <script src="{% static 'js/logout.js' %}" defer></script>
                     <!--設定登出按鈕-->
-                    <button class="logout-button" onclick="redirectToPage()">登出</button>
+                    <button class="logout-button" id="logoutButton" onclick="redirectToPage()">登出</button>
                         <!--要轉跳到註冊頁面-->
                         <script>
                         function redirectToPage() {
-                            window.location.href = 'http://127.0.0.1:8000/database%E7%81%8F%E5%A0%9F%EE%94%8D/search/index.html';
+                            window.location.href = 'http://127.0.0.1:8000/home';
                         }
                         </script>
                     </div> 
