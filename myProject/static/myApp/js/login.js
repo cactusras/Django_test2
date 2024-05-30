@@ -16,6 +16,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         return response.json();
     })
     .then(data => {
+        print("to js")
         if (data.status === 'success') {
             if(data.message == 'client'){
                 // alert('Login success: ' + data.message);
