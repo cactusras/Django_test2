@@ -43,18 +43,19 @@ def user_login(request):
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
             user = authenticate(request, email=email, password=password)
+            username = user.name
             if user is not None:
                 login(request, user)  # Ensure the user object is passed correctly
                 # 登入成功，根據用戶身份導向不同的頁面
                 if hasattr(user, 'client'):  # 检查是否是客户
                     print('client')
-                    return JsonResponse({'message': 'client', 'status': 'success'})
+                    return JsonResponse({'user_type': 'client', 'username': username,  'status': 'success'})
                 elif hasattr(user, 'clinic'):  # 检查是否是诊所
                     print('clinic')
-                    return JsonResponse({'message': 'clinic', 'status': 'success'})
+                    return JsonResponse({'user_type': 'clinic', 'username': username,  'status': 'success'})
                 elif hasattr(user, 'experience'):  # 检查是否是医生
                     print('doctor')
-                    return JsonResponse({'message': 'doctor', 'status': 'success'})
+                    return JsonResponse({'user_type': 'doctor', 'username': username,  'status': 'success'})
                 else:
                     return JsonResponse({'message': 'unknown', 'status': 'success'})
             else:
@@ -1125,6 +1126,7 @@ def check_authentication(request):
         return JsonResponse({'is_authenticated': True})
     else:
         return JsonResponse({'is_authenticated': False})
+    
 def doctor_info(request):
     if hasattr(request.user, 'doctor'):
         user = request.user
