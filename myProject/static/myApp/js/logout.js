@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', (event) => {
     const logoutButton = document.getElementById('logoutButton');
-    
     logoutButton.addEventListener('click', () => {
         fetch('/logout/', {
             method: 'POST',

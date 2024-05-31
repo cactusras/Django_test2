@@ -86,7 +86,7 @@
                             <select class="form-select" id="district" style="width: 320px; height: 40px;">
                                 <option value="">--請先選擇縣市--</option>
                             </select>
-                            <input id="addressVlue" hidden>
+                            <input id="addressVlue" name="addressVlue" hidden>
                         </div>
                         治療項目<br>
                         <div class="row">
@@ -104,21 +104,31 @@
                             <select class="form-select" id="treatment" style="width: 320px; height: 40px;">
                                 <option value="">--請先選擇大範圍治療項目--</option>
                             </select>
-                            <input id="experVlue" hidden>
+                            <input id="experVlue" name="experVlue" hidden>
                         </div>
                         看診日期<br>
                        <div>
                             <label>
-                                開始：
                                 <input type="date" id="inputDate" name="inputDate" min=new Date().toISOString().split('T')[0] style="width: 240px; height: 40px;"/>
                             </label>
                        </div>
                         <br>
-                        <div class="form-floating">
-                            <textarea class="form-control" placeholder="Leave a comment here" id="inputKeyVlue" name="inputKeyVlue"></textarea>
-                            <label for="floatingTextarea" style="color:#808080">輸入醫師名稱/診所名稱/治療項目</label>
-                        </div>
                         <br>
+                            <div class="row">
+                              <div class="col-md-6">
+                                <div class="form-floating">
+                                  <textarea class="form-control custom-textarea" placeholder="Leave a comment here" id="clinicNameInput" name="clinicNameInput" style="height: 50px;"></textarea>
+                                  <label for="clinicNameInput" style="color:#808080">請輸入診所名稱</label>
+                                </div>
+                              </div>
+                              <div class="col-md-6">
+                                <div class="form-floating">
+                                  <textarea class="form-control custom-textarea" placeholder="Leave a comment here" id="doctorNameInput" name="doctorNameInput" style="height: 50px;"></textarea>
+                                  <label for="doctorNameInput" style="color:#808080">請輸入治療項目</label>
+                                </div>
+                              </div>
+                            </div>
+                            <br>
                         <br>
                         <div class="d-flex">
                             <button id="searchButton" class="btn btn-outline-dark" type="submit" style="font-size: 20px; width: 630px; height: 40px;">
@@ -241,8 +251,9 @@
                 var searchForm = document.getElementById('searchForm');
                 searchForm.addEventListener('submit', async function(event){
                     event.preventDefault();
+                    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
                     const form = {
-                        doc_name: document.getElementById('docNameInput').value,
+                        doc_name: document.getElementById('doctorNameInput').value,
                         clinic_name: document.getElementById('clinicNameInput').value,
                         clinic_address: addrVlue,
                         appointed_date: document.getElementById('inputDate').value,
@@ -252,6 +263,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
+                            'X-CSRFToken':  csrfToken
                         },
                         body: JSON.stringify(form),
                     })
@@ -260,12 +272,13 @@
                             throw new Error('Failed to add doctor');
                         }
                         const data = await response.json();
-                        searchForm.submit();
-                        window.location.href = 'searchPage.html';
+                        console.log("doctors = " + data.doctors + "   clinics = " + data.clinics)
+
+                        window.location.href = '/home';
                     })
                     .catch(error => {
                         // 处理错误情况，例如显示错误消息给用户
-                        alert('Error adding doctor: ' + error.message);
+                        alert('Error searching: ' + error.message);
                     });
                 })
 

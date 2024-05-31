@@ -39,30 +39,29 @@ document.addEventListener('DOMContentLoaded', function() {
         //頁面加載後才能把這些element load進來
         const btnRegis = document.getElementById('btnClieRegis');
         const barTitle = document.getElementById('barTitle');
+        const clieForm = document.getElementById('clientForm');
         fetch_element();
-
         //canva11進入canva12   
-        if (window.isLogin){
+        if (window.localStorage.getItem('isLogin') == 'success'){
+            console.log('cliejs46')
             barTitle.innerText = '患者資料'
-            btnRegis.addEventListener('click', function(){
-                window.location.href = "clinicPage.html"
-            })
-            fetch_info();
-        }else{
+            btnRegis.innerText = '回到主頁'
+            fetch_info(clieForm);
+        }else if(window.localStorage.getItem('isLogin') == 'failed'){
+            console.log('cliejs46_no')
             barTitle.innerText = '註冊'
+            btnRegis.innerText = '完成'
         }
 })
 
-/*function navBtn_listener(event){
+function click_regis(event){
     event.preventDefault();
-    if (window.isLogin) {
-        console.log("Navigating to clinic_dataEdit.html");
-        window.location.href = "/client/data/edit";
-    } else {
-        console.log("login.html after 2 seconds");
-        window.location.href = "/login";
+    if (window.isLogin){
+        window.location.href = '/home'
+    }else{
+        window.location.href = "/loginP"
     }
-}*/
+}
 
 async function isUniqueEmail(email){
     try {
@@ -84,7 +83,8 @@ async function isUniqueEmail(email){
 }
 
 //是抓後端存著的資料
-function fetch_info(){
+function fetch_info(formFilled){
+    console.log('fetch_info')
     fetch('/client_info/', {
         method: 'GET'
     })
@@ -95,14 +95,29 @@ function fetch_info(){
         const data = await response.json();
 
         if (data.status === 'success') {
-            const doctorInfo = data.info;
-            fillForm(doctorInfo);
+            const clieInfo = data.data;
+            //console.log("info_type = " + typeof(data.data) + "  info = " + data.data)
+            fillForm(clieInfo, formFilled);
         } else {
             console.error(data.error);
         }
     })   
     .catch(error => {
         console.log('Error:', error);
+    });
+}
+
+function fillForm(data, form) {
+    if (!form) {
+        console.error('Form not found');
+        return;
+    }
+
+    Object.keys(data).forEach(key => {
+        const field = form.querySelector(`[name=${key}]`);
+        if (field) {
+            field.value = data[key];
+        }
     });
 }
 

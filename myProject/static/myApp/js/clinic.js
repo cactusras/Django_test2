@@ -27,35 +27,38 @@ document.addEventListener('DOMContentLoaded', function() {
         const btnRegis = document.getElementById('btnClinRegis');
         const btnDocManage = document.getElementById('btnDocManage');
         const barTitle = document.getElementById('barTitle');
+        const clinForm = document.getElementById('clinicForm')
         fetch_element();
 
         //canva11進入canva12   
-        if (window.isLogin){
+        if (window.localStorage.getItem('isLogin') == 'success'){
             barTitle.innerText = '診所資料'
             btnDocManage.hidden = false;
+            btnRegis.innerText = '完成'
             btnDocManage.addEventListener('click', function(){
-                window.location.href = "doctor_management.html"
+                window.location.href = "/doctor/manage"
             })
             btnRegis.addEventListener('click', function(){
-                window.location.href = "clinicPage.html"
+                window.location.href = "/clinic/home"
             })
-            fetch_info();
-        }else{
+            fetch_info(clinForm);
+        }else if(window.localStorage.getItem('isLogin') == 'failed'){
+            btnRegis.innerText = '新增醫生'
             btnDocManage.hidden = true;
             barTitle.innerText = '註冊'
         }
 })
 
-/*function navBtn_listener(event){
+function regis_click(event){
     event.preventDefault();
     if (window.isLogin) {
-        console.log("Navigating to clinic_dataEdit.html");
-        window.location.href = "/clinic/data/edit";
+        
+        window.location.href = "/clinic/home";
     } else {
-        console.log("login.html after 2 seconds");
-        window.location.href = "/login";
+        
+        window.location.href = "/doctor/manage";
     }
-}*/
+}
 
 async function isUniqueLicense(license_number){
     try {
@@ -93,26 +96,29 @@ async function isUniqueEmail(email){
     }
 }
 
-function fetch_info(){
+function fetch_info(formFilled){
     fetch('/clinic_info/', {
         method: 'GET'
     })
-    .then(response => {
+    .then(async response => {
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
-        return response.json(); // 解析 JSON 响应
-    })
-    .then(infoDic =>{
-        
-        window.username = infoDic['name'];
-        for (var key in infoDic) {
-            if (infoDic.hasOwnProperty(key)) {
-                //
-                clinField[key] = infoDic[key];
-            }
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            const clinInfo = data.data;
+            //console.log("info_type = " + typeof(data.data) + "  info = " + data.data)
+            Object.keys(clinInfo).forEach(key => {
+                const field = formFilled.querySelector(`[name=${key}]`);
+                if (field) {
+                    field.value = data[key];
+                }
+            });
+        } else {
+            console.error(data.error);
         }
-    })   
+    })  
     .catch(error => {
         console.log('Error:', error);
     });

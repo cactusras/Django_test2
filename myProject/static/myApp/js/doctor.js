@@ -30,36 +30,24 @@
             const btnRegis = document.getElementById('btnDocRegis');
             const barTitle = document.getElementById('barTitle');
             fetch_element();
-
-            //將該醫生選過的expertises設為disabled
-            if(expExist.length > 0){
-                console.log(expExist);
-                expExist.forEach(element => {
-                    const optionToDisable = document.querySelector(`#experSelect option[value="${element}"]`);
-                    optionToDisable.disabled = true;
-                    console.log('Option disabled:', optionToDisable);
-                });
-            }
                 
             //canva11進入canva12   
-            if (getIsLogin()){
+            if (window.localStorage.getItem('isLogin') == 'success'){
                 barTitle.innerText = '醫生資料'
                 btnRegis.addEventListener('click', function(){
                     window.location.href = "/clinic/home"
                 })
                 fetch_info();
-            }else{
+            }else if (window.localStorage.getItem('isLogin') == 'failed'){
                 barTitle.innerText = '註冊'
             }
     })
     
-    /*function navBtn_listener(event){
+    /*function click_regis(event){
         event.preventDefault();
-        if (window.isLogin) {
-            console.log("Navigating to clinic_dataEdit.html");
+        if (window.localStorage.getItem('isLogin') == 'success') {
             window.location.href = "/doctor_dataEdit";
-        } else {
-            console.log("login.html after 2 seconds");
+        } else if(window.localStorage.getItem('isLogin') == 'failed'){
             window.location.href = "/login";
         }
     }*/
@@ -109,6 +97,9 @@
             // 处理成功响应，例如显示成功消息或重定向
             alert('Expertise added successfully!');
             expExist.push(expertise);
+            const optionToEdit = document.querySelector(`#expertiseSelect option[value="${expertise}"]`);
+            optionToEdit.disabled = true;
+            optionToEdit.innerText = expertise + "(已選)"
 
             console.log("expExist = " + expExist + expExist.length);
             console.log(data.exp)
@@ -120,74 +111,7 @@
         });
     })
 
-    /*document.getElementById('timePopForm').addEventListener('submit', async function(event){
-        event.preventDefault();
-        const day_of_week = document.getElementById('daySelect').value;
-        const start_time = document.getElementById('start_time').value;
-        const end_time = document.getElementById('end_time').value;
-
-        const data = {
-            day_of_week: day_of_week,
-            start_time: start_time,
-            end_time: end_time
-        };
-
-        fetch(`/workingHour/upload/`,{
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        })
-        .then(async response => {
-            if (!response.ok) {
-                throw new Error('Failed to add doctor');
-            }
-            const data = await response.json();
-            // 处理成功响应，例如显示成功消息或重定向
-            alert('working_hour added successfully!');
-            expExist.push(expertise);
-            //window.location.href = '/click/schedule';
-        })
-        .catch(error => {
-            console.error('Error fetching working_hour list:', error);
-            // 处理错误情况
-        });
-    })
-
-    document.getElementById('schedulingForm').addEventListener('submit', async function(event){
-        event.preventDefault();
-        const StartDate = document.getElementById('StartDate').value;
-        const EndDate = document.getElementById('EndDate').value;
-
-        const data = {
-            StartDate: StartDate,
-            EndDate: EndDate
-        };
-
-        fetch(`/scheduling/upload/`,{
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        })
-        .then(async response => {
-            if (!response.ok) {
-                throw new Error('Failed to add doctor');
-            }
-            const data = await response.json();
-            // 处理成功响应，例如显示成功消息或重定向
-            alert('scheduling added successfully!');
-            window.location.href = '/doctor/data/edit';
-            //回註冊頁後 顯示醫生剛剛填的資料(不確定)
-            info_before_regis();
-        })
-        .catch(error => {
-            console.error('Error fetching scheduling list:', error);
-            // 处理错误情况
-        });
-    })*/
+    
 
     //登入狀態從後端抓資料放到dataEdit
     function fetch_info(){

@@ -56,7 +56,7 @@ def login_view(request):
             print(user)
             username = user.name
             user_type = None
-
+            
             if hasattr(user, 'client'):
                 print('client')
                 user_type = 'client'
@@ -66,6 +66,7 @@ def login_view(request):
             elif hasattr(user, 'doctor'):
                 print('doctor')
                 user_type = 'doctor'
+            print('username = ', username, "  usertype = ", user_type)
             print('user_type = ', user_type)
             return JsonResponse({'status': 'success','username': username,  'user_type': user_type})
         else:
@@ -189,7 +190,7 @@ def add_Reservation(request):
                 SchedulingID=SchedulingID,
                 time_start__lt=datetime.combine(datetime.strptime(date, '%Y-%m-%d').date(), timeS),
                 time_end__gt=datetime.combine(datetime.strptime(date, '%Y-%m-%d').date(), timeS),
-                Exoertise = expertise
+                Expertise = expertise
             )
             scheduling = Scheduling.objects.get(id=SchedulingID)
             day_of_week = timeS.weekday() + 1
@@ -395,7 +396,7 @@ def Doc_uploading(request):
             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
         if doctor_form.is_valid():
             request.session['doctor_form_data'] = doctor_form.cleaned_data
-            print('succeed adding', doctor_form)
+            print('succeed adding', doctor_form.cleaned_data)
             doc_expertise_list = request.session.get('doc_expertise_list', None)
             return JsonResponse({'message': 'Doctor Session added', 'status': 'success'})
         else:
@@ -497,6 +498,7 @@ def doc_session(request):
     # 返回 JSON 响应
     return JsonResponse(response_data, status=200)
 
+#doctor_management中要抓此診所所有醫生的資料(這樣login_required要刪掉)
 @login_required
 def success(request):
     clinic = Clinic.objects.get(user=request.user)
@@ -515,7 +517,6 @@ def success(request):
 
     return JsonResponse(data)
 
-@login_required
 def delete_doctor(request, doctor_email):
     doctor = get_object_or_404(Doctor, email=doctor_email)
 
@@ -525,8 +526,9 @@ def delete_doctor(request, doctor_email):
 
     return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
+@csrf_exempt
 def doctor_clinic_search_view(request):
-        # Apply the filter
+    # Apply the filter
     filter = docClinicFilter(request.GET, queryset=docClinicSearch.objects.all())
 
     # Retrieve detailed information for each filtered doctor
@@ -562,18 +564,13 @@ def doctor_clinic_search_view(request):
         else:
             # Create a new dictionary for the doctor
             new_doctor = {
-	    'doc_id': doc['doc_id'],
+                'doc_id': doc['doc_id'],
                 'doc_name': doc['doc_name'],
                 'clinic_name': doc['clinic_name'],
                 'clinic_adress': doc['clinic_adress'],
                 'doc_exp': [doc['doc_exp']]  # Initialize doc_exp as a list
             }
             doc_final.append(new_doctor)
-
-            # Update session with doctor IDs
-            #doc_list = request.session.get('doc_list', [])
-            #doc_list.append(doc['doc_id'])
-            #request.session['doc_list'] = doc_list  # Save session
 
     # Combine clinic details
     clinic_final = []
@@ -586,7 +583,7 @@ def doctor_clinic_search_view(request):
         else:
             # Create a new dictionary for the clinic
             new_clinic = {
-	    'clinic_id': clinic['clinic_id'],
+                'clinic_id': clinic['clinic_id'],
                 'clinic_name': clinic['clinic_name'],
                 'clinic_adress': clinic['clinic_adress'],
                 'clinic_introduction': clinic['clinic_introduction'],
@@ -594,16 +591,13 @@ def doctor_clinic_search_view(request):
             }
             clinic_final.append(new_clinic)
 
-            # Update session with clinic IDs
-            #clinic_list = request.session.get('clinic_list', [])
-            #clinic_list.append(clinic['clinic_id'])
-            #request.session['clinic_list'] = clinic_list  # Save session
-    
-    return render(request, 'myApp/home/', {
-        'filter': filter,
-        'doc_final': doc_final,
-        'clinic_final': clinic_final
-    })
+    # Prepare data to be returned as JsonResponse
+    data = {
+        'doctors': doc_final,
+        'clinics': clinic_final,
+    }
+
+    return JsonResponse(data)
     
 #schedule tomeslot(輸入start time end time，每一小時割一次)
 def get_time_slots(schedule):
@@ -1200,6 +1194,7 @@ def client_info(request):
             'occupation': user.client.occupation,
             'notify': user.client.notify,
         }
+        print("info = ", info)
         return JsonResponse({'status': 'success', 'data': info}, status=200)
     else:
         return JsonResponse({'status': 'error', 'error': 'User is not a client'}, status=400)
@@ -1252,3 +1247,5 @@ def user_logout(request):
         return JsonResponse({'message': 'Logged out successfully', 'status': 'success'})
     else:
         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
+
+

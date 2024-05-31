@@ -38,38 +38,8 @@ $('#date1').datetimepicker({
 });*/
 
   //fetch使用者是否登入了 並設window變數(整個project都可取得)
-window.isLogin = "";
-window.user_type = "";
-window.username = "";
+//window.isLogin = "";
 
-function getIsLogin() {
-  return window.isLogin;
-}
-
-function setIsLogin(value) {
-  console.log('Setting isLogin:', value);
-  window.isLogin = value;
-}
-
-// Getter and setter for user_type
-function getUserType() {
-  return window.user_type;
-}
-
-function setUserType(value) {
-  console.log('Setting user_type:', value);
-  window.user_type = value;
-}
-
-// Getter and setter for username
-function getUsername() {
-  return window.username;
-}
-
-function setUsername(value) {
-  console.log('Setting username:', value);
-  window.username = value;
-}
 
 document.addEventListener('DOMContentLoaded', function() {
   const btnNav = document.getElementById('nav_btn');
@@ -87,18 +57,15 @@ document.addEventListener('DOMContentLoaded', function() {
   })
   .then(data => {
       if (data.is_authenticated) {
-        setIsLogin(true);
-        console.log("isLogin = true");
-        btnNav.innerText = getUsername();
-        //barTitle.innerText = "診所資料";
-        //btnDocManage.hidden = false;
+        window.localStorage.setItem('isLogin', 'success')
+        console.log('loginYes')
+        btnNav.innerText = window.localStorage.getItem('username');
         btnLogout.hidden = false;
       }else{
-        setIsLogin(false)
-        console.log("isLogin = false");
+        window.localStorage.setItem('isLogin', 'failed')
+        console.log('loginNo')
         btnNav.innerText = '登入';
         barTitle.innerText = "註冊"
-        //btnDocManage.hidden = true;
         btnLogout.hidden = true;
       }
       document.dispatchEvent(new CustomEvent('authChecked', { detail: window.isLogin }));
@@ -111,16 +78,16 @@ document.addEventListener('DOMContentLoaded', function() {
 function navBtn_listener(event){
   event.preventDefault();
   console.log("click nav_btn")
-  console.log("getUserType = " + getUserType() + "  getIsLogin = " + getIsLogin())
-  if (getIsLogin()) {
-    if(getUserType() == 'client'){
+  if (window.localStorage.getItem('isLogin') == 'success') {
+    let usertype = window.localStorage.getItem('user_type')
+    if(usertype == 'client'){
       window.location.href = '/client/data/edit'
-    }else if(getUserType() == 'clinic'){
+    }else if(usertype == 'clinic'){
       window.location.href = '/clinic/data/edit'
-    }else if(getUserType() == 'doctor'){
+    }else if(usertype == 'doctor'){
       window.location.href = '/doctor/data/edit'
     }
-  }else{
+  }else if(window.localStorage.getItem('isLogin') == 'failed'){
     window.location.href = '/loginP'
   }
   /*fetch('/fetch/user_type/')

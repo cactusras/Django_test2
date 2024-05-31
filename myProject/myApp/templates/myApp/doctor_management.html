@@ -24,10 +24,10 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <div class="ms-auto">
-                    <button class="btn btn-outline-dark" type="submit"  style="font-size: 20px;">
+                    <!--<button class="btn btn-outline-dark" type="submit"  style="font-size: 20px;">
                         <i class="bi bi-person-fill"></i>
                         使用者
-                    </button>
+                    </button>-->
                 </div>
             </div>
         </div>
@@ -52,23 +52,8 @@
                                 <th scope="col">刪除</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {% for doctor in doctors %}
-                            <tr>
-                                <td>{{ doctor.name }}</td>
-                                <td>{{ doctor.email }}</td>
-                                <td>{{ doctor.phone_number }}</td>
-                                <td>{{ doctor.experience }}</td>
-                                <td>
-                                    <form method="post" id="" action="{% url 'delete_doctor' doctor.email %}">
-                                        {% csrf_token %}
-                                        <div>
-                                            <button type="submit" class="rectangle-button">刪除</button>
-                                        </div>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% endfor %}
+                        <tbody id="doctor_info_body">
+                            
                             <!--<tr>
                                 <td>A</td>
                                 <td>A</td>
@@ -301,7 +286,8 @@
     <script src="{% static 'myApp/js/scripts.js' %}"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function(){
-            if(window.isLogin){
+
+            if(getIsLogin()){
                 document.getElementById('btnClinPage').innerText = "回到主頁"
             }else{
                 document.getElementById('btnClinPage').innerText = "完成"
@@ -311,7 +297,7 @@
 
         function clinPage(event){
             event.preventDefault();
-            if(window.isLogin){
+            if(getIsLogin()){
                  window.location.href = '/clinic/home/'
             }else{
                 window.location.href = '/loginP'
@@ -324,7 +310,7 @@
             window.location.href = "/doctor/data/edit"
         }
 
-        document.getElementById('addTimeSlot').addEventListener('click', function() {
+        /*document.getElementById('addTimeSlot').addEventListener('click', function() {
 
             const doctorName = document.getElementById('doctorName').value;
     
@@ -374,11 +360,61 @@
     
             }
     
-        });
+        });*/
     
-    
-    
-        function deleteCheckedRows() {
+        //該診所現有醫生跟他們的資料顯示
+        function doc_info() {
+            fetch('/success/')
+                .then(response => response.json())
+                .then(data => {
+                    const doctors = data.doctors;
+                    const tableBody = document.getElementById('doctor_info_body');
+                    doctors.forEach(doctor => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${doctor.name}</td>
+                            <td>${doctor.email}</td>
+                            <td>${doctor.phone_number}</td>
+                            <td>${doctor.experience}</td>
+                            <td>
+                                <form class="delete-doctor-form">
+                                    {% csrf_token %}
+                                    <div>
+                                        <button type="submit" data-doctor-email="${doctor.email}" class="rectangle-button">刪除</button>
+                                    </div>
+                                </form>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                    const deleteForms = document.querySelectorAll('.delete-doctor-form');
+                    deleteForms.forEach(form => {
+                        form.addEventListener('submit', function(event) {
+                            event.preventDefault(); // 阻止表单默认提交行为
+        
+                            const doctorEmail = form.querySelector('button').dataset.doctorEmail;
+        
+                            fetch(`/doctor/delete/${doctorEmail}/`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                alert(data.message);
+                                window.location.href = '/doctor/manage' 
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                            });
+                        });
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        /*function deleteCheckedRows() {
     
             const table = document.getElementById('doctorTable').getElementsByTagName('tbody')[0];
     
@@ -396,7 +432,7 @@
     
             }
     
-        }
+        }*/
     
     
     
