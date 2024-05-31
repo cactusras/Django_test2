@@ -34,17 +34,23 @@ def user_login(request):
             password = form.cleaned_data['password']
             user = authenticate(request, email=email, password=password)
             if user is not None:
+                username = user.name
+                user_type = None
                 login(request, user)  # Ensure the user object is passed correctly
                 # 登入成功，根據用戶身份導向不同的頁面
                 if hasattr(user, 'client'):  # 检查是否是客户
                     print('client')
-                    return JsonResponse({'message': 'client', 'status': 'success'})
+                    user_type = 'client'
+                    return JsonResponse({'user_type': 'client', 'username': username,  'status': 'success'})
                 elif hasattr(user, 'clinic'):  # 检查是否是诊所
                     print('clinic')
-                    return JsonResponse({'message': 'clinic', 'status': 'success'})
+              
+                    user_type = 'clinic'
+                    return JsonResponse({'user_type': 'clinic', 'username': username,  'status': 'success'})
                 elif hasattr(user, 'experience'):  # 检查是否是医生
                     print('doctor')
-                    return JsonResponse({'message': 'doctor', 'status': 'success'})
+                    user_type = 'doctor'
+                    return JsonResponse({'user_type': 'doctor', 'username': username,  'status': 'success'})
                 else:
                     return JsonResponse({'message': 'unknown', 'status': 'success'})
             else:
@@ -139,7 +145,7 @@ def add_Reservation(request):
                 SchedulingID=SchedulingID,
                 time_start__lt=datetime.combine(datetime.strptime(date, '%Y-%m-%d').date(), timeS),
                 time_end__gt=datetime.combine(datetime.strptime(date, '%Y-%m-%d').date(), timeS),
-                Exoertise = expertise
+                Expertise = expertise
             )
             scheduling = Scheduling.objects.get(id=SchedulingID)
             day_of_week = timeS.weekday() + 1
@@ -347,8 +353,90 @@ def delete_doctor(request, doctor_email):
 
     return render(request, 'myApp/doctor_management.html', {'doctor': doctor})
 
+# def doctor_clinic_search_view(request):
+#         # Apply the filter
+#     filter = docClinicFilter(request.GET, queryset=docClinicSearch.objects.all())
+
+#     # Retrieve detailed information for each filtered doctor
+#     detailed_doctors = []
+#     detailed_clinics = []
+#     for result in filter.qs:
+#         doctor_details = {
+#             'doc_id': result.doc_id,
+#             'doc_name': result.doc_name,  # Changed from result.name to result.doc_name
+#             'clinic_name': result.clinic_name,
+#             'clinic_adress': result.clinic_adress,
+#             'doc_exp': result.exp_name
+#         }
+#         detailed_doctors.append(doctor_details)
+
+#         clinic_details = {
+#             'clinic_id': result.clinic_id,
+#             'clinic_name': result.clinic_name,
+#             'clinic_adress': result.clinic_adress,
+#             'clinic_introduction': result.clinic_introduction,
+#             'doc_exp': result.exp_name
+#         }
+#         detailed_clinics.append(clinic_details)  # Changed from detailed_doctors to detailed_clinics
+
+#     # Combine doctor details
+#     doc_final = []
+#     for doc in detailed_doctors:
+#         # Check if the doctor already exists in doc_final
+#         existing_doctor = next((item for item in doc_final if item['doc_name'] == doc['doc_name']), None)
+#         if existing_doctor:
+#             # Append the expertise to the existing doctor's expertise list
+#             existing_doctor['doc_exp'].append(doc['doc_exp'])
+#         else:
+#             # Create a new dictionary for the doctor
+#             new_doctor = {
+# 	    'doc_id': doc['doc_id'],
+#                 'doc_name': doc['doc_name'],
+#                 'clinic_name': doc['clinic_name'],
+#                 'clinic_adress': doc['clinic_adress'],
+#                 'doc_exp': [doc['doc_exp']]  # Initialize doc_exp as a list
+#             }
+#             doc_final.append(new_doctor)
+
+#             # Update session with doctor IDs
+#             #doc_list = request.session.get('doc_list', [])
+#             #doc_list.append(doc['doc_id'])
+#             #request.session['doc_list'] = doc_list  # Save session
+
+#     # Combine clinic details
+#     clinic_final = []
+#     for clinic in detailed_clinics:
+#         # Check if the clinic already exists in clinic_final
+#         existing_clinic = next((item for item in clinic_final if item['clinic_name'] == clinic['clinic_name']), None)
+#         if existing_clinic:
+#             # Append the expertise to the existing clinic's expertise list
+#             existing_clinic['doc_exp'].append(clinic['doc_exp'])
+#         else:
+#             # Create a new dictionary for the clinic
+#             new_clinic = {
+# 	    'clinic_id': clinic['clinic_id'],
+#                 'clinic_name': clinic['clinic_name'],
+#                 'clinic_adress': clinic['clinic_adress'],
+#                 'clinic_introduction': clinic['clinic_introduction'],
+#                 'doc_exp': [clinic['doc_exp']]  # Initialize doc_exp as a list
+#             }
+#             clinic_final.append(new_clinic)
+
+#             # Update session with clinic IDs
+#             #clinic_list = request.session.get('clinic_list', [])
+#             #clinic_list.append(clinic['clinic_id'])
+#             #request.session['clinic_list'] = clinic_list  # Save session
+    
+#     return render(request, 'myApp/home.html', {
+#         'filter': filter,
+#         'doc_final': doc_final,
+#         'clinic_final': clinic_final
+#     })
+
+
+@csrf_exempt
 def doctor_clinic_search_view(request):
-        # Apply the filter
+    # Apply the filter
     filter = docClinicFilter(request.GET, queryset=docClinicSearch.objects.all())
 
     # Retrieve detailed information for each filtered doctor
@@ -384,18 +472,13 @@ def doctor_clinic_search_view(request):
         else:
             # Create a new dictionary for the doctor
             new_doctor = {
-	    'doc_id': doc['doc_id'],
+                'doc_id': doc['doc_id'],
                 'doc_name': doc['doc_name'],
                 'clinic_name': doc['clinic_name'],
                 'clinic_adress': doc['clinic_adress'],
                 'doc_exp': [doc['doc_exp']]  # Initialize doc_exp as a list
             }
             doc_final.append(new_doctor)
-
-            # Update session with doctor IDs
-            #doc_list = request.session.get('doc_list', [])
-            #doc_list.append(doc['doc_id'])
-            #request.session['doc_list'] = doc_list  # Save session
 
     # Combine clinic details
     clinic_final = []
@@ -408,7 +491,7 @@ def doctor_clinic_search_view(request):
         else:
             # Create a new dictionary for the clinic
             new_clinic = {
-	    'clinic_id': clinic['clinic_id'],
+                'clinic_id': clinic['clinic_id'],
                 'clinic_name': clinic['clinic_name'],
                 'clinic_adress': clinic['clinic_adress'],
                 'clinic_introduction': clinic['clinic_introduction'],
@@ -416,16 +499,16 @@ def doctor_clinic_search_view(request):
             }
             clinic_final.append(new_clinic)
 
-            # Update session with clinic IDs
-            #clinic_list = request.session.get('clinic_list', [])
-            #clinic_list.append(clinic['clinic_id'])
-            #request.session['clinic_list'] = clinic_list  # Save session
+    # Prepare data to be returned as JsonResponse
+    data = {
+        'doctors': doc_final,
+        'clinics': clinic_final,
+    }
+
+    return JsonResponse(data)
     
-    return render(request, 'myApp/home.html', {
-        'filter': filter,
-        'doc_final': doc_final,
-        'clinic_final': clinic_final
-    })
+
+
     
 #schedule tomeslot(輸入start time end time，每一小時割一次)
 def get_time_slots(schedule):
@@ -891,7 +974,7 @@ def loginP(request):
 
 def clinHome(request):
     context={}
-    return render(request, "myApp/clinicPage.html", context)
+    return render(request, "myApp/clinic_dataEdit.html", context)
 
 
 def docManage(request):
@@ -970,6 +1053,7 @@ def check_authentication(request):
         return JsonResponse({'is_authenticated': True})
     else:
         return JsonResponse({'is_authenticated': False})
+    
 def doctor_info(request):
     if hasattr(request.user, 'doctor'):
         user = request.user
@@ -977,7 +1061,7 @@ def doctor_info(request):
             'email': user.email,
             'name': user.name,
             'phone_number': user.phone_number,
-            'password': user.pw,
+            'password': user.password,
             'photo_url': user.doctor.photo.url,
             'experience': user.doctor.experience,
         }
@@ -992,16 +1076,18 @@ def client_info(request):
             'email': user.email,
             'name': user.name,
             'phone_number': user.phone_number,
-            'password': user.pw,
+            'password': user.password,
             'address': user.client.address,
             'birth_date': user.client.birth_date,
             'gender': user.client.gender,
             'occupation': user.client.occupation,
             'notify': user.client.notify,
         }
-        return JsonResponse(info)
+        print("info = ", info)
+        return JsonResponse({'status': 'success', 'data': info}, status=200)
     else:
-        return JsonResponse({'error': 'User is not a client'}, status=400)
+        return JsonResponse({'status': 'error', 'error': 'User is not a client'}, status=400)
+
 
 # def logout_view(request):
 #     logout(request)

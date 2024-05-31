@@ -26,24 +26,39 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnRegis = document.getElementById('btnClinRegis');
     const btnDocManage = document.getElementById('btnDocManage');
     const barTitle = document.getElementById('barTitle');
+    const clinForm = document.getElementById('clinicForm')
+    
     fetch_element();
 
     // Handle login state
     if (window.isLogin) {
         barTitle.innerText = '診所資料';
         btnDocManage.hidden = false;
+        btnRegis.innerText = '完成'
         btnDocManage.addEventListener('click', function () {
-            window.location.href = "doctor_management.html";
+            window.location.href = "/doctor/manage"
         });
         btnRegis.addEventListener('click', function () {
-            window.location.href = "clinicPage.html";
+            window.location.href =  "/clinic/home"
         });
-        fetch_info();
+        fetch_info(clinForm);
     } else {
+        btnRegis.innerText = '新增醫生'
         btnDocManage.hidden = true;
         barTitle.innerText = '註冊';
     }
 });
+
+function regis_click(event){
+    event.preventDefault();
+    if (window.isLogin) {
+        
+        window.location.href = "/clinic/home";
+    } else {
+        
+        window.location.href = "/doctor/manage";
+    }
+}
 
 async function isUniqueLicense(license_number) {
     try {
@@ -109,9 +124,9 @@ document.getElementById('clinicForm').addEventListener('submit', async function 
 
     // Fetch form elements
     // fetch_element();
-
+    fetch_element();
     // Use FormData for handling file uploads
-    const formData = new FormData(document.getElementById('clinicForm'));
+    //const formData = new FormData(document.getElementById('clinicForm'));
 
     // Validate form data
     if (formData.get('name').length > 100) {
@@ -134,14 +149,17 @@ document.getElementById('clinicForm').addEventListener('submit', async function 
     }
 
     if (isValid) {
-
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
         // Send AJAX request
         fetch('/add/clinic/', {
+            
             method: 'POST',
             body: formData,
-            // headers: {
-            //     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value // Ensure you include the CSRF token
-            // }
+            headers: {
+                 //'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value // Ensure you include the CSRF token
+                 'X-CSRFToken': csrfToken
+            },
+            body: new FormData(this)
         })
         .then(response => response.json())
         .then(data => {

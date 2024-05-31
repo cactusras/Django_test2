@@ -39,21 +39,38 @@ document.addEventListener('DOMContentLoaded', function() {
         //頁面加載後才能把這些element load進來
         const btnRegis = document.getElementById('btnClieRegis');
         const barTitle = document.getElementById('barTitle');
-        //fetch_element();
+        const clieForm = document.getElementById('clientForm');
+        fetch_element();
 
         //canva11進入canva12   
-        if (window.isLogin){
+        if (window.localStorage.getItem('isLogin') == 'success'){
+            console.log('cliejs46')
             barTitle.innerText = '患者資料'
-            btnRegis.addEventListener('click', function(){
-                window.location.href = "clinicPage.html"
-                fetch_element();
-            })
-            fetch_info();
-        }else{
+            btnRegis.innerText = '回到主頁'
+            fetch_info(clieForm);
+            // btnRegis.addEventListener('click', function(){
+            //     window.location.href = "clinicPage.html"
+            //     fetch_element();
+            // })
+            //fetch_info();
+        }else if(window.localStorage.getItem('isLogin') == 'failed'){
+            console.log('cliejs46_no')
             barTitle.innerText = '註冊'
-            fetch_element();
+            btnRegis.innerText = '完成'
+            // barTitle.innerText = '註冊'
+            // fetch_element();
         }
 })
+
+function click_regis(event){
+    event.preventDefault();
+    if (window.isLogin){
+        window.location.href = '/home'
+    }else{
+        window.location.href = "/loginP"
+    }
+}
+
 
 async function isUniqueEmail(email){
     try {
@@ -75,29 +92,52 @@ async function isUniqueEmail(email){
 }
 
 //是抓後端存著的資料
-function fetch_info(){
+function fetch_info(formFilled){
     fetch('/client_info/', {
         method: 'GET'
     })
-    .then(response => {
+    .then(async response => {
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
-        return response.json(); // 解析 JSON 响应
-    })
-    .then(infoDic =>{
-        username = infoDic['name'];
-        for (var key in infoDic) {
-            if (infoDic.hasOwnProperty(key)) {
-                //
-                clieField[key] = infoDic[key];
-            }
+        const data = await response.json();
+        //return response.json(); // 解析 JSON 响应
+        if (data.status === 'success') {
+            const clieInfo = data.data;
+            //console.log("info_type = " + typeof(data.data) + "  info = " + data.data)
+            fillForm(clieInfo, formFilled);
+        } else {
+            console.error(data.error);
         }
-    })   
+    })
+    // .then(infoDic =>{
+    //     username = infoDic['name'];
+    //     for (var key in infoDic) {
+    //         if (infoDic.hasOwnProperty(key)) {
+    //             //
+    //             clieField[key] = infoDic[key];
+    //         }
+    //     }
+    // })   
     .catch(error => {
         console.log('Error:', error);
     });
 }
+
+function fillForm(data, form) {
+    if (!form) {
+        console.error('Form not found');
+        return;
+    }
+
+    Object.keys(data).forEach(key => {
+        const field = form.querySelector(`[name=${key}]`);
+        if (field) {
+            field.value = data[key];
+        }
+    });
+}
+
 
 document.getElementById('clientForm').addEventListener('submit', async function(event){
     let isValid = false;
