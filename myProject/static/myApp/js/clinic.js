@@ -191,7 +191,7 @@ document.getElementById('clinicForm').addEventListener('submit', async function(
         .then(data => {
             if (data.status === 'success') {
                 alert(data.message);
-                window.location.href = '/doctor/manage';
+                window.location.href = '/loginP';
             } else {
                 alert(data.message);
             }

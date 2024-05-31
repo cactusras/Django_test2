@@ -36,6 +36,34 @@ def index(request):
 
 #login check身份別，django 自帶，用isinstance分身份，此處等migrate完可進行初步測試，看要手動加資料還是把register頁面都弄好一併測試（需要頁面跳轉邏輯）
 @csrf_exempt
+def user_login(request):
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+            user = authenticate(request, email=email, password=password)
+            if user is not None:
+                login(request, user)  # Ensure the user object is passed correctly
+                # 登入成功，根據用戶身份導向不同的頁面
+                if hasattr(user, 'client'):  # 检查是否是客户
+                    print('client')
+                    return JsonResponse({'message': 'client', 'status': 'success'})
+                elif hasattr(user, 'clinic'):  # 检查是否是诊所
+                    print('clinic')
+                    return JsonResponse({'message': 'clinic', 'status': 'success'})
+                elif hasattr(user, 'experience'):  # 检查是否是医生
+                    print('doctor')
+                    return JsonResponse({'message': 'doctor', 'status': 'success'})
+                else:
+                    return JsonResponse({'message': 'unknown', 'status': 'success'})
+            else:
+                return JsonResponse({'message': 'Invalid email or password', 'status': 'error'})
+        else:
+            return JsonResponse({'message': 'Invalid form data', 'errors': form.errors, 'status': 'error'})
+    else:
+        return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
+'''@csrf_exempt
 def login_view(request):
     if request.method == 'POST':
         try:
@@ -74,16 +102,8 @@ def login_view(request):
             return JsonResponse({'status': 'error', 'message': 'Invalid login credentials'})
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
-    
-'''def fetch_userType(request):
-    global userType
-    isLogin = request.user.is_authenticated
-    if isLogin:
-        print('login yes , type = ', userType)
-        return JsonResponse({'isLogin': 'success', 'user_type': userType})
-    else:
-        print('login no')
-        return JsonResponse({'isLogin': 'failed', 'user_type': None})'''
+    '''
+
 
 
 def add_client(request):
@@ -342,50 +362,7 @@ def add_doctor(request):
 
     return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
-'''@login_required
-def add_doctor(request):
-    if request.method == 'POST':
-        doctor_form_data = request.session.get('doctor_form_data')
-        expertise_list = request.session.get('expertise_list', [])
-        schedule_form_data = request.session.get('schedule_form_data')
-        working_hour_list = request.session.get('working_hour_list', [])
 
-        if not (doctor_form_data and expertise_list and schedule_form_data and working_hour_list):
-            return render(request,'myApp/doctor_dataEdit.html')
-
-        clinic = Clinic.objects.get(user=request.user)
-        # Add clinic to the doctor form data
-        doctor_form_data['clinic'] = clinic
-
-        email = doctor_form_data.pop('email')
-        doctor, created = Doctor.objects.update_or_create(email=email, defaults=doctor_form_data)
-
-        # Delete all existing doctor expertise entries
-        Doc_Expertise.objects.filter(doctor=doctor).delete()
-
-        # Create new doctor expertise instances
-        for expertise_data in expertise_list:
-            expertise_name = expertise_data.get('name')
-            expertise, created = Expertise.objects.get_or_create(name=expertise_name)
-            Doc_Expertise.objects.create(doctor=doctor, expertise=expertise)
-
-        for working_hour_data in working_hour_list:
-            working_hour, created = WorkingHour.objects.update_or_create(
-                day_of_week=working_hour_data['day_of_week'],
-                start_time=working_hour_data['start_time'],
-                end_time=working_hour_data['end_time'],
-                defaults=working_hour_data
-            )
-            Scheduling.objects.update_or_create(
-                doctor=doctor,
-                working_hour=working_hour,
-                defaults=schedule_form_data
-            )
-
-        request.session.flush()
-        return redirect('success')
-
-    return render(request,'myApp/doctor_dataEdit.html')'''
 
    
 def Doc_uploading(request):

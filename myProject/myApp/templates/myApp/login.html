@@ -207,87 +207,49 @@
             window.location.href = "/clinic/data/edit";
         }
 
-        /* 加入email 
-        let data = {
-            "example@example.com": "password123",
-            "another@example.com": "password456",
-        };*/
+
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent default form submission
     
-        document.getElementById('loginForm').addEventListener('submit', function(event){
-            event.preventDefault(); // 阻止默認表單提交
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-            const loginData = {
-                email: email,
-                password: password
-            };
-
-            console.log('loginData:', loginData);
-            console.log('csrfToken:', csrfToken);
-
-            fetch("/loginP/login_view/", {
+            const formData = new FormData(this); // Use 'this' to refer to the form element
+        
+            // Send the form data to the server
+            fetch('/login/', {
                 method: 'POST',
+                body: formData,
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken':  csrfToken
-                },
-                body: JSON.stringify(loginData)
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value // Ensure you include the CSRF token
+                }
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Response received:', response);
+                return response.json();
+            })
             .then(data => {
+                // print("to js")
                 if (data.status === 'success') {
-                    console.log("data.status = success")
-                    console.log(data.user_type)
-                    window.localStorage.clear()
-                    window.localStorage.setItem('user_type', data.user_type)
-                    window.localStorage.setItem('username', data.username)
-                    if (data.user_type === 'client') {
-                        window.location.href = '/home';
-                    } else if (data.user_type === 'clinic') {
-                        window.location.href = '/clinic/home';
-                    } else if (data.user_type === 'doctor') {
-                        window.location.href = '/doctor/page';
+                    if(data.message == 'client'){
+                        // alert('Login success: ' + data.message);
+                        window.location.href = '/home/'; // Redirect to the home page
+                    }else if(data.message == 'clinic'){
+                        // alert('Login success: ' + data.message);
+                        window.location.href = '/clinic/home/'; // Redirect to the home page
+                    }else if(data.message == 'doctor'){
+                        // alert('Login success: ' + data.message);
+                        window.location.href = '/doctor/page/'; // Redirect to the home page
+                    }else{
+    
                     }
-                    
                 } else {
-                    console.log('Login failed');
-                    // 處理登錄失敗情況，例如顯示錯誤消息
+                    alert('Login failed: ' + data.message);
                 }
             })
             .catch(error => {
-                console.log('Error:', error);
-                // 處理錯誤情況
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
             });
         });
 
-        /*function login(event) {
-            let emailInput = document.querySelector("input[name='useremail']");
-            let passwordInput = document.querySelector("input[name='password']");
-    
-            let email = emailInput.value;
-            let password = passwordInput.value;
-    
-            if (data[email] != undefined) {
-                if (data[email] == password) {
-                    window.alert("Success");
-                } else {
-                    window.alert("Login failed. Password Failure.");
-                    // Clear the input values
-                    passwordInput.value = "";
-                }
-            } else {
-                window.alert("Login failed. Email error or does not exist");
-                // Clear the input values
-                emailInput.value = "";
-                passwordInput.value = "";
-            }
-            event.preventDefault();
-        }*/
-    
-        //document.querySelector(".login100-form-btn").addEventListener("click", login(event));
     </script>
     
 
