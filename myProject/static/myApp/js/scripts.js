@@ -39,7 +39,7 @@ $('#date1').datetimepicker({
 
   //fetch使用者是否登入了 並設window變數(整個project都可取得)
   window.isLogin = "";
-  window.username = "";
+  window.username = "username";
   
   document.addEventListener('DOMContentLoaded', function() {
     const btnNav = document.getElementById('nav_btn');
@@ -70,7 +70,7 @@ $('#date1').datetimepicker({
     
   function navBtn_listener(event){
     event.preventDefault();
-    fetch('/login/')
+    fetch('/fetch/userType/')
     .then(response => {
         if (response.ok) {
             return response.json();
@@ -80,18 +80,21 @@ $('#date1').datetimepicker({
     })
     .then(data => {
         if (window.isLogin) {
-          if(data.user_type == 'Client'){
-            window.location.href = 'searchPage.html'
-          }else if(data.user_type == 'Clinic'){
-            window.location.href = '/clinic/home/'
-          }else if(data.user_type == 'Doctor'){
-            window.location.href = '/doctor/page/'
+          console.log("isLogin")
+          user_type = data.get('userType')
+          if(user_type == 'Client'){
+            window.location.href = '/client/data/edit/'
+          }else if(user_type == 'Clinic'){
+            window.location.href = '/clinic/data/edit/'
+          }else if(user_type == 'Doctor'){
+            window.location.href = '/doctor/data/edit/'
           }
         }else{
-          window.location.href = '/login'
+          window.location.href = '/loginP/'
         }
     })
     .catch(error => {
         console.log('Error checking authentication:', error);
     });
+    
   }

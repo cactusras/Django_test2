@@ -24,9 +24,11 @@ def index(request):
     
     context={}
     return render(request, "myApp/index.html", context)
-    
+
+
 @csrf_exempt
-def user_login(request):
+def user_login(request):  
+    
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -36,6 +38,7 @@ def user_login(request):
             if user is not None:
                 login(request, user)  # Ensure the user object is passed correctly
                 # 登入成功，根據用戶身份導向不同的頁面
+                loginStatus = True
                 if hasattr(user, 'client'):  # 检查是否是客户
                     print('client')
                     return JsonResponse({'message': 'client', 'status': 'success'})
@@ -53,6 +56,7 @@ def user_login(request):
             return JsonResponse({'message': 'Invalid form data', 'errors': form.errors, 'status': 'error'})
     else:
         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
+
 
 def add_client(request):
     if request.method == 'POST':
@@ -139,7 +143,7 @@ def add_Reservation(request):
                 SchedulingID=SchedulingID,
                 time_start__lt=datetime.combine(datetime.strptime(date, '%Y-%m-%d').date(), timeS),
                 time_end__gt=datetime.combine(datetime.strptime(date, '%Y-%m-%d').date(), timeS),
-                Exoertise = expertise
+                Expertise = expertise
             )
             scheduling = Scheduling.objects.get(id=SchedulingID)
             day_of_week = timeS.weekday() + 1
@@ -399,7 +403,7 @@ def delete_doctor(request, doctor_email):
     return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
 def doctor_clinic_search_view(request):
-        # Apply the filter
+    # Apply the filter
     filter = docClinicFilter(request.GET, queryset=docClinicSearch.objects.all())
 
     # Retrieve detailed information for each filtered doctor
@@ -435,18 +439,13 @@ def doctor_clinic_search_view(request):
         else:
             # Create a new dictionary for the doctor
             new_doctor = {
-	    'doc_id': doc['doc_id'],
+	            'doc_id': doc['doc_id'],
                 'doc_name': doc['doc_name'],
                 'clinic_name': doc['clinic_name'],
                 'clinic_adress': doc['clinic_adress'],
                 'doc_exp': [doc['doc_exp']]  # Initialize doc_exp as a list
             }
             doc_final.append(new_doctor)
-
-            # Update session with doctor IDs
-            #doc_list = request.session.get('doc_list', [])
-            #doc_list.append(doc['doc_id'])
-            #request.session['doc_list'] = doc_list  # Save session
 
     # Combine clinic details
     clinic_final = []
@@ -459,24 +458,19 @@ def doctor_clinic_search_view(request):
         else:
             # Create a new dictionary for the clinic
             new_clinic = {
-	    'clinic_id': clinic['clinic_id'],
+	            'clinic_id': clinic['clinic_id'],
                 'clinic_name': clinic['clinic_name'],
                 'clinic_adress': clinic['clinic_adress'],
                 'clinic_introduction': clinic['clinic_introduction'],
                 'doc_exp': [clinic['doc_exp']]  # Initialize doc_exp as a list
             }
             clinic_final.append(new_clinic)
-
-            # Update session with clinic IDs
-            #clinic_list = request.session.get('clinic_list', [])
-            #clinic_list.append(clinic['clinic_id'])
-            #request.session['clinic_list'] = clinic_list  # Save session
     
-    return render(request, 'myApp/home.html', {
-        'filter': filter,
-        'doc_final': doc_final,
-        'clinic_final': clinic_final
-    })
+    data = {
+        'doctors': doc_final,
+        'clinics': clinic_final,
+    }
+    return JsonResponse(data)
     
 #schedule tomeslot(輸入start time end time，每一小時割一次)
 def get_time_slots(schedule):
@@ -541,9 +535,6 @@ def clinic_load(request):
     ],
     }
     return render(request, 'myApp/clinicPage.html', context)
-
-
-
 
 #reservation id required
 #以下為reservation狀態改變
@@ -977,7 +968,6 @@ def isUniqueEmail_clin(request):
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-
 @csrf_exempt
 def isUniqueLicense_clin(request):
     if request.method == 'POST':
@@ -989,7 +979,6 @@ def isUniqueLicense_clin(request):
             return JsonResponse({'isUnique': True}, status=200)
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
-
 
 @csrf_exempt
 def isUniqueEmail_clie(request):
@@ -1015,12 +1004,12 @@ def isUniqueEmail_doc(request):
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-
 def check_authentication(request):
     if request.user.is_authenticated:
         return JsonResponse({'is_authenticated': True})
     else:
         return JsonResponse({'is_authenticated': False})
+
 def doctor_info(request):
     if hasattr(request.user, 'doctor'):
         user = request.user
@@ -1058,7 +1047,6 @@ def logout_view(request):
     logout(request)
     return render(request,'myApp/searchPage.html')
 
-
 def check_reservations(request):
     now = now()
     #one_hour_ago = now - timedelta(hours=1)
@@ -1074,3 +1062,12 @@ def check_reservations(request):
 
 
     return JsonResponse({'message': 'Checked and updated reservations if necessary.'})
+
+#如果是Status = 2或3的話 就不執行而是跳jsonresponse
+#變數名有待確認
+def client_cancel_reservation(request):
+    return render(request, 'UserAppointmentRecords.html')
+
+@csrf_exempt
+def user_logout(request):
+        return JsonResponse({'message': 'Invalid request method', 'status': 'error'})

@@ -34,7 +34,7 @@
                         <li class="nav-item"><a class="nav-link" href="#!" style="font-size: 20px;">Q&A</a></li>
                     </ul>
                     <form class="d-flex">
-                        <button class="btn btn-outline-dark" type="submit"  style="font-size: 20px;">
+                        <button class="btn btn-outline-dark" type="submit"  style="font-size: 20px;" id="nav_btn" onclick="client_navBtn(event)">
                             <i class="bi bi-person-fill"></i>
                             登入
                         </button>
@@ -217,6 +217,15 @@
             <script src="{% static 'myApp/js/scripts.js' %}" ></script>
             <!-- Core theme JS-->
             <script>
+                function client_navBtn(event){
+                    event.preventDefault();
+                    if(window.isLogin){
+                        window.location.href = '/client/data/edit'
+                    }else{
+                        window.location.href = '/login'
+                    }
+                }
+
                 //這裡應該渲染頁面就好 其他資料會從clinic_reserve 去抓
                 function docReserve(event){
                     event.preventDefault();
