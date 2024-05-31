@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const barTitle = document.getElementById('barTitle');
         const clieForm = document.getElementById('clientForm');
         fetch_element();
+<<<<<<< HEAD
 
         //canva11進入canva12   
         if (window.localStorage.getItem('isLogin') == 'success'){
@@ -54,6 +55,18 @@ document.addEventListener('DOMContentLoaded', function() {
             barTitle.innerText = '註冊'
             btnRegis.innerText = '完成'
           
+=======
+        //canva11進入canva12   
+        if (window.localStorage.getItem('isLogin') == 'success'){
+            //console.log('cliejs46')
+            barTitle.innerText = '患者資料'
+            btnRegis.innerText = '回到主頁'
+            fetch_info(clieForm);
+        }else if(window.localStorage.getItem('isLogin') == 'failed'){
+            //console.log('cliejs46_no')
+            barTitle.innerText = '註冊'
+            btnRegis.innerText = '完成'
+>>>>>>> frontback
         }
 })
 
@@ -66,7 +79,10 @@ function click_regis(event){
     }
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> frontback
 async function isUniqueEmail(email){
     try {
         const response = await fetch('/isUniqueEmail_clie/', {
@@ -88,6 +104,10 @@ async function isUniqueEmail(email){
 
 //是抓後端存著的資料
 function fetch_info(formFilled){
+<<<<<<< HEAD
+=======
+    console.log('fetch_info')
+>>>>>>> frontback
     fetch('/client_info/', {
         method: 'GET'
     })
@@ -96,7 +116,11 @@ function fetch_info(formFilled){
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
+<<<<<<< HEAD
         //return response.json(); // 解析 JSON 响应
+=======
+
+>>>>>>> frontback
         if (data.status === 'success') {
             const clieInfo = data.data;
             //console.log("info_type = " + typeof(data.data) + "  info = " + data.data)
@@ -104,6 +128,7 @@ function fetch_info(formFilled){
         } else {
             console.error(data.error);
         }
+<<<<<<< HEAD
     })
     // .then(infoDic =>{
     //     username = infoDic['name'];
@@ -114,6 +139,9 @@ function fetch_info(formFilled){
     //         }
     //     }
     // })   
+=======
+    })   
+>>>>>>> frontback
     .catch(error => {
         console.log('Error:', error);
     });
@@ -156,7 +184,11 @@ document.getElementById('clientForm').addEventListener('submit', async function(
                     return;
                 } else {
                     // 要串資料庫把所有的clinic email先找出來      
+<<<<<<< HEAD
                     if (!await isUniqueEmail(email)) {
+=======
+                    if (!await isUniqueEmail(clieField.email)) {
+>>>>>>> frontback
                         alert("Email already registered");
                         return;
                     }else{
@@ -182,7 +214,11 @@ document.getElementById('clientForm').addEventListener('submit', async function(
         .then(data => {
             if (data.status === 'success') {
                 alert(data.message);
+<<<<<<< HEAD
                 window.location.href = '/loginP/';
+=======
+                window.location.href = '/home';
+>>>>>>> frontback
             } else {
                 alert(data.message);
             }
@@ -192,4 +228,36 @@ document.getElementById('clientForm').addEventListener('submit', async function(
             alert('An error occurred. Please try again.');
         });
     }
+<<<<<<< HEAD
+=======
+        
+
+   /* const clientForm = new FormData(document.getElementById("clientForm"));
+
+    //html元素name == elements[]中的name == model中的attribute name
+    // 发送 POST 请求到 Django 后端视图
+    fetch('/client/add_client/', {
+        method: 'POST',
+        body: JSON.stringify(clieField),
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json(); // 如果后端返回 JSON 数据，则解析
+    })
+    .then(data => {
+        console.log('Success:', data);
+        window.location.href = "client_dataEdit.html";
+        // 到login之後要有一個變數辨認診所是否為第一次登入 是的話就進clinic_login_docManage
+    })
+    .catch(error => {
+        console.log('Error:', error);
+        // 处理错误情况，例如显示错误消息给用户
+    });*/
+>>>>>>> frontback
 });

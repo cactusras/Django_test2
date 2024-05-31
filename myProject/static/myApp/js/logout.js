@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', (event) => {
     const logoutButton = document.getElementById('logoutButton');
+<<<<<<< HEAD
     
+=======
+>>>>>>> frontback
     logoutButton.addEventListener('click', () => {
         fetch('/logout/', {
             method: 'POST',
@@ -12,7 +15,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
+<<<<<<< HEAD
                 window.location.href = '/';
+=======
+                window.location.href = '/home';
+>>>>>>> frontback
             } else {
                 console.error('Logout failed:', data.message);
             }

@@ -48,6 +48,10 @@
                                 <div class="col">
                                     <label for="name" class="required">專長</label>
                                     <form id="experForm">
+<<<<<<< HEAD
+=======
+                                        {% csrf_token %}
+>>>>>>> frontback
                                     <div class="form-floating">
                                         <!--<input type="text" class="form-control" id="expertise" name="expertise" style="width: 50%; margin-right: 30px;">-->
                                         <select id="expertiseSelect" name="expertiseSelect">
@@ -163,7 +167,11 @@
 
             <div class="d-flex justify-content-center">
 
+<<<<<<< HEAD
                 <button class="btn btn-outline-dark" type="button" onclick="logout(event)" id="btnLogout" style="font-size: 20px; width: 160px; height: 40px;">
+=======
+                <button class="btn btn-outline-dark" type="button" id="logoutButton" style="font-size: 20px; width: 160px; height: 40px;">
+>>>>>>> frontback
 
                     登出
 
@@ -180,5 +188,9 @@
             <!-- Core theme JS-->
             <script src="{% static 'myApp/js/scripts.js' %}"></script>
             <script src="{% static 'myApp/js/doctor.js' %}"></script>
+<<<<<<< HEAD
+=======
+            <script src="{% static 'myApp/js/logout.js' %}"></script>
+>>>>>>> frontback
     </body>
 </html>

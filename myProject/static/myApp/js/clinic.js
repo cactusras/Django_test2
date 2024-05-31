@@ -96,6 +96,7 @@ async function isUniqueEmail(email){
     }
 }
 
+<<<<<<< HEAD
 function fillForm(data, form) {
     if (!form) {
         console.error('Form not found');
@@ -111,6 +112,8 @@ function fillForm(data, form) {
 }
 
 
+=======
+>>>>>>> frontback
 function fetch_info(formFilled){
     fetch('/clinic_info/', {
         method: 'GET'
@@ -122,12 +125,23 @@ function fetch_info(formFilled){
         const data = await response.json();
 
         if (data.status === 'success') {
+<<<<<<< HEAD
             //const clinInfo = data.info;
             //console.log("info_type = " + typeof(data.data) + "  info = " + data.data)
             const clinInfo = data.data;
             console.log(clinInfo.photo_url)
             //console.log("info_type = " + typeof(data.data) + "  info = " + data.data)
             fillForm(clinInfo, formFilled);
+=======
+            const clinInfo = data.data;
+            //console.log("info_type = " + typeof(data.data) + "  info = " + data.data)
+            Object.keys(clinInfo).forEach(key => {
+                const field = formFilled.querySelector(`[name=${key}]`);
+                if (field) {
+                    field.value = data[key];
+                }
+            });
+>>>>>>> frontback
         } else {
             console.error(data.error);
         }

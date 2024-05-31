@@ -57,7 +57,10 @@ document.addEventListener('DOMContentLoaded', function() {
   })
   .then(data => {
       if (data.is_authenticated) {
+<<<<<<< HEAD
         //console.log(data.username)
+=======
+>>>>>>> frontback
         window.localStorage.setItem('isLogin', 'success')
         console.log('loginYes')
         btnNav.innerText = window.localStorage.getItem('username');
@@ -78,7 +81,10 @@ document.addEventListener('DOMContentLoaded', function() {
   
 function navBtn_listener(event){
   event.preventDefault();
+<<<<<<< HEAD
   console.log("click nav_btn")
+=======
+>>>>>>> frontback
   if (window.localStorage.getItem('isLogin') == 'success') {
     let usertype = window.localStorage.getItem('user_type')
     if(usertype == 'client'){
@@ -91,6 +97,7 @@ function navBtn_listener(event){
   }else if(window.localStorage.getItem('isLogin') == 'failed'){
     window.location.href = '/loginP'
   }
+<<<<<<< HEAD
   /*fetch('/fetch/user_type/')
   .then(response => {
       if (response.ok) {
@@ -115,4 +122,6 @@ function navBtn_listener(event){
   .catch(error => {
       console.log('Error checking authentication:', error);
   });*/
+=======
+>>>>>>> frontback
 }

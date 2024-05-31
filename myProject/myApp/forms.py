@@ -12,7 +12,11 @@ from django.contrib.auth import authenticate
 class CustomUserForm(forms.ModelForm):
     class Meta:
         model = CustomUser
+<<<<<<< HEAD
         fields = ['email', 'name', 'phone_number']
+=======
+        fields = ['email', 'name', 'phone_number', 'password']
+>>>>>>> frontback
 
 
 class DoctorForm(forms.ModelForm):
@@ -21,18 +25,32 @@ class DoctorForm(forms.ModelForm):
         fields = ['email', 'name','phone_number','password','photo' ]
     def __init__(self, *args, **kwargs):
         super(DoctorForm, self).__init__(*args,**kwargs)
+<<<<<<< HEAD
     #  self.fields['is_active'].initial = True
      #   self.fields['is_admin'].initial = False
+=======
+        #self.fields['is_active'].initial = True
+        #self.fields['is_admin'].initial = False
+>>>>>>> frontback
         
 class ClinicForm(forms.ModelForm):
     class Meta:
         model = Clinic
+<<<<<<< HEAD
         #fields = ['name', 'license_number','phone_number','address','introduction','photo','email','password' ]
         fields = ['email', 'name','phone_number','password','license_number','address','introduction','photo']
     def __init__(self, *args, **kwargs):
         super(ClinicForm, self).__init__(*args,**kwargs)
       #  self.fields['is_active'].initial = True
       #  self.fields['is_admin'].initial = False
+=======
+        #fields = ['name', 'license_number','phone_number','address','introduction','photo','email','pw' ]
+        fields = ['email', 'name','phone_number','password','license_number','address','introduction','photo']
+    def __init__(self, *args, **kwargs):
+        super(ClinicForm, self).__init__(*args,**kwargs)
+        #self.fields['is_active'].initial = True
+        #self.fields['is_admin'].initial = False
+>>>>>>> frontback
         
 class ClientForm(forms.ModelForm):
     class Meta:
@@ -130,6 +148,7 @@ class AuthenticationForm(forms.Form):
 		if self.user_cache:
 			return self.user_cache.id
 		return None
+<<<<<<< HEAD
 
 
 
@@ -174,6 +193,9 @@ class AuthenticationForm(forms.Form):
 #     def get_user(self):
 #         return self.user_cache
         
+=======
+     
+>>>>>>> frontback
 class LoginForm(forms.Form):
     email = forms.EmailField()
     password = forms.CharField(widget=forms.PasswordInput)

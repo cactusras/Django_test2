@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 # backends.py
+=======
+>>>>>>> frontback
 from django.contrib.auth.backends import BaseBackend
 from .models import CustomUser
 
