@@ -21,8 +21,8 @@ class DoctorForm(forms.ModelForm):
         fields = ['email', 'name','phone_number','password','photo' ]
     def __init__(self, *args, **kwargs):
         super(DoctorForm, self).__init__(*args,**kwargs)
-        self.fields['is_active'].initial = True
-        self.fields['is_admin'].initial = False
+    #  self.fields['is_active'].initial = True
+     #   self.fields['is_admin'].initial = False
         
 class ClinicForm(forms.ModelForm):
     class Meta:
@@ -31,8 +31,8 @@ class ClinicForm(forms.ModelForm):
         fields = ['email', 'name','phone_number','password','license_number','address','introduction','photo']
     def __init__(self, *args, **kwargs):
         super(ClinicForm, self).__init__(*args,**kwargs)
-        self.fields['is_active'].initial = True
-        self.fields['is_admin'].initial = False
+      #  self.fields['is_active'].initial = True
+      #  self.fields['is_admin'].initial = False
         
 class ClientForm(forms.ModelForm):
     class Meta:

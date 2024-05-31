@@ -39,17 +39,19 @@ document.addEventListener('DOMContentLoaded', function() {
         //頁面加載後才能把這些element load進來
         const btnRegis = document.getElementById('btnClieRegis');
         const barTitle = document.getElementById('barTitle');
-        fetch_element();
+        //fetch_element();
 
         //canva11進入canva12   
         if (window.isLogin){
             barTitle.innerText = '患者資料'
             btnRegis.addEventListener('click', function(){
                 window.location.href = "clinicPage.html"
+                fetch_element();
             })
             fetch_info();
         }else{
             barTitle.innerText = '註冊'
+            fetch_element();
         }
 })
 

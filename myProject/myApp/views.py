@@ -194,7 +194,10 @@ def add_clinic(request):
 
         if form.is_valid():
             cleaned_data = form.cleaned_data
-            print(cleaned_data)
+            print("Cleaned Data: ", cleaned_data)
+
+            #print(cleaned_data)
+            
             cleaned_data['is_active'] = True
             cleaned_data['is_admin'] = False
             cleaned_data['password'] = make_password(cleaned_data['password'])
@@ -1003,9 +1006,9 @@ def client_info(request):
     else:
         return JsonResponse({'error': 'User is not a client'}, status=400)
 
-def logout_view(request):
-    logout(request)
-    return render(request,'myApp/searchPage.html')
+# def logout_view(request):
+#     logout(request)
+#     return render(request,'myApp/searchPage.html')
 
 
 def check_reservations(request):
