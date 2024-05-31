@@ -25,10 +25,8 @@ def index(request):
     context={}
     return render(request, "myApp/index.html", context)
 
-
 @csrf_exempt
-def user_login(request):  
-    
+def user_login(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -38,7 +36,6 @@ def user_login(request):
             if user is not None:
                 login(request, user)  # Ensure the user object is passed correctly
                 # 登入成功，根據用戶身份導向不同的頁面
-                loginStatus = True
                 if hasattr(user, 'client'):  # 检查是否是客户
                     print('client')
                     return JsonResponse({'message': 'client', 'status': 'success'})
@@ -56,7 +53,6 @@ def user_login(request):
             return JsonResponse({'message': 'Invalid form data', 'errors': form.errors, 'status': 'error'})
     else:
         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
-
 
 def add_client(request):
     if request.method == 'POST':
@@ -92,7 +88,6 @@ def add_client(request):
                 defaults=cleaned_data
             )
 
-            # password = cleaned_data['pw']
 
             if created_client:
                 message = 'Client created successfully.'
@@ -1063,11 +1058,17 @@ def check_reservations(request):
 
     return JsonResponse({'message': 'Checked and updated reservations if necessary.'})
 
+
+@csrf_exempt
+def user_logout(request):
+    if request.method == 'POST':
+        logout(request)
+        print('logged out')
+        return JsonResponse({'message': 'Logged out successfully', 'status': 'success'})
+    else:
+        return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
+
 #如果是Status = 2或3的話 就不執行而是跳jsonresponse
 #變數名有待確認
 def client_cancel_reservation(request):
     return render(request, 'UserAppointmentRecords.html')
-
-@csrf_exempt
-def user_logout(request):
-        return JsonResponse({'message': 'Invalid request method', 'status': 'error'})

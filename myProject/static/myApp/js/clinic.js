@@ -134,14 +134,13 @@ document.getElementById('clinicForm').addEventListener('submit', async function 
     }
 
     if (isValid) {
-
         // Send AJAX request
         fetch('/add/clinic/', {
             method: 'POST',
             body: formData,
-            // headers: {
-            //     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value // Ensure you include the CSRF token
-            // }
+            headers: {
+                 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value // Ensure you include the CSRF token
+            }
         })
         .then(response => response.json())
         .then(data => {

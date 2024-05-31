@@ -77,3 +77,57 @@ class WaitingForm(forms.ModelForm):
 class LoginForm(forms.Form):
     email = forms.EmailField()
     password = forms.CharField(widget=forms.PasswordInput)
+#django自帶login
+class AuthenticationForm(forms.Form):
+	username = forms.CharField()
+	password = forms.CharField(widget=forms.PasswordInput)
+
+	error_messages = {
+		'invalid_login': _(
+			"Please enter a correct %(username)s and password. Note that both "
+			"fields may be case-sensitive."
+		),
+		'inactive': _("This account is inactive."),
+	}
+
+	def __init__(self, request=None, *args, **kwargs):
+		self.request = request
+		self.user_cache = None
+		super().__init__(*args, **kwargs)
+		self.username_field = User._meta.get_field(User.USERNAME_FIELD)
+		self.fields['username'].label = self.username_field.verbose_name
+		self.fields['username'].max_length = self.username_field.max_length or 254
+		if self.fields['username'].label is None:
+			self.fields['username'].label = _('Username')
+
+	def clean(self):
+		username = self.cleaned_data.get('username')
+		password = self.cleaned_data.get('password')
+
+		if username is not None and password:
+			self.user_cache = authenticate(self.request, username=username, password=password)
+			if self.user_cache is None:
+				raise forms.ValidationError(
+					self.error_messages['invalid_login'],
+					code='invalid_login',
+					params={'username': self.username_field.verbose_name},
+				)
+			else:
+				self.confirm_login_allowed(self.user_cache)
+
+		return self.cleaned_data
+
+	def confirm_login_allowed(self, user):
+		if not user.is_active:
+			raise forms.ValidationError(
+				self.error_messages['inactive'],
+				code='inactive',
+			)
+
+	def get_user(self):
+		return self.user_cache
+
+	def get_user_id(self):
+		if self.user_cache:
+			return self.user_cache.id
+		return None

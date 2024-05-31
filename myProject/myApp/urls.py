@@ -45,8 +45,6 @@ urlpatterns = [
     path('doctor_info/', views.doctor_info, name='doctor_info'),
     path('client_info/', views.client_info, name='client_info'),
     path('clinic/doctor/<int:doctor_id>/reserve/', views.clinic_reserve_doctor_confirmed, name='clinic_reserve_doctor_confirmed'),
-    # path('login/login_view/', views.login_view, name='login_view'),
     path('logout/', views.logout_view, name='logout_view'),
     path('check_reservations/', views.check_reservations, name='check_reservations'),
-    # path('client/delete/reserve/', views.client_cancel_reservation, name='client_cancel_reservation'),
 ]
