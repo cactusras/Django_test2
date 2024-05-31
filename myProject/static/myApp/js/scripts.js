@@ -38,68 +38,6 @@ $('#date1').datetimepicker({
 });*/
 
   //fetch使用者是否登入了 並設window變數(整個project都可取得)
-<<<<<<< HEAD
-  window.isLogin = "";
-  window.username = "username";
-  
-  document.addEventListener('DOMContentLoaded', function() {
-    const btnNav = document.getElementById('nav_btn');
-    fetch('/check_authentication/')
-    .then(response => {
-        if (response.ok) {
-            return response.json();
-        } else {
-            throw new Error('Network response was not ok');
-        }
-    })
-    .then(data => {
-        if (data.is_authenticated) {
-          window.isLogin = true;
-          console.log("isLogin = true");
-          btnNav.innerText = username;
-        }else{
-          window.isLogin = false;
-          console.log("isLogin = false");
-          btnNav.innerText = '登入';
-        }
-        document.dispatchEvent(new CustomEvent('authChecked', { detail: window.isLogin }));
-    })
-    .catch(error => {
-        console.log('Error checking authentication:', error);
-    });
-  })
-    
-  function navBtn_listener(event){
-    event.preventDefault();
-    fetch('/fetch/userType/')
-    .then(response => {
-        if (response.ok) {
-            return response.json();
-        } else {
-            throw new Error('Network response was not ok');
-        }
-    })
-    .then(data => {
-        if (window.isLogin) {
-          console.log("isLogin")
-          user_type = data.get('userType')
-          if(user_type == 'Client'){
-            window.location.href = '/client/data/edit/'
-          }else if(user_type == 'Clinic'){
-            window.location.href = '/clinic/data/edit/'
-          }else if(user_type == 'Doctor'){
-            window.location.href = '/doctor/data/edit/'
-          }
-        }else{
-          window.location.href = '/loginP/'
-        }
-    })
-    .catch(error => {
-        console.log('Error checking authentication:', error);
-    });
-    
-  }
-=======
 //window.isLogin = "";
 
 
@@ -177,4 +115,3 @@ function navBtn_listener(event){
       console.log('Error checking authentication:', error);
   });*/
 }
->>>>>>> frontback

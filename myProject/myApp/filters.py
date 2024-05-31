@@ -1,10 +1,6 @@
 import django_filters
 from .models import Doctor, Doc_Expertise,Expertise,Scheduling,WorkingHour,docClinicSearch
 
-<<<<<<< HEAD
-
-=======
->>>>>>> frontback
 class DoctorFilter(django_filters.FilterSet):
     name = django_filters.CharFilter(lookup_expr='icontains')
     clinicID = django_filters.CharFilter(field_name= 'clinicID__name',lookup_expr='icontains')
@@ -43,15 +39,6 @@ class docClinicFilter(django_filters.FilterSet):
             )
         return queryset
 
-<<<<<<< HEAD
-
-=======
-    
-    
-
-
-    
->>>>>>> frontback
   
 
    

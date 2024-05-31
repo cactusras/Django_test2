@@ -40,8 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_filters',
     'debug_toolbar',
-    'myApp',
-    'django_filters'
+    'myApp'
 ]
 
 MIDDLEWARE = [
@@ -78,16 +77,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'myProject.wsgi.application'
 
 AUTHENTICATION_BACKENDS = [
-<<<<<<< HEAD
-    'myApp.backend.EmailBackend',  # Adjust to your app name
-    'django.contrib.auth.backends.ModelBackend',
-]
-
-=======
     'myApp.backend.EmailBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
->>>>>>> frontback
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -97,13 +89,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME':  'db_project',
         'USER': 'root',
-<<<<<<< HEAD
         'PASSWORD': '03OnionOnion@',
-=======
-        'PASSWORD': 'syy88824',
->>>>>>> frontback
         'HOST': 'localhost',
-        'PORT': '3307'
+        'PORT': '3306'
     }
 }
 
