@@ -1119,3 +1119,27 @@ def user_logout(request):
         return JsonResponse({'message': 'Logged out successfully', 'status': 'success'})
     else:
         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
+
+
+   
+def clinic_info(request):
+    if hasattr(request.user, 'clinic'):
+        user = request.user
+        info = {
+            'email': user.email,
+            'name': user.name,
+            'phone_number': user.phone_number,
+            'password': user.password,
+            'address': user.clinic.address,
+            'license_number': user.clinic.license_number,
+            #'photo_url': user.clinic.photo.url,
+            'introduction': user.clinic.introduction,
+        }
+        print("info = ", info)
+        if user.clinic.photo and user.clinic.photo.name:
+           info['photo_url'] =  user.clinic.photo.url
+        print("info = ", info)
+        print('photo = ', user.clinic.photo, '  name = ', user.clinic.photo.name)
+        return JsonResponse({'status': 'success', 'data': info}, status=200)
+    else:
+        return JsonResponse({'status': 'error', 'error': 'User is not a clinic'}, status=400)

@@ -44,6 +44,7 @@ urlpatterns = [
     path('check_authentication/', views.check_authentication, name='check_authentication'),
     path('doctor_info/', views.doctor_info, name='doctor_info'),
     path('client_info/', views.client_info, name='client_info'),
+    path('clinic_info/', views.clinic_info, name='clinic_info'),
     path('clinic/doctor/<int:doctor_id>/reserve/', views.clinic_reserve_doctor_confirmed, name='clinic_reserve_doctor_confirmed'),
     # path('login/login_view/', views.login_view, name='login_view'),
     path('logout/', views.user_logout, name='logout'),

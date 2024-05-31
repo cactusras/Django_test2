@@ -48,17 +48,12 @@ document.addEventListener('DOMContentLoaded', function() {
             barTitle.innerText = '患者資料'
             btnRegis.innerText = '回到主頁'
             fetch_info(clieForm);
-            // btnRegis.addEventListener('click', function(){
-            //     window.location.href = "clinicPage.html"
-            //     fetch_element();
-            // })
-            //fetch_info();
+      
         }else if(window.localStorage.getItem('isLogin') == 'failed'){
             console.log('cliejs46_no')
             barTitle.innerText = '註冊'
             btnRegis.innerText = '完成'
-            // barTitle.innerText = '註冊'
-            // fetch_element();
+          
         }
 })
 
