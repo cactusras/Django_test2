@@ -43,12 +43,12 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch_element();
         //canva11進入canva12   
         if (window.localStorage.getItem('isLogin') == 'success'){
-            console.log('cliejs46')
+            //console.log('cliejs46')
             barTitle.innerText = '患者資料'
             btnRegis.innerText = '回到主頁'
             fetch_info(clieForm);
         }else if(window.localStorage.getItem('isLogin') == 'failed'){
-            console.log('cliejs46_no')
+            //console.log('cliejs46_no')
             barTitle.innerText = '註冊'
             btnRegis.innerText = '完成'
         }
@@ -121,6 +121,7 @@ function fillForm(data, form) {
     });
 }
 
+
 document.getElementById('clientForm').addEventListener('submit', async function(event){
     let isValid = false;
     console.log("clicked regis")
@@ -179,6 +180,7 @@ document.getElementById('clientForm').addEventListener('submit', async function(
             alert('An error occurred. Please try again.');
         });
     }
+        
 
    /* const clientForm = new FormData(document.getElementById("clientForm"));
 
