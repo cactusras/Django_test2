@@ -40,7 +40,11 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4"></ul>
                 <div class="ms-auto">
+<<<<<<< HEAD
                     <button class="btn btn-outline-dark" type="submit" id="nav_btn" onclick="clinic_navBtn(event)" style="font-size: 20px;">
+=======
+                    <button class="btn btn-outline-dark" type="submit" id="nav_btn" onclick="navBtn_listener(event)" style="font-size: 20px;">
+>>>>>>> frontback
                         <i class="bi bi-person-fill"></i>
                         使用者
                     </button>
@@ -591,10 +595,13 @@
     <!-- Core theme JS-->
     <script src="{% static 'myApp/js/scripts.js' %}"></script>
     <script>
+<<<<<<< HEAD
         function clinic_navBtn(event){
             window.location.href = '/clinic/data/edit'
         }
 
+=======
+>>>>>>> frontback
         // For Button 1
         document.getElementById('confirmReportButton1').addEventListener('click', function() {
             document.getElementById('reportButton1').innerHTML = '<i class="bi bi-check-circle-fill"></i> 已報到';
