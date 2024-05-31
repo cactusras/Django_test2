@@ -57,6 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
   })
   .then(data => {
       if (data.is_authenticated) {
+        //console.log(data.username)
         window.localStorage.setItem('isLogin', 'success')
         console.log('loginYes')
         btnNav.innerText = window.localStorage.getItem('username');

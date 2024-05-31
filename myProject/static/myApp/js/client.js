@@ -47,10 +47,12 @@ document.addEventListener('DOMContentLoaded', function() {
             barTitle.innerText = '患者資料'
             btnRegis.innerText = '回到主頁'
             fetch_info(clieForm);
+      
         }else if(window.localStorage.getItem('isLogin') == 'failed'){
             console.log('cliejs46_no')
             barTitle.innerText = '註冊'
             btnRegis.innerText = '完成'
+          
         }
 })
 
@@ -62,6 +64,7 @@ function click_regis(event){
         window.location.href = "/loginP"
     }
 }
+
 
 async function isUniqueEmail(email){
     try {
@@ -84,7 +87,6 @@ async function isUniqueEmail(email){
 
 //是抓後端存著的資料
 function fetch_info(formFilled){
-    console.log('fetch_info')
     fetch('/client_info/', {
         method: 'GET'
     })
@@ -93,7 +95,7 @@ function fetch_info(formFilled){
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
-
+        //return response.json(); // 解析 JSON 响应
         if (data.status === 'success') {
             const clieInfo = data.data;
             //console.log("info_type = " + typeof(data.data) + "  info = " + data.data)
@@ -101,7 +103,16 @@ function fetch_info(formFilled){
         } else {
             console.error(data.error);
         }
-    })   
+    })
+    // .then(infoDic =>{
+    //     username = infoDic['name'];
+    //     for (var key in infoDic) {
+    //         if (infoDic.hasOwnProperty(key)) {
+    //             //
+    //             clieField[key] = infoDic[key];
+    //         }
+    //     }
+    // })   
     .catch(error => {
         console.log('Error:', error);
     });
@@ -120,6 +131,7 @@ function fillForm(data, form) {
         }
     });
 }
+
 
 document.getElementById('clientForm').addEventListener('submit', async function(event){
     let isValid = false;

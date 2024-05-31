@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('loginForm').addEventListener('submit', async function(event) {
         event.preventDefault(); // Prevent default form submission
@@ -18,14 +19,18 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(data => {
             // print("to js")
+
+            window.localStorage.clear()
+            window.localStorage.setItem('user_type',data.user_type)
+            window.localStorage.setItem('username',data.username)
             if (data.status === 'success') {
-                if(data.message == 'client'){
+                if(data.user_type == 'client'){
                     // alert('Login success: ' + data.message);
                     window.location.href = '/home/'; // Redirect to the home page
-                }else if(data.message == 'clinic'){
+                }else if(data.user_type == 'clinic'){
                     // alert('Login success: ' + data.message);
                     window.location.href = '/clinic/home/'; // Redirect to the home page
-                }else if(data.message == 'doctor'){
+                }else if(data.user_type == 'doctor'){
                     // alert('Login success: ' + data.message);
                     window.location.href = '/doctor/page/'; // Redirect to the home page
                 }else{

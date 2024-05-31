@@ -39,11 +39,7 @@
         <section class="py-5"  style="background-color:#FFFFF4">
             <div class="container" style="border: 1px solid #F0EAD6;">
                 <div class="row row-cols-1">
-<<<<<<< HEAD
-                    <form id="clinicForm" method="post" enctype="multipart/form-data" action="{% url 'add_clinic' %}">
-=======
                     <form id="clinicForm"  enctype="multipart/form-data">
->>>>>>> frontback
                      {% csrf_token %}
                         <fieldset>
                       <legend id="barTitle" class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:76px; font-size: 20px; ">
@@ -110,17 +106,16 @@
                             <div class="form-floating">
                                 <input type="file" class="form-control-file" id="photo" name="photo">
                             </div>
+                             
+                             <img src="{{ data.photo_url }}" alt="Clinic Photo">
+                             
                         </div>
                         <!--管理醫師&完成按鈕-->
                         <!--他們現在還是並排的，之後再說-->
                        
                         <button class="setting-button" id="btnDocManage">管理/新增醫師</button>
 
-<<<<<<< HEAD
-                        <button class="rectangle-button" id="btnClinRegis" type="submit">完成</button>
-=======
                         <button class="rectangle-button" id="btnClinRegis" onclick="regis_click(event)" type="submit">完成</button>
->>>>>>> frontback
                      </fieldset>
                     </form>
                     </div>
@@ -155,11 +150,5 @@
             <script src="{% static 'myApp/js/scripts.js' %}"></script>
             <script src="{% static 'myApp/js/clinic.js' %}"></script>
             <script src="{% static 'myApp/js/logout.js' %}"></script>
-<<<<<<< HEAD
-            
     </body>
 </html>
-=======
-    </body>
-</html>
->>>>>>> frontback

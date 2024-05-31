@@ -36,18 +36,24 @@ def user_login(request):
             password = form.cleaned_data['password']
             user = authenticate(request, email=email, password=password)
             if user is not None:
+                username = user.name
+                user_type = None
                 login(request, user)  # Ensure the user object is passed correctly
                 # 登入成功，根據用戶身份導向不同的頁面
                 loginStatus = True
                 if hasattr(user, 'client'):  # 检查是否是客户
                     print('client')
-                    return JsonResponse({'message': 'client', 'status': 'success'})
+                    user_type = 'client'
+                    return JsonResponse({'user_type': 'client', 'username': username,  'status': 'success'})
                 elif hasattr(user, 'clinic'):  # 检查是否是诊所
                     print('clinic')
-                    return JsonResponse({'message': 'clinic', 'status': 'success'})
+              
+                    user_type = 'clinic'
+                    return JsonResponse({'user_type': 'clinic', 'username': username,  'status': 'success'})
                 elif hasattr(user, 'experience'):  # 检查是否是医生
                     print('doctor')
-                    return JsonResponse({'message': 'doctor', 'status': 'success'})
+                    user_type = 'doctor'
+                    return JsonResponse({'user_type': 'doctor', 'username': username,  'status': 'success'})
                 else:
                     return JsonResponse({'message': 'unknown', 'status': 'success'})
             else:
@@ -933,7 +939,7 @@ def loginP(request):
 
 def clinHome(request):
     context={}
-    return render(request, "myApp/clinicPage.html", context)
+    return render(request, "myApp/clinic_dataEdit.html", context)
 
 
 def docManage(request):
@@ -1017,7 +1023,7 @@ def doctor_info(request):
             'email': user.email,
             'name': user.name,
             'phone_number': user.phone_number,
-            'password': user.pw,
+            'password': user.password,
             'photo_url': user.doctor.photo.url,
             'experience': user.doctor.experience,
         }
@@ -1032,20 +1038,21 @@ def client_info(request):
             'email': user.email,
             'name': user.name,
             'phone_number': user.phone_number,
-            'password': user.pw,
+            'password': user.password,
             'address': user.client.address,
             'birth_date': user.client.birth_date,
             'gender': user.client.gender,
             'occupation': user.client.occupation,
             'notify': user.client.notify,
         }
-        return JsonResponse(info)
+        print("info = ", info)
+        return JsonResponse({'status': 'success', 'data': info}, status=200)
     else:
-        return JsonResponse({'error': 'User is not a client'}, status=400)
+        return JsonResponse({'status': 'error', 'error': 'User is not a client'}, status=400)
 
-def logout_view(request):
-    logout(request)
-    return render(request,'myApp/searchPage.html')
+# def logout_view(request):
+#     logout(request)
+#     return render(request,'myApp/searchPage.html')
 
 def check_reservations(request):
     now = now()
@@ -1071,3 +1078,27 @@ def client_cancel_reservation(request):
 @csrf_exempt
 def user_logout(request):
         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
+
+
+   
+def clinic_info(request):
+    if hasattr(request.user, 'clinic'):
+        user = request.user
+        info = {
+            'email': user.email,
+            'name': user.name,
+            'phone_number': user.phone_number,
+            'password': user.password,
+            'address': user.clinic.address,
+            'license_number': user.clinic.license_number,
+            #'photo_url': user.clinic.photo.url,
+            'introduction': user.clinic.introduction,
+        }
+        print("info = ", info)
+        if user.clinic.photo and user.clinic.photo.name:
+           info['photo_url'] =  user.clinic.photo.url
+        print("info = ", info)
+        print('photo = ', user.clinic.photo, '  name = ', user.clinic.photo.name)
+        return JsonResponse({'status': 'success', 'data': info}, status=200)
+    else:
+        return JsonResponse({'status': 'error', 'error': 'User is not a clinic'}, status=400)
