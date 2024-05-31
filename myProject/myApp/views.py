@@ -194,10 +194,7 @@ def add_clinic(request):
 
         if form.is_valid():
             cleaned_data = form.cleaned_data
-            print("Cleaned Data: ", cleaned_data)
-
-            #print(cleaned_data)
-            
+            print(cleaned_data)
             cleaned_data['is_active'] = True
             cleaned_data['is_admin'] = False
             cleaned_data['password'] = make_password(cleaned_data['password'])

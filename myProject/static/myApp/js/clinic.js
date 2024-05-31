@@ -26,11 +26,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnRegis = document.getElementById('btnClinRegis');
     const btnDocManage = document.getElementById('btnDocManage');
     const barTitle = document.getElementById('barTitle');
-    //fetch_element();
+    fetch_element();
 
     // Handle login state
     if (window.isLogin) {
-        fetch_element();
         barTitle.innerText = '診所資料';
         btnDocManage.hidden = false;
         btnDocManage.addEventListener('click', function () {
@@ -40,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function () {
             window.location.href = "clinicPage.html";
         });
         fetch_info();
-    } else if(!window.isLogin) {
+    } else {
         btnDocManage.hidden = true;
         barTitle.innerText = '註冊';
     }
@@ -140,9 +139,9 @@ document.getElementById('clinicForm').addEventListener('submit', async function 
         fetch('/add/clinic/', {
             method: 'POST',
             body: formData,
-            headers: {
-                // 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value // Ensure you include the CSRF token
-            }
+            // headers: {
+            //     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value // Ensure you include the CSRF token
+            // }
         })
         .then(response => response.json())
         .then(data => {
