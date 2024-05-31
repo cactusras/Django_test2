@@ -77,7 +77,6 @@ document.addEventListener('DOMContentLoaded', function() {
   
 function navBtn_listener(event){
   event.preventDefault();
-  console.log("click nav_btn")
   if (window.localStorage.getItem('isLogin') == 'success') {
     let usertype = window.localStorage.getItem('user_type')
     if(usertype == 'client'){
@@ -90,28 +89,4 @@ function navBtn_listener(event){
   }else if(window.localStorage.getItem('isLogin') == 'failed'){
     window.location.href = '/loginP'
   }
-  /*fetch('/fetch/user_type/')
-  .then(response => {
-      if (response.ok) {
-          return response.json();
-      } else {
-          throw new Error('Network response was not ok');
-      }
-  })
-  .then(data => {
-      if (data.isLogin == 'success') {
-        if(data.user_type == 'client'){
-          window.location.href = '/client/data/edit'
-        }else if(data.user_type == 'clinic'){
-          window.location.href = '/clinic/data/edit'
-        }else if(data.user_type == 'doctor'){
-          window.location.href = '/doctor/data/edit'
-        }
-      }else{
-        window.location.href = '/loginP'
-      }
-  })
-  .catch(error => {
-      console.log('Error checking authentication:', error);
-  });*/
 }

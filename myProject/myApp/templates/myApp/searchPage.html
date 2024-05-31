@@ -56,6 +56,7 @@
                     </div>
                     <!--搜尋左半部-->
                     <form id="searchForm">
+                    {% csrf_token %}
                     <div class="col" style="background-color:#fffff0; border: 1px solid #ada089; height:450px; font-size: 20px;">
                         縣市地區<br>
                         <div class="row">
@@ -259,6 +260,7 @@
                         appointed_date: document.getElementById('inputDate').value,
                         exp_name: experVlue,
                     };
+                    setTimeout(console.log("form = " + form), 5000)
                     fetch('/doctor/clinic/search/', {
                         method: 'POST',
                         headers: {

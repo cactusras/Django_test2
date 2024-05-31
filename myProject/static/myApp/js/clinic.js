@@ -132,21 +132,6 @@ document.getElementById('clinicForm').addEventListener('submit', async function(
     //在這裡處理這些attribute的限制(不能default vlue.length...)
     //有任一項不符合就進到return; 不會繼續往下
     fetch_element();
-    //確認form中有必填沒被填上改成用html的required判斷
-    /*if (Object.values(clinField).some(value => value == "" || value === undefined)){
-        for (var [key, value] of Object.entries(clinField)) {
-            //再找出沒被填到的元素
-            if (value == "") {
-                alert(`${key} must be filled in`);
-                break;
-                return;
-            }else if(value === undefined){
-                //只有photo可能是undefined型態
-                alert(`You must add at least one photo`);
-                return;
-            }
-        }        
-    }*/
     //email格式在html的type = 'email'就確認了
     if (clinField.name.length > 100) {
         alert("Name cannot exceed 100 characters");
