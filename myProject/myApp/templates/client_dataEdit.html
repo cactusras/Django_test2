@@ -1,0 +1,175 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>User Account</title>
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="{% static 'myApp/assets/favicon.ico' %}" />
+        <!-- Bootstrap icons-->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="{% static 'myApp/css/styles_client_dataEdit.css' %}" rel="stylesheet" />
+         <!-- Bootstrap date-->
+        <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="https://cdn.bootcss.com/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+        <style>
+            .form-select {
+                font-size: 15px;
+            }
+
+            #gender option {
+            color: #808080; /* 您可以根據需要設置不同的顏色 */
+            }
+        </style>
+    </head>
+    <body>
+        <!--網頁頭-->
+        <nav class="navbar navbar-expand-lg" style="background-color:#F0EAD6;  height: 100px;">
+            <div class="container px-4 px-lg-5">
+                <img src="{% static 'myApp/assets/dental.png' %}" alt="DEN Logo">
+                <a class="navbar-brand" href="#!"  style="font-size: 24px;"> 牙醫預約平台</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                   
+                    <div class="ms-auto">
+                        <button class="btn btn-outline-dark" id="nav_btn" type="submit" onclick="navBtn_listener(event)" style="font-size: 20px;">
+                            <i class="bi bi-person-fill"></i>
+                            使用者
+                         <!--  <span class="badge bg-dark text-white ms-1 rounded-pill">0</span> -->
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </nav>
+        <!--就只是字-->
+        <section class="py-5"  style="background-color:#FFFFF4">
+            <div class="container" style="border: 1px solid #F0EAD6;">
+                <div class="row row-cols-1">
+                    <form id="clientForm">
+                        {% csrf_token %}
+                            <fieldset>
+                    <legend id="barTitle" class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:80px; font-size: 20px; ">
+                        我的帳號
+                    </legend>
+                    <!--註冊內容-->
+                    <div class="col" style="background-color:#fffff0; border: 1px solid #ada089; height:650px; font-size: 20px;">
+                        <br>
+                        <div class="row">
+                            <div class="col">
+                                <label for="email" class="required">帳號(電子郵件)</label>
+                                <div class="form-floating">
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <label for="phone_number" class="required">電話</label>
+                                <div class="form-floating">
+                                    <input type="tel" class="form-control" id="phone_number" name="phone_number" required>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col">
+                                <label for="password" class="required">密碼</label>
+                                <div class="form-floating">
+                                    <input type="password" class="form-control" id="password" name="password" required>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <label for="gender" class="required">性別</label>
+                                <div class="form-floating">
+                                    <select class="form-select" id="gender" name="gender" required>
+                                        <option value="">選擇性別</option>
+                                        <option value="male">男</option>
+                                        <option value="female">女</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col">
+                                <label for="name" class="required">名字</label>
+                                <div class="form-floating">
+                                    <input type="text" class="form-control half-width" id="name" name="name" style="width: 575px;" required>
+                                  
+                                </div>
+                            </div>
+                            <div class="col">
+                                <label for="address">地址</label>
+                                <div class="form-floating">
+                                    <input type="text" class="form-control half-width" id="address" name="address" style="width: 575px;">
+                                  
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col">
+                                <label for="birth_date" class="required">生日</label>
+                                <div class="form-floating">
+                                    <input type="date" class="form-control half-width" id="birth_date" name="birth_date" style="width: 575px;" required>
+                                    
+                                </div>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" id="notify" name="notify" value="isNotify" checked>是否確認接收通知
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col">
+                                <label for="occupation">職業</label>
+                                <div class="form-floating">
+                                    <input type="text" class="form-control half-width" id="occupation" name="occupation" style="width: 575px;">
+                                </div>
+                            </div>
+                            
+                        </div>
+
+                        <!--設定編輯按鈕-->
+                        <button class="rectangle-button" id="btnClieRegis" type="submit">完成</button>
+                      </fieldset>
+                     </form>
+                    </div>
+
+                    <!--設定登出按鈕-->
+                    <button class="logout-button" id="logoutButton" onclick="redirectToPage()">登出</button>
+                        <!--要轉跳到註冊頁面-->
+                        <script>
+                        function redirectToPage() {
+                            window.location.href = 'http://127.0.0.1:8000/database%E7%81%8F%E5%A0%9F%EE%94%8D/search/index.html';
+                        }
+                        </script>
+                    </div> 
+        </section>
+        
+  
+                </div>
+              </div>
+           </div>
+           <!--排版空格-->
+           <br>
+           <br>
+          <!--返回頁面頂部按鈕-->
+           <div class="d-flex justify-content-center">
+            <button onclick="window.scrollTo(0, 0)" class="btn" style="background-color :#F0EAD6; border: 1px solid #ada089;">返回頂部</button>
+        </div>
+            </section>
+             <!--頁面底-->
+            <footer class="py-5 bg-dark">
+                <div class="container"><p class="m-0 text-center text-white">Copyright &copy; Your Website 2023</p></div>
+            </footer>
+            <!-- Bootstrap core JS-->
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+            <!-- Core theme JS-->
+            <script src="{% static 'myApp/js/scripts.js' %}"></script>
+            <script src="{% static 'myApp/js/client.js' %}"></script>
+            <script src="{% static 'myApp/js/logout.js' %}"></script>
+    </body>
+</html>
