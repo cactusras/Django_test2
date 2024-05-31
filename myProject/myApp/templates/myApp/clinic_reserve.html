@@ -219,7 +219,7 @@
                                         option.textContent = expertise.expertise_name;
                                         expertiseSelect.appendChild(option);
                                     });
-                                }
+                                })
 
                                 timeBtns = document.querySelectorAll('timeBtn')
                                 /*const doctorName = document.getElementById('doctorLabel').value;
@@ -252,9 +252,9 @@
                                             if(data.includes[timebtn.value]){
                                                 //調顏色(reserve狀態)
                                                 timebtn.style = ''
-                                                timebtn.addEventListener(){
+                                                timebtn.addEventListener({
 
-                                                }
+                                                })
                                             }
                                             
                                         })
@@ -262,12 +262,12 @@
                                     .catch(error => {
                                         console.log('Error:', error);
                                     });
-                                };
+                                }
                             
                                 document.getElementById('experSelect').addEventListener('change', selectOrInputHandler);
                                 document.getElementById('doctorSelect').addEventListener('change', selectOrInputHandler);
                                 document.getElementById('dateInput').addEventListener('change', selectOrInputHandler);
-                            });
+                            })
 
                             function expertiseChange(event){
                                 event.preventDefault();
