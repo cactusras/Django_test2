@@ -38,16 +38,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_filters',
-    'debug_toolbar',
-    'myApp'
+    'myApp',
+    'django_filters'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -60,7 +58,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            BASE_DIR.joinpath('myApp').joinpath('templates')
+            BASE_DIR / 'myApp' / 'templates'
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -77,9 +75,10 @@ TEMPLATES = [
 WSGI_APPLICATION = 'myProject.wsgi.application'
 
 AUTHENTICATION_BACKENDS = [
-    'myApp.backend.EmailBackend',
+    'myApp.backend.EmailBackend',  # Adjust to your app name
     'django.contrib.auth.backends.ModelBackend',
 ]
+
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases

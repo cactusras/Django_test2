@@ -55,7 +55,7 @@
                         地圖
                     </div>
                     <!--搜尋左半部-->
-                    <form id="searchForm">
+                    <form method="post" id="searchForm" action="<{% url "doctor_clinic_search" %}">
                     <div class="col" style="background-color:#fffff0; border: 1px solid #ada089; height:450px; font-size: 20px;">
                         縣市地區<br>
                         <div class="row">
@@ -86,7 +86,7 @@
                             <select class="form-select" id="district" style="width: 320px; height: 40px;">
                                 <option value="">--請先選擇縣市--</option>
                             </select>
-                            <input id="addressVlue" name="addressVlue" hidden>
+                            <input id="addressVlue" hidden>
                         </div>
                         治療項目<br>
                         <div class="row">
@@ -104,31 +104,25 @@
                             <select class="form-select" id="treatment" style="width: 320px; height: 40px;">
                                 <option value="">--請先選擇大範圍治療項目--</option>
                             </select>
-                            <input id="experVlue" name="experVlue" hidden>
+                            <input id="experVlue" hidden>
                         </div>
                         看診日期<br>
                        <div>
                             <label>
-                                <input type="date" id="inputDate" name="inputDate" min=new Date().toISOString().split('T')[0] style="width: 240px; height: 40px;"/>
+                                開始：
+                                <input type="date" id="" name="bday" min=new Date().toISOString().split('T')[0] style="width: 240px; height: 40px;"/>
+                            </label>
+                            <label>
+                                結束：
+                                <input type="date" name="bday" min=new Date().toISOString().split('T')[0] style="width: 250px; height: 40px;"/>
                             </label>
                        </div>
                         <br>
+                        <div class="form-floating">
+                            <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea"></textarea>
+                            <label for="floatingTextarea" style="color:#808080">輸入醫師名稱/診所名稱/治療項目</label>
+                        </div>
                         <br>
-                            <div class="row">
-                              <div class="col-md-6">
-                                <div class="form-floating">
-                                  <textarea class="form-control custom-textarea" placeholder="Leave a comment here" id="clinicNameInput" name="clinicNameInput" style="height: 50px;"></textarea>
-                                  <label for="clinicNameInput" style="color:#808080">請輸入診所名稱</label>
-                                </div>
-                              </div>
-                              <div class="col-md-6">
-                                <div class="form-floating">
-                                  <textarea class="form-control custom-textarea" placeholder="Leave a comment here" id="doctorNameInput" name="doctorNameInput" style="height: 50px;"></textarea>
-                                  <label for="doctorNameInput" style="color:#808080">請輸入治療項目</label>
-                                </div>
-                              </div>
-                            </div>
-                            <br>
                         <br>
                         <div class="d-flex">
                             <button id="searchButton" class="btn btn-outline-dark" type="submit" style="font-size: 20px; width: 630px; height: 40px;">
@@ -146,72 +140,73 @@
                 </div>
             </div>
         </section>
-            <!--搜尋結果-->
-            <section class="py-5 clickShow" style="background-color:#FFFFF4;">
-                <div class="container px-4 px-lg-5 mt-5 clickShow" style="background-color:#FFFFF4;">
-                    <h2 class="fw-bolder mb-4 clickShow">搜尋結果</h2>
-            
-                    <!--醫生與診所結果-->
-                    <div class="container clickShow" style="border: 1px solid #FFFFF4">
-                        <div class="row justify-content-evenly clickShow">
-                            <!--醫生結果-->
-                            <div class="col-4 clickShow" style="background-color:#fffff0; border: 1px solid #ada089; width: 550px; height:600px; font-size: 20px;">
-                                <div class="h2 clickShow" style="text-align: center;">
-                                    <p>醫師</p>
-                                </div>
-                                <figure class="figure clickShow">
-                                    <img src="https://cdn-icons-png.flaticon.com/512/3845/3845316.png" class="img-thumbnail clickShow" alt="doctor" style="width: 300px; height: 300px;">
-                                    <figcaption class="figure-caption clickShow">
-                                        <p style="color: black;">醫師：</p>
-                                        <p style="color: black;">診所：</p>
-                                        <p style="color: black;">診所地址：</p>
-                                        <p style="color: black;">治療項目：</p>
-                                    </figcaption>
-                                </figure>
-                                <br> 
-                                <!--預約按鈕-->
-                                <div class="d-flex justify-content-center clickShow">
-                                    <button class="btn btn-outline-dark" type="submit" style="font-size: 20px; width: 160px; height: 40px;" onclick="docReserve(event)">
-                                        <i class="bi bi-calendar-check-fill"></i>
-                                        預約此醫師
-                                    </button>
-                                </div>
-                            </div> 
-                            <!--診所結果-->
-                            <div class="col-4 clickShow" style="background-color:#fffff0; border: 1px solid #ada089;width: 550px; height:600px; font-size: 20px;">
-                                <div class="h2 clickShow" style="text-align: center;">
-                                    <p>診所</p>
-                                </div>
-                                <figure class="figure clickShow">
-                                    <img src="https://cdn-icons-png.flaticon.com/512/3845/3845316.png" class="img-thumbnail clickShow" alt="clinic" style="width: 300px; height: 300px;">
-                                    <figcaption class="figure-caption clickShow">
-                                        <p style="color: black;">診所：</p>
-                                        <p style="color: black;">診所地址：</p>
-                                        <p style="color: black;">簡介：</p>
-                                        <p style="color: black;">治療項目：</p>
-                                    </figcaption>
-                                </figure>
-                                <br>
-                                <!--預約按鈕-->
-                                <div class="d-flex justify-content-center clickShow">
-                                    <button class="btn btn-outline-dark" type="submit" style="font-size: 20px; width: 160px; height: 40px;" onclick="clinReserve(event)">
-                                        <i class="bi bi-calendar-check-fill"></i>
-                                        預約
-                                    </button>
-                                </div>
+
+       
+                <!--搜尋結果-->
+        <section class="py-5" style="background-color:#FFFFF4;" >
+            <div class="container px-4 px-lg-5 mt-5" style="background-color:#FFFFF4;" >
+                <h2 class="fw-bolder mb-4">搜尋結果</h2>
+
+                <!--醫生與診所結果-->
+                <div class="container" style="border: 1px solid #FFFFF4">
+                    <div class="row justify-content-evenly">
+                        <!--醫生結果-->
+                        <div class="col-4" style="background-color:#fffff0; border: 1px solid #ada089; width: 550px; height:600px; font-size: 20px;">
+                            <div class="h2" style="text-align: center;">
+                                <p>醫師</p>
+                            </div>
+                            <figure class="figure">
+                                <img src="https://cdn-icons-png.flaticon.com/512/3845/3845316.png" class="img-thumbnail" alt="doctor" style="width: 300px; height: 300px;">
+                                <figcaption class="figure-caption">
+                                    <p style="color: black;">醫師：</p>
+                                    <p style="color: black;">診所：</p>
+                                    <p style="color: black;">診所地址：</p>
+                                    <p style="color: black;">治療項目：</p>
+                                </figcaption>
+                            </figure>
+                            <br> 
+                            <!--預約按鈕-->
+                            <div class="d-flex justify-content-center">
+                                <button class="btn btn-outline-dark" type="submit" style="font-size: 20px; width: 160px; height: 40px;" onclick="docReserve(event)">
+                                    <i class="bi bi-calendar-check-fill"></i>
+                                    預約此醫師
+                                </button>
+                            </div>
+                        </div> 
+                        <!--診所結果-->
+                        <div class="col-4" style="background-color:#fffff0; border: 1px solid #ada089;width: 550px; height:600px; font-size: 20px;">
+                            <div class="h2" style="text-align: center;">
+                                <p>診所</p>
+                            </div>
+                            <figure class="figure">
+                                <img src="https://cdn-icons-png.flaticon.com/512/3845/3845316.png" class="img-thumbnail" alt="clinic" style="width: 300px; height: 300px;">
+                                <figcaption class="figure-caption">
+                                    <p style="color: black;">診所：</p>
+                                    <p style="color: black;">診所地址：</p>
+                                    <p style="color: black;">簡介：</p>
+                                    <p style="color: black;">治療項目：</p>
+                                </figcaption>
+                            </figure>
+                            <br>
+                            <!--預約按鈕-->
+                            <div class="d-flex justify-content-center">
+                                <button class="btn btn-outline-dark" type="submit" style="font-size: 20px; width: 160px; height: 40px;" onclick="clinReserve(event)">
+                                    <i class="bi bi-calendar-check-fill"></i>
+                                    預約
+                                </button>
                             </div>
                         </div>
                     </div>
-                    <!--排版空格-->
-                    <br>
-                    <br>
-                    <!--返回頁面頂部按鈕-->
-                    <div class="d-flex justify-content-center clickShow">
-                        <button onclick="window.scrollTo(0, 0)" class="btn" style="background-color:#F0EAD6; border: 1px solid #ada089;">返回頂部</button>
-                    </div>
                 </div>
-            </section>
-            
+                <!--排版空格-->
+                <br>
+                <br>
+                <!--返回頁面頂部按鈕-->
+                <div class="d-flex justify-content-center">
+                    <button onclick="window.scrollTo(0, 0)" class="btn" style="background-color:#F0EAD6; border: 1px solid #ada089;">返回頂部</button>
+                </div>
+            </div>
+        </section>
 
              <!--頁面底-->
             <footer class="py-5 bg-dark">
@@ -222,14 +217,13 @@
             <script src="{% static 'myApp/js/scripts.js' %}" ></script>
             <!-- Core theme JS-->
             <script>
-                var searchClick = false;
                 //這裡應該渲染頁面就好 其他資料會從clinic_reserve 去抓
                 function docReserve(event){
                     event.preventDefault();
                     if(window.isLogin){
                         window.location.href = '/doctor/reserve';
                     }else{
-                        window.location.href = '/login';
+                        window.location.href = 'login';
                     }
                 }
 
@@ -238,46 +232,34 @@
                     if(window.isLogin){
                         window.location.href = '/clinic/reserve';
                     }else{
-                        window.location.href = '/login';
+                        window.location.href = 'login';
                     }
                 }
 
                 var searchForm = document.getElementById('searchForm');
                 searchForm.addEventListener('submit', async function(event){
                     event.preventDefault();
-                    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-                    const form = {
-                        doc_name: document.getElementById('doctorNameInput').value,
-                        clinic_name: document.getElementById('clinicNameInput').value,
-                        clinic_address: addrVlue,
-                        appointed_date: document.getElementById('inputDate').value,
-                        exp_name: experVlue,
-                    };
                     fetch('/doctor/clinic/search/', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRFToken':  csrfToken
                         },
-                        body: JSON.stringify(form),
+                        body: JSON.stringify({}),
                     })
                     .then(async response => {
                         if (!response.ok) {
                             throw new Error('Failed to add doctor');
                         }
                         const data = await response.json();
-                        console.log("doctors = " + data.doctors + "   clinics = " + data.clinics)
-
-                        window.location.href = '/home';
+                        searchForm.submit();
+                        window.location.href = 'searchPage.html';
                     })
                     .catch(error => {
                         // 处理错误情况，例如显示错误消息给用户
-                        alert('Error searching: ' + error.message);
+                        alert('Error adding doctor: ' + error.message);
                     });
                 })
 
-                var addrVlue = "";
-                var experVlue = "";
                 function updateDistricts() {
                     const cityToDistricts = {
                         '台北市': ['中正區', '大同區', '中山區', '松山區', '大安區', '萬華區', '信義區', '士林區', '北投區', '內湖區', '南港區', '文山區'],
@@ -322,7 +304,7 @@
                             districtSelect.appendChild(option);
                         });
                     }
-                    addrVlue = updateCombinedLocation();
+                    updateCombinedLocation();
                 }
 
                 function updateCombinedLocation() {
@@ -330,7 +312,6 @@
                     const districtSelect = document.getElementById("district");
                     const address = document.getElementById("addressVlue");
                     address.value = citySelect.value + districtSelect.value;
-                    return address.value;
                 }
 
                 function updateCombinedExpertise() {
@@ -338,7 +319,6 @@
                     const treatmentSelect = document.getElementById("treatment");
                     const expertise = document.getElementById("experVlue");
                     expertise.value = categorySelect.value + '-' + treatmentSelect.value;
-                    return expertise.value;
                 }
 
                 function updateTreatments() {
@@ -372,9 +352,13 @@
                             treatmentSelect.appendChild(option);
                         });
                     }
-                    experVlue = updateCombinedExpertise();
+                    updateCombinedExpertise();
                 }
 
             </script>
+          
+           
+            
+            
     </body>
 </html>

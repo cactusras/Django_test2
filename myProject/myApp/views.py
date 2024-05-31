@@ -24,11 +24,9 @@ def index(request):
     
     context={}
     return render(request, "myApp/index.html", context)
-
-
-@csrf_exempt
-def user_login(request):  
     
+@csrf_exempt
+def user_login(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -40,7 +38,6 @@ def user_login(request):
                 user_type = None
                 login(request, user)  # Ensure the user object is passed correctly
                 # 登入成功，根據用戶身份導向不同的頁面
-                loginStatus = True
                 if hasattr(user, 'client'):  # 检查是否是客户
                     print('client')
                     user_type = 'client'
@@ -62,7 +59,6 @@ def user_login(request):
             return JsonResponse({'message': 'Invalid form data', 'errors': form.errors, 'status': 'error'})
     else:
         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
-
 
 def add_client(request):
     if request.method == 'POST':
@@ -291,112 +287,60 @@ def add_doctor(request):
 @login_required    
 def Doc_uploading(request):
     if request.method == 'POST':
-        try:
-            doctor_form = DoctorForm(request.POST, request.FILES)
-        except json.JSONDecodeError:
-            return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
+        doctor_form = DoctorForm(request.POST, request.FILES)
         if doctor_form.is_valid():
             request.session['doctor_form_data'] = doctor_form.cleaned_data
-            print('succeed adding', doctor_form)
-            doc_expertise_list = request.session.get('doc_expertise_list', None)
-            if not doc_expertise_list:
-                return JsonResponse({'message': 'Please choose your expertise(s)', 'status': 'error'})
-            else:
-                return JsonResponse({'message': 'Doctor Session added', 'status': 'success'})
-        else:
-            return JsonResponse({'message': 'Invalid form data', 'errors': doctor_form.errors, 'status': 'error'})
+            return render(request,'myApp/ClicktoEditSchedule.html')
     else:
         doctor_form = DoctorForm()
-    return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
-
+    return render(request, 'myApp/doctor_dataEdit.html', {'doctor_form': doctor_form})
 
 @login_required
 def DocExp_uploading(request):
     if request.method == 'POST':
-        try:
-            doc_expertise_form = ExpertiseForm(request.POST)
-        except json.JSONDecodeError:
-            print('post error')
-            return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
-
+        doc_expertise_form = ExpertiseForm(request.POST)
         if doc_expertise_form.is_valid():
             doc_expertise_list = request.session.get('doc_expertise_list', [])
             doc_expertise_list.append(doc_expertise_form.cleaned_data)
             request.session['expertise_list'] = doc_expertise_list
-            print('succeed adding', doc_expertise_list)
-            return JsonResponse({'message': 'Expertise data added successfully', 'status': 'success'})
-        else:
-            return JsonResponse({'message': 'Invalid form data', 'errors': doc_expertise_form.errors, 'status': 'error'})
+            return render(request,'myApp/doctor_dataEdit.html')
     else:
-        return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
+        expertise_form = ExpertiseForm()
+    return render(request, 'myApp/doctor_dataEdit.html', {'expertise_form': expertise_form})
 
 @login_required
 def workingHour_upload(request):
     if request.method == 'POST':
-        try:
-            working_hour_form = WorkingHourForm(request.POST)
-        except json.JSONDecoderError:
-            print('post failed')
-            return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
-
+        working_hour_form = WorkingHourForm(request.POST)
         if working_hour_form.is_valid():
             working_hour_list = request.session.get('working_hour_list', [])
             working_hour_list.append(working_hour_form.cleaned_data)
             request.session['working_hour_list'] = working_hour_list
-            return JsonResponse({'message': 'Working hour data added successfully', 'status': 'success'})
-        else:
-            return JsonResponse({'message': 'Invalid form data', 'errors': working_hour_form.errors, 'status': 'error'})
+            return render(request,'myApp/ClicktoEditSchedule.html')
     else:
         working_hour_form = WorkingHourForm()
-    return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
+    return render(request, 'myApp/ClicktoEditSchedule.html', {'working_hour_form': working_hour_form})
 
 @login_required
 def scheduling_upload(request):
     if request.method == 'POST':
-        try:
-            schedule_form = SchedulingForm(request.POST)
-        except json.JSONDecodeError:
-            return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
-
+        schedule_form = SchedulingForm(request.POST)
         if schedule_form.is_valid():
             request.session['schedule_form_data'] = schedule_form.cleaned_data
-            return JsonResponse({'message': 'Scheduling data added successfully', 'status': 'success'})
-        else:
-            return JsonResponse({'message': 'Invalid form data', 'errors': schedule_form.errors, 'status': 'error'})
+            return render(request,'myApp/doctor_dataEdit.html')
     else:
         schedule_form = SchedulingForm()
-    return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
-
-def doc_session(request):
-    doctor_form_data = request.session.get('doctor_form_data', {})
-    expertise_list = request.session.get('expertise_list', [])
-    schedule_form_data = request.session.get('schedule_form_data', {})
-    working_hour_list = request.session.get('working_hour_list', [])
-
-    response_data = {
-        'doctor_form_data': doctor_form_data,
-        'expertise_list': expertise_list,
-        'schedule_form_data': schedule_form_data,
-        'working_hour_list': working_hour_list,
-    }
-    return JsonResponse(response_data, status=200)
+    return render(request, 'myApp/doctor_dataEdit.html', {'schedule_form': schedule_form})
 
 @login_required
 def success(request):
+    # Get the clinic associated with the logged-in user
     clinic = Clinic.objects.get(user=request.user)
+
+    # Get all doctors associated with this clinic
     doctors = Doctor.objects.filter(clinic=clinic)
     #診所登入(管理/新增醫師)頁面名稱要=doctor_management.html
-    data = {
-        'clinic': {
-            'id': clinic.id,
-            'name': clinic.name,
-            'phone_number': clinic.phone_number,
-            'address': clinic.address,
-            # 添加其他需要的字段
-        },
-        'doctors': list(doctors),  # 将 QuerySet 转为列表
-    }
-    return JsonResponse(data)
+    return render(request, 'myApp/doctor_management.html', {'doctors': doctors, 'clinic': clinic})
 
 @login_required
 def delete_doctor(request, doctor_email):
@@ -405,9 +349,92 @@ def delete_doctor(request, doctor_email):
 
     if request.method == "POST":
         doctor.delete()#the doctors schedule, expertise records are delete as well(because cascade)
-        return JsonResponse({'message': 'Doctor deleted successfully', 'status': 'success'})
-    return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
+        return redirect('myApp/doctor_management.html')
 
+    return render(request, 'myApp/doctor_management.html', {'doctor': doctor})
+
+# def doctor_clinic_search_view(request):
+#         # Apply the filter
+#     filter = docClinicFilter(request.GET, queryset=docClinicSearch.objects.all())
+
+#     # Retrieve detailed information for each filtered doctor
+#     detailed_doctors = []
+#     detailed_clinics = []
+#     for result in filter.qs:
+#         doctor_details = {
+#             'doc_id': result.doc_id,
+#             'doc_name': result.doc_name,  # Changed from result.name to result.doc_name
+#             'clinic_name': result.clinic_name,
+#             'clinic_adress': result.clinic_adress,
+#             'doc_exp': result.exp_name
+#         }
+#         detailed_doctors.append(doctor_details)
+
+#         clinic_details = {
+#             'clinic_id': result.clinic_id,
+#             'clinic_name': result.clinic_name,
+#             'clinic_adress': result.clinic_adress,
+#             'clinic_introduction': result.clinic_introduction,
+#             'doc_exp': result.exp_name
+#         }
+#         detailed_clinics.append(clinic_details)  # Changed from detailed_doctors to detailed_clinics
+
+#     # Combine doctor details
+#     doc_final = []
+#     for doc in detailed_doctors:
+#         # Check if the doctor already exists in doc_final
+#         existing_doctor = next((item for item in doc_final if item['doc_name'] == doc['doc_name']), None)
+#         if existing_doctor:
+#             # Append the expertise to the existing doctor's expertise list
+#             existing_doctor['doc_exp'].append(doc['doc_exp'])
+#         else:
+#             # Create a new dictionary for the doctor
+#             new_doctor = {
+# 	    'doc_id': doc['doc_id'],
+#                 'doc_name': doc['doc_name'],
+#                 'clinic_name': doc['clinic_name'],
+#                 'clinic_adress': doc['clinic_adress'],
+#                 'doc_exp': [doc['doc_exp']]  # Initialize doc_exp as a list
+#             }
+#             doc_final.append(new_doctor)
+
+#             # Update session with doctor IDs
+#             #doc_list = request.session.get('doc_list', [])
+#             #doc_list.append(doc['doc_id'])
+#             #request.session['doc_list'] = doc_list  # Save session
+
+#     # Combine clinic details
+#     clinic_final = []
+#     for clinic in detailed_clinics:
+#         # Check if the clinic already exists in clinic_final
+#         existing_clinic = next((item for item in clinic_final if item['clinic_name'] == clinic['clinic_name']), None)
+#         if existing_clinic:
+#             # Append the expertise to the existing clinic's expertise list
+#             existing_clinic['doc_exp'].append(clinic['doc_exp'])
+#         else:
+#             # Create a new dictionary for the clinic
+#             new_clinic = {
+# 	    'clinic_id': clinic['clinic_id'],
+#                 'clinic_name': clinic['clinic_name'],
+#                 'clinic_adress': clinic['clinic_adress'],
+#                 'clinic_introduction': clinic['clinic_introduction'],
+#                 'doc_exp': [clinic['doc_exp']]  # Initialize doc_exp as a list
+#             }
+#             clinic_final.append(new_clinic)
+
+#             # Update session with clinic IDs
+#             #clinic_list = request.session.get('clinic_list', [])
+#             #clinic_list.append(clinic['clinic_id'])
+#             #request.session['clinic_list'] = clinic_list  # Save session
+    
+#     return render(request, 'myApp/home.html', {
+#         'filter': filter,
+#         'doc_final': doc_final,
+#         'clinic_final': clinic_final
+#     })
+
+
+@csrf_exempt
 def doctor_clinic_search_view(request):
     # Apply the filter
     filter = docClinicFilter(request.GET, queryset=docClinicSearch.objects.all())
@@ -445,7 +472,7 @@ def doctor_clinic_search_view(request):
         else:
             # Create a new dictionary for the doctor
             new_doctor = {
-	            'doc_id': doc['doc_id'],
+                'doc_id': doc['doc_id'],
                 'doc_name': doc['doc_name'],
                 'clinic_name': doc['clinic_name'],
                 'clinic_adress': doc['clinic_adress'],
@@ -464,19 +491,24 @@ def doctor_clinic_search_view(request):
         else:
             # Create a new dictionary for the clinic
             new_clinic = {
-	            'clinic_id': clinic['clinic_id'],
+                'clinic_id': clinic['clinic_id'],
                 'clinic_name': clinic['clinic_name'],
                 'clinic_adress': clinic['clinic_adress'],
                 'clinic_introduction': clinic['clinic_introduction'],
                 'doc_exp': [clinic['doc_exp']]  # Initialize doc_exp as a list
             }
             clinic_final.append(new_clinic)
-    
+
+    # Prepare data to be returned as JsonResponse
     data = {
         'doctors': doc_final,
         'clinics': clinic_final,
     }
+
     return JsonResponse(data)
+    
+
+
     
 #schedule tomeslot(輸入start time end time，每一小時割一次)
 def get_time_slots(schedule):
@@ -541,6 +573,9 @@ def clinic_load(request):
     ],
     }
     return render(request, 'myApp/clinicPage.html', context)
+
+
+
 
 #reservation id required
 #以下為reservation狀態改變
@@ -974,6 +1009,7 @@ def isUniqueEmail_clin(request):
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
+
 @csrf_exempt
 def isUniqueLicense_clin(request):
     if request.method == 'POST':
@@ -985,6 +1021,7 @@ def isUniqueLicense_clin(request):
             return JsonResponse({'isUnique': True}, status=200)
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
+
 
 @csrf_exempt
 def isUniqueEmail_clie(request):
@@ -1010,12 +1047,13 @@ def isUniqueEmail_doc(request):
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
+
 def check_authentication(request):
     if request.user.is_authenticated:
         return JsonResponse({'is_authenticated': True})
     else:
         return JsonResponse({'is_authenticated': False})
-
+    
 def doctor_info(request):
     if hasattr(request.user, 'doctor'):
         user = request.user
@@ -1050,9 +1088,11 @@ def client_info(request):
     else:
         return JsonResponse({'status': 'error', 'error': 'User is not a client'}, status=400)
 
+
 # def logout_view(request):
 #     logout(request)
 #     return render(request,'myApp/searchPage.html')
+
 
 def check_reservations(request):
     now = now()
@@ -1070,13 +1110,14 @@ def check_reservations(request):
 
     return JsonResponse({'message': 'Checked and updated reservations if necessary.'})
 
-#如果是Status = 2或3的話 就不執行而是跳jsonresponse
-#變數名有待確認
-def client_cancel_reservation(request):
-    return render(request, 'UserAppointmentRecords.html')
 
 @csrf_exempt
 def user_logout(request):
+    if request.method == 'POST':
+        logout(request)
+        print('logged out')
+        return JsonResponse({'message': 'Logged out successfully', 'status': 'success'})
+    else:
         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
 
