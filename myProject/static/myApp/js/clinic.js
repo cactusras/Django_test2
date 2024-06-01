@@ -43,22 +43,11 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             fetch_info(clinForm);
         }else if(window.localStorage.getItem('isLogin') == 'failed'){
-            btnRegis.innerText = '新增醫生'
+            btnRegis.innerText = '完成'
             btnDocManage.hidden = true;
             barTitle.innerText = '註冊'
         }
 })
-
-function regis_click(event){
-    event.preventDefault();
-    if (window.isLogin) {
-        
-        window.location.href = "/clinic/home";
-    } else {
-        
-        window.location.href = "/doctor/manage";
-    }
-}
 
 async function isUniqueLicense(license_number){
     try {
@@ -96,7 +85,6 @@ async function isUniqueEmail(email){
     }
 }
 
-<<<<<<< HEAD
 function fillForm(data, form) {
     if (!form) {
         console.error('Form not found');
@@ -111,9 +99,6 @@ function fillForm(data, form) {
     });
 }
 
-
-=======
->>>>>>> frontback
 function fetch_info(formFilled){
     fetch('/clinic_info/', {
         method: 'GET'
@@ -125,23 +110,12 @@ function fetch_info(formFilled){
         const data = await response.json();
 
         if (data.status === 'success') {
-<<<<<<< HEAD
             //const clinInfo = data.info;
             //console.log("info_type = " + typeof(data.data) + "  info = " + data.data)
             const clinInfo = data.data;
             console.log(clinInfo.photo_url)
             //console.log("info_type = " + typeof(data.data) + "  info = " + data.data)
             fillForm(clinInfo, formFilled);
-=======
-            const clinInfo = data.data;
-            //console.log("info_type = " + typeof(data.data) + "  info = " + data.data)
-            Object.keys(clinInfo).forEach(key => {
-                const field = formFilled.querySelector(`[name=${key}]`);
-                if (field) {
-                    field.value = data[key];
-                }
-            });
->>>>>>> frontback
         } else {
             console.error(data.error);
         }
@@ -202,8 +176,13 @@ document.getElementById('clinicForm').addEventListener('submit', async function(
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                alert(data.message);
-                window.location.href = '/loginP';
+                if(window.localStorage.getItem('isLogin') == 'success'){
+                    alert(data.message);
+                    window.location.href = '/clinic/home';
+                }else{
+                    alert(data.message);
+                    window.location.href = '/loginP';
+                }
             } else {
                 alert(data.message);
             }

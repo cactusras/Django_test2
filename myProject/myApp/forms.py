@@ -12,11 +12,7 @@ from django.contrib.auth import authenticate
 class CustomUserForm(forms.ModelForm):
     class Meta:
         model = CustomUser
-<<<<<<< HEAD
         fields = ['email', 'name', 'phone_number']
-=======
-        fields = ['email', 'name', 'phone_number', 'password']
->>>>>>> frontback
 
 
 class DoctorForm(forms.ModelForm):
@@ -25,32 +21,18 @@ class DoctorForm(forms.ModelForm):
         fields = ['email', 'name','phone_number','password','photo' ]
     def __init__(self, *args, **kwargs):
         super(DoctorForm, self).__init__(*args,**kwargs)
-<<<<<<< HEAD
     #  self.fields['is_active'].initial = True
      #   self.fields['is_admin'].initial = False
-=======
-        #self.fields['is_active'].initial = True
-        #self.fields['is_admin'].initial = False
->>>>>>> frontback
         
 class ClinicForm(forms.ModelForm):
     class Meta:
         model = Clinic
-<<<<<<< HEAD
         #fields = ['name', 'license_number','phone_number','address','introduction','photo','email','password' ]
         fields = ['email', 'name','phone_number','password','license_number','address','introduction','photo']
     def __init__(self, *args, **kwargs):
         super(ClinicForm, self).__init__(*args,**kwargs)
       #  self.fields['is_active'].initial = True
       #  self.fields['is_admin'].initial = False
-=======
-        #fields = ['name', 'license_number','phone_number','address','introduction','photo','email','pw' ]
-        fields = ['email', 'name','phone_number','password','license_number','address','introduction','photo']
-    def __init__(self, *args, **kwargs):
-        super(ClinicForm, self).__init__(*args,**kwargs)
-        #self.fields['is_active'].initial = True
-        #self.fields['is_admin'].initial = False
->>>>>>> frontback
         
 class ClientForm(forms.ModelForm):
     class Meta:
@@ -148,54 +130,7 @@ class AuthenticationForm(forms.Form):
 		if self.user_cache:
 			return self.user_cache.id
 		return None
-<<<<<<< HEAD
-
-
-
-
-# class LoginForm(forms.Form):
-#     email = forms.EmailField(label=_("Email"))
-#     password = forms.CharField(label=_("Password"), widget=forms.PasswordInput)
-
-#     error_messages = {
-#         'invalid_login': _(
-#             "Please enter a correct email address and password. Note that both "
-#             "fields may be case-sensitive."
-#         ),
-#         'inactive': _("This account is inactive."),
-#     }
-    
-#     def __init__(self, *args, **kwargs):
-#         self.request = kwargs.pop('request', None)
-#         super().__init__(*args, **kwargs)
-
-#     def clean(self):
-#         cleaned_data = super().clean()
-#         email = cleaned_data.get('email')
-#         password = cleaned_data.get('password')
-
-#         if email is not None and password:
-#             self.user_cache = authenticate(self.request, email=email, password=password)
-            
-#             if not self.user_cache:
-#                 raise forms.ValidationError('Invalid email or password.')
-
-#             # if self.user_cache is None:
-#             #     raise forms.ValidationError(
-#             #         self.error_messages['invalid_login'],
-#             #         code='invalid_login',
-#             #         params={'email': self.fields.verbose_name},
-#             #     )
-#             # elif not self.user_cache.is_active:
-#             #     raise forms.ValidationError(self.error_messages['inactive'], code='inactive')
-#         return cleaned_data
-
-#     def get_user(self):
-#         return self.user_cache
-        
-=======
      
->>>>>>> frontback
 class LoginForm(forms.Form):
     email = forms.EmailField()
     password = forms.CharField(widget=forms.PasswordInput)

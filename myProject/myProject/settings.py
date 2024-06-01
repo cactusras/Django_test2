@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'django_filters',
     'debug_toolbar',
     'myApp',
-    'django_filters'
 ]
 
 MIDDLEWARE = [
@@ -78,16 +77,10 @@ TEMPLATES = [
 WSGI_APPLICATION = 'myProject.wsgi.application'
 
 AUTHENTICATION_BACKENDS = [
-<<<<<<< HEAD
     'myApp.backend.EmailBackend',  # Adjust to your app name
     'django.contrib.auth.backends.ModelBackend',
 ]
 
-=======
-    'myApp.backend.EmailBackend',
-    'django.contrib.auth.backends.ModelBackend',
-]
->>>>>>> frontback
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
