@@ -66,9 +66,9 @@
                         <br>
                         <div class="row">
                             <div class="col">
-                                <label for="password" class="required">密碼</label>
-                                <div class="form-floating">
-                                    <input type="password" class="form-control half-width" id="password" name="password" required>
+                                <label for="password" class="required password">密碼</label>
+                                <div class="form-floating password">
+                                    <input type="password" class="form-control half-width password" id="password" name="password" required>
                                 </div>
                             </div>
                             <div class="col">
@@ -106,11 +106,13 @@
                             <div class="form-floating">
                                 <input type="file" class="form-control-file" id="photo" name="photo">
                             </div>
+                            <img src="{{ data.photo_url }}" alt="Clinic Photo">
+
                         </div>
                         <!--管理醫師&完成按鈕-->
                         <!--他們現在還是並排的，之後再說-->
                        
-                        <button class="setting-button" id="btnDocManage">管理/新增醫師</button>
+                        <button class="setting-button" type="button" id="btnDocManage">管理/新增醫師</button>
 
                         <button class="rectangle-button" id="btnClinRegis" onclick="regis_click(event)" type="submit">完成</button>
                      </fieldset>

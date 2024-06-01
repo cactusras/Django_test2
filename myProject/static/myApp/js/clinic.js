@@ -105,22 +105,31 @@ function fetch_info(formFilled){
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
-
+        //return response.json(); // 解析 JSON 响应
         if (data.status === 'success') {
             const clinInfo = data.data;
             //console.log("info_type = " + typeof(data.data) + "  info = " + data.data)
-            Object.keys(clinInfo).forEach(key => {
-                const field = formFilled.querySelector(`[name=${key}]`);
-                if (field) {
-                    field.value = data[key];
-                }
-            });
+            fillForm(clinInfo, formFilled);
         } else {
             console.error(data.error);
         }
     })  
     .catch(error => {
         console.log('Error:', error);
+    });
+}
+
+function fillForm(data, form) {
+    if (!form) {
+        console.error('Form not found');
+        return;
+    }
+
+    Object.keys(data).forEach(key => {
+        const field = form.querySelector(`[name=${key}]`);
+        if (field) {
+            field.value = data[key];
+        }
     });
 }
 

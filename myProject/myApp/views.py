@@ -365,7 +365,7 @@ def add_doctor(request):
 
 
 
-   
+@login_required  
 def Doc_uploading(request):
     if request.method == 'POST':
         try:
@@ -383,7 +383,7 @@ def Doc_uploading(request):
         doctor_form = DoctorForm()
     return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
-
+@login_required 
 def DocExp_uploading(request):
     
     if request.method == 'POST':
@@ -406,7 +406,7 @@ def DocExp_uploading(request):
     else:
         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
-
+@login_required 
 def workingHour_upload(request):
     if request.method == 'POST':
         try:
@@ -439,7 +439,7 @@ def workingHour_upload(request):
     
     return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
-
+@login_required 
 def scheduling_upload(request):
     if request.method == 'POST':
         try:
@@ -1152,9 +1152,13 @@ def clinic_info(request):
             'password': user.password,
             'address': user.clinic.address,
             'license_number': user.clinic.license_number,
-            'photo_url': user.clinic.photo.url,
+            #'photo_url': user.clinic.photo.url,
             'introduction': user.clinic.introduction,
         }
+        if user.clinic.photo and user.clinic.photo.name:
+           info['photo_url'] =  user.clinic.photo.url
+        print("info = ", info)
+        print('photo = ', user.clinic.photo, '  name = ', user.clinic.photo.name)
         return JsonResponse({'status': 'success', 'data': info}, status=200)
     else:
         return JsonResponse({'status': 'error', 'error': 'User is not a clinic'}, status=400)

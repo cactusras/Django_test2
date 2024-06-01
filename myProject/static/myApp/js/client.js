@@ -47,6 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
             barTitle.innerText = '患者資料'
             btnRegis.innerText = '回到主頁'
             fetch_info(clieForm);
+            pwClass = document.querySelectorAll('.password')
         }else if(window.localStorage.getItem('isLogin') == 'failed'){
             //console.log('cliejs46_no')
             barTitle.innerText = '註冊'
@@ -143,13 +144,17 @@ document.getElementById('clientForm').addEventListener('submit', async function(
                     alert("Phone number cannot exceed 15 digits");
                     return;
                 } else {
-                    // 要串資料庫把所有的clinic email先找出來      
-                    if (!await isUniqueEmail(clieField.email)) {
-                        alert("Email already registered");
-                        return;
-                    }else{
+                    // 要串資料庫把所有的clinic email先找出來 
+                    if(window.localStorage.getItem('isLogin') == 'failed'){
+                        if (!await isUniqueEmail(clieField.email)) {
+                            alert("Email already registered");
+                            return;
+                        }else{
+                            isValid = true;
+                        }
+                    }else if(window.localStorage.getItem('isLogin') == 'success'){
                         isValid = true;
-                    }
+                    }                        
                 }
             }
     }  
