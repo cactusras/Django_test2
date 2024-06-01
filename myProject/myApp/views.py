@@ -1,8 +1,10 @@
-import json
+import json, simplejson
 from pathlib import Path
 from PIL import Image
 from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
+#from rest_framework import serializers
+from myProject.encoder import CustomEncoder
 from .forms import DoctorForm,ClinicForm,ClientForm, LoginForm,SchedulingForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm
 from django.db.models import Q
 from django.db import connection
@@ -241,15 +243,20 @@ def add_clinic(request):
 def add_doctor(request):
     if request.method == 'POST':
         doctor_form_data = request.session.get('doctor_form_data')
-        expertise_list = request.session.get('expertise_list', [])
+        expertise_list = request.session.get('doc_expertise_list', [])
         schedule_form_data = request.session.get('schedule_form_data')
         working_hour_list = request.session.get('working_hour_list', [])
 
-        if not (doctor_form_data and expertise_list and schedule_form_data and working_hour_list):
+        print('doc_info = ', doctor_form_data , '  exp_info = ', expertise_list, '  working_hours = ', working_hour_list, '  schedule = ', schedule_form_data)
+
+        '''if not (doctor_form_data and expertise_list and schedule_form_data and working_hour_list):
+            return JsonResponse({'message': 'Session data incomplete', 'status': 'error'})'''
+        
+        if not (doctor_form_data and expertise_list and schedule_form_data):
             return JsonResponse({'message': 'Session data incomplete', 'status': 'error'})
 
         # Process photo if included in doctor_form_data
-        if 'photo' in doctor_form_data:
+        '''if 'photo' in doctor_form_data:
             photo_url = doctor_form_data.pop('photo', '')  # Remove photo from form data
             try:
                 image = Image.open(photo_url)
@@ -261,21 +268,20 @@ def add_doctor(request):
                 doctor_form_data['photo'] = save_path  # Update form data with saved photo path
             except Exception as e:
                 print(f"Error saving photo: {e}")
-                return JsonResponse({'message': 'Error saving photo', 'status': 'error'})
+                return JsonResponse({'message': 'Error saving photo', 'status': 'error'})'''
 
-        clinic = Clinic.objects.get(user=request.user)
-        doctor_form_data['clinic'] = clinic
-
+        clinic = Clinic.objects.get(id=request.user.id)
+        doctor_form_data['clinicID'] = clinic
         email = doctor_form_data.pop('email')
         doctor, created = Doctor.objects.update_or_create(email=email, defaults=doctor_form_data)
-
-        Doc_Expertise.objects.filter(doctor=doctor).delete()
-
+        
+        Doc_Expertise.objects.filter(DocID_id=doctor.id).delete()
+        
         for expertise_data in expertise_list:
             expertise_name = expertise_data.get('name')
             expertise, created = Expertise.objects.get_or_create(name=expertise_name)
             Doc_Expertise.objects.create(doctor=doctor, expertise=expertise)
-
+        
         for working_hour_data in working_hour_list:
             working_hour, created = WorkingHour.objects.update_or_create(
                 day_of_week=working_hour_data['day_of_week'],
@@ -331,7 +337,7 @@ def DocExp_uploading(request):
         if doc_expertise_form.is_valid():
             doc_expertise_list = request.session.get('doc_expertise_list', [])
             doc_expertise_list.append(doc_expertise_form.cleaned_data)
-            print("clean = ", doc_expertise_form.cleaned_data)
+            print("clean = ", doc_expertise_list)
             request.session['doc_expertise_list'] = doc_expertise_list  # 更新 session
             return JsonResponse({'message': 'Expertise data added successfully', 'status': 'success', 'exp': doc_expertise_form.cleaned_data})
         else:
@@ -339,7 +345,7 @@ def DocExp_uploading(request):
     else:
         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
-
+@login_required
 def workingHour_upload(request):
     if request.method == 'POST':
         try:
@@ -348,43 +354,101 @@ def workingHour_upload(request):
         except json.JSONDecodeError:
             print('post failed')
             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
+        start_time_str = data.get('start_time')
+        end_time_str = data.get('end_time')
         
+
         data = {
             'day_of_week' : data.get('day_of_week'),
-            'start_time' : data.get('start_time'),
-            'end_time' : data.get('end_time'),
+            'start_time' : start_time_str,
+            'end_time' : end_time_str
+            #'start_time' : start_time_str.strftime('%H:%M'),
+            #'end_time' : end_time_str.strftime('%H:%M')
         }
-        for key, value in data.items():
-                print(f'{key}: {value}')
-
+        #print('type2 = ' , type(start_time_str)) 
         working_hour_form = WorkingHourForm(data)
-
+        print('before valid')
         if working_hour_form.is_valid():
+            #print('after valid1')
             working_hour_list = request.session.get('working_hour_list', [])
-            working_hour_list.append(working_hour_form.cleaned_data)
-            print('succeed adding', working_hour_list)
+            #print('first get list = ', working_hour_list)
+            #working_hour_list.append(working_hour_form.cleaned_data)
+            working_hour_list.append(data)
+            #print('succeed adding', working_hour_list)
+
+            # 序列化 time 对象为字符串
+            '''workingHour_data = []
+            for item in working_hour_list:
+                if(type(item['start_time']) == datetime):
+                    print('type is datatimeS')
+                    item['start_time'] = item['start_time'].strftime('%H:%M')
+                if(type(item['end_time']) == datetime):
+                    print('type is datatimeE')
+                    item['end_time'] = item['end_time'].strftime('%H:%M')
+                workingHour_data.append(item)'''
+            print('data = ', working_hour_list)
             request.session['working_hour_list'] = working_hour_list
+            #print('after valid3')
+            #想除掉not serializable的bug 所以寫了這個(跟encoder.py 所以寫了這個(跟encoder.py) 但會導到cls的bug
+            #serialized_data  = simplejson.dumps(working_hour_list, cls=CustomEncoder)
             return JsonResponse({'message': 'Working hour data added successfully', 'status': 'success'})
+            #return HttpResponse(status=204)
         else:
-            return JsonResponse({'message': 'Invalid form data', 'errors': working_hour_form.errors, 'status': 'error'})
+            print('notvalid = ', working_hour_form.errors)
+            return JsonResponse({'message': 'Invalid form data', 'status': 'error'})
     else:
         working_hour_form = WorkingHourForm()
     
     return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
+'''render版的workingHour_upload 對應到clicktoEditSchedule_new
+@login_required
+def workingHour_upload(request):
+    print('hi')
+    if request.method == 'POST':
+        print('post here')
+        working_hour_form = WorkingHourForm(request.POST)
+        print('form = ', working_hour_form)
+        if working_hour_form.is_valid():
+            print('valid here')
+            working_hour_list = request.session.get('working_hour_list', [])
+            working_hour_list.append(working_hour_form.cleaned_data)
+            request.session['working_hour_list'] = working_hour_list
+            print('working = ', working_hour_list)
+            return render(request,'myApp/ClicktoEditSchedule.html')
+        else:
+            print(working_hour_form.errors)
+    else:
+        working_hour_form = WorkingHourForm()
+    return render(request, 'myApp/ClicktoEditSchedule_new.html', {'working_hour_form': working_hour_form})'''
+
 @login_required
 def scheduling_upload(request):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)  # 解析 JSON 数据
-            schedule_form = SchedulingForm(data)
+            data = json.loads(request.body)  # 解析 JSON 数据        
         except json.JSONDecodeError:
             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
 
+        data = {
+                #'StartDate': datetime.strftime(data.get('StartDate'), '%Y-%m-%d'),
+                'StartDate' : data.get('StartDate'),
+                'EndDate' : data.get('EndDate')
+                #'EndDate': datetime.strftime(data.get('EndDate'), '%Y-%m-%d')
+            }
+
+        schedule_form = SchedulingForm(data)
+        
         if schedule_form.is_valid():
-            request.session['schedule_form_data'] = schedule_form.cleaned_data
+            scheduling_data = schedule_form.cleaned_data
+             # 序列化 date 对象为字符串
+            scheduling_data['StartDate'] = data.get('StartDate')
+            scheduling_data['EndDate'] = data.get('EndDate')
+        
+            request.session['schedule_form_data'] = scheduling_data
             return JsonResponse({'message': 'Scheduling data added successfully', 'status': 'success'})
         else:
+            print('notvalid = ', schedule_form.errors)
             return JsonResponse({'message': 'Invalid form data', 'errors': schedule_form.errors, 'status': 'error'})
     else:
         schedule_form = SchedulingForm()
@@ -392,12 +456,14 @@ def scheduling_upload(request):
     return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
 def doc_session(request):
+    print('doc_session')
+
     # 从会话中获取所需的数据
     doctor_form_data = request.session.get('doctor_form_data', {})
     expertise_list = request.session.get('expertise_list', [])
     schedule_form_data = request.session.get('schedule_form_data', {})
     working_hour_list = request.session.get('working_hour_list', [])
-
+    print('doctor_form = ', doctor_form_data)
     # 构建响应数据
     response_data = {
         'doctor_form_data': doctor_form_data,
@@ -965,6 +1031,9 @@ def clickSchedule(request):
     context={}
     return render(request, "myApp/ClicktoEditSchedule.html", context)
 
+def clickScheduleNew(request):
+    context={}
+    return render(request, "myApp/ClicktoEditSchedule_New.html", context)
 
 def loginP(request):
     context={}

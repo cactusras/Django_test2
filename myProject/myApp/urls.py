@@ -10,6 +10,7 @@ urlpatterns = [
     path('clinic/data/edit/', views.clinDataEd, name='clinic_data_edit'),
     path('doctor/data/edit/', views.docDataEd, name='doctor_data_edit'),
     path('click/schedule/', views.clickSchedule, name='click_to_edit_schedule'),
+    path('click/schedule/new/', views.clickScheduleNew, name='click_to_edit_schedule_new'),
     path('clinic/home/', views.clinHome, name='clinic_home'),
     path('doctor/manage/', views.docManage, name='doctor_management'),
     path('doctor/page/', views.docPage, name='doctor_page'),

@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any, Mapping
 from django import forms
 from django.core.files.base import File
@@ -46,8 +47,29 @@ class ClientForm(forms.ModelForm):
 
 class WorkingHourForm(forms.ModelForm):
     class Meta:
+        #print('form start')
         model = WorkingHour
         fields = ['day_of_week','start_time','end_time']
+        #print('form finish')
+    '''不確定到底有沒有用到 但先放著
+     def clean_start_time(self):
+        start_time = self.cleaned_data['start_time']
+        start_time_str = start_time.strftime('%H:%M')
+        print('type = ', type(start_time_str), '  str = ', start_time_str)
+        try:
+            return datetime.strptime(start_time_str, '%H:%M').time()
+        except ValueError:
+            raise forms.ValidationError('Enter a valid time.')
+
+    def clean_end_time(self):
+        end_time = self.cleaned_data['end_time']
+        end_time_str = end_time.strftime('%H:%M')
+        print('type = ', type(end_time_str), '  str = ', end_time_str)
+
+        try:
+            return datetime.strptime(end_time_str, '%H:%M').time()
+        except ValueError:
+            raise forms.ValidationError('Enter a valid time.')'''
         
 class SchedulingForm(forms.ModelForm):
     class Meta:

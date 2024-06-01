@@ -7,6 +7,8 @@
         experience: ""
     };
 
+    var readyRegis = false;
+
     //存已經選過的 讓他disabled
     var expExist = [];
 
@@ -32,14 +34,17 @@
             fetch_element();
                 
             //canva11進入canva12   
-            if (window.localStorage.getItem('isLogin') == 'success'){
+            if (window.localStorage.getItem('user_type') == 'doctor'){
                 barTitle.innerText = '醫生資料'
                 btnRegis.addEventListener('click', function(){
                     window.location.href = "/clinic/home"
                 })
                 fetch_info();
-            }else if (window.localStorage.getItem('isLogin') == 'failed'){
+            }else if (window.localStorage.getItem('user_type') == 'clinic'){
                 barTitle.innerText = '註冊'
+                if(readyRegis){
+                    info_before_regis();
+                }
             }
     })
     
@@ -111,11 +116,23 @@
         });
     })
 
+    function fillForm(data, form) {
+        if (!form) {
+            console.error('Form not found');
+            return;
+        }
     
+        Object.keys(data).forEach(key => {
+            const field = form.querySelector(`[name=${key}]`);
+            if (field) {
+                field.value = data[key];
+            }
+        });
+    }
 
     //登入狀態從後端抓資料放到dataEdit
     function fetch_info(){
-        fetch('/doctor/doctor_info/', {
+        fetch('/doctor_info/', {
             method: 'GET'
         })
         .then(response => {
@@ -140,6 +157,7 @@
     
     //編輯完班表之後回到醫生註冊頁會出現的資料
     function info_before_regis(){
+        console.log('readyRegis = true')
         fetch('/doc/session/', {
             method: 'GET',
             headers: {
@@ -150,23 +168,21 @@
         .then(data => {
             const doctorForm = document.getElementById('doctorForm');
             const doctorFormData = data.doctor_form_data;
-            for (const [key, value] of Object.entries(doctorFormData)) {
-                const field = doctorForm.querySelector(`[name="${key}"]`);
-                if (field) {
-                    field.value = value;
-                }
-            }
+            console.log(doctorFormData)
+            fillForm(doctorFormData, doctorForm)
         })
         .catch(error => {
             console.error('Error fetching session data:', error);
         });
     }
 
-    async function clickRegis(){
+    function clickRegis(){
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
         fetch('/add/doctor/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRFTOKEN' : csrfToken
             },
             body: JSON.stringify({}),
         })
@@ -176,8 +192,12 @@
             }
             const data = await response.json();
             // 处理成功响应，例如显示成功消息或重定向
-            alert('Doctor added successfully!');
-            window.location.href = '/doctor/manage';
+            if(data.status == 'success'){
+                alert('Doctor added successfully!');
+                window.location.href = '/doctor/manage';
+            }else{
+                alert('Error : ' + data.message)
+            }
         })
         .catch(error => {
             // 处理错误情况，例如显示错误消息给用户
@@ -242,6 +262,7 @@
                 if (data.status === 'success') {
                     setTimeout(function(){console.log(data.info)}, 2000) 
                     alert(data.message);
+                    readyRegis = true;
                     window.location.href = '/click/schedule';
                 } else {
                     alert(data.message);
