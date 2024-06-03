@@ -6,10 +6,10 @@
 [ FONT ]*/
 
 @font-face {
- font-family: "titillium-web", sans-serif;
- /* src: url('../fonts/poppins/Poppins-Regular.ttf'); */
-}
-
+  font-family: "titillium-web", sans-serif;
+  /* src: url('../fonts/poppins/Poppins-Regular.ttf'); */
+ }
+ 
 @font-face {
   font-family: "titillium-web", sans-serif;
   src: url('../fonts/poppins/Poppins-Medium.ttf'); 
