@@ -155,7 +155,7 @@ class Reservation(models.Model):
     Status = models.IntegerField(choices=STATUS_CHOICES, default=0)
     
     class Meta:
-        unique_together = ('ClientID', 'SchedulingID', 'Status')
+        unique_together = ('ClientID', 'time_start','SchedulingID', 'Status')
     
     #原本應該是直觀用來看客戶醫生診所預約關係
     #改成scheduling之後應該就變成直觀能看到醫生不一定有診所

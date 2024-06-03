@@ -23,6 +23,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 from django.core.files.storage import FileSystemStorage
 from django.contrib.auth.hashers import make_password
+from django.utils import timezone
+from operator import attrgetter
 
 
 def index(request):
@@ -880,8 +882,6 @@ def add_times(time1, duration):
     result_datetime = datetime1 + duration
     return result_datetime.time()
 
-#
-
 def add_times(time, duration):
     return (datetime.combine(datetime.today(), time) + duration).time()
 
@@ -1289,20 +1289,19 @@ def get_doc_working(request, doctor_id):
     return JsonResponse({'working_hours': working_hours})
 
 #if chosen date < 'start_date': scheduling.StartDate,'end_date': scheduling.EndDate, and chosen date.weekday()+1, exists in the doctor's workinghour.weekday,
-#
-#go check the reservation of this doctor, split time by 1 hr, check in reservation, if reserved=> not avaliable, than show the avaliable
 def get_available_times(request):
     if request.method == 'GET':
         doctor_id = request.GET.get('doctor_id')
         chosen_date_str = request.GET.get('date')
-        print(f'chosen_date_str:  {chosen_date_str}')
         expertise_name = request.GET.get('expertise_name')
+        expertise_time = Expertise.objects.get(name = expertise_name).time
 
         if not doctor_id or not chosen_date_str or not expertise_name:
             return JsonResponse({'error': 'Invalid input data'}, status=400)
 
         try:
             chosen_date = datetime.strptime(chosen_date_str, '%Y-%m-%d').date()
+            expertise_time = timedelta(hours=expertise_time.hour, minutes=expertise_time.minute)
         except (TypeError, ValueError) as e:
             return JsonResponse({'error': f'Invalid date format: {e}'}, status=400)
 
@@ -1311,43 +1310,81 @@ def get_available_times(request):
         doctor = get_object_or_404(Doctor, id=doctor_id)
         available_times = []
 
-        # 获取医生的排班
+        # 获取可用时间段
         for scheduling in doctor.scheduling.all():
             if scheduling.StartDate <= chosen_date <= scheduling.EndDate and scheduling.WorkingHour.day_of_week == chosen_weekday:
                 start_time = scheduling.WorkingHour.start_time
                 end_time = scheduling.WorkingHour.end_time
 
-                current_time = start_time
-                print(f'current_time{current_time}')
-                while current_time < end_time:
-                    next_time = (datetime.combine(chosen_date, current_time) + timedelta(hours=1)).time()
-                    if not is_reserved(doctor_id, chosen_date, current_time, next_time):
-                        available_times.append(current_time.strftime('%H:%M:%S'))
-                    current_time = next_time
+                current_datetime = datetime.combine(chosen_date, start_time)
+                end_datetime = datetime.combine(chosen_date, end_time)
+                while current_datetime  + expertise_time <= end_datetime:
+                    next_datetime = current_datetime + timedelta(hours=1)
+                    available_times.append((current_datetime.time(), next_datetime.time()))
+                    current_datetime = next_datetime
+                    
 
-        return JsonResponse({'reserve_choices': available_times})
+        # 检查可用时间段是否与已有预约重叠
+        available_times = sorted(available_times, key=lambda x: x[0])  # 按照开始时间排序
+        reserved_times = get_reserved_times(doctor_id, chosen_date)
+        available_times = exclude_overlapping_times(available_times, reserved_times,expertise_time)
+
+        # 只显示开始时间
+        available_times_str = [start_time.strftime("%H:%M:%S") for start_time, _ in available_times]
+
+        return JsonResponse({'reserve_choices': available_times_str})
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-def is_reserved(doctor_id, date, start_time, end_time):
-    
-    start_datetime = datetime.combine(date, start_time)
-    end_datetime = datetime.combine(date, end_time)
+def get_reserved_times(doctor_id, date):
     reservations = Reservation.objects.filter(
         SchedulingID__DoctorID_id=doctor_id,
-        time_start__date=date,
-        time_start__lt=start_datetime,
-        time_end__gt=start_datetime
-    )
-    return reservations.exists()
+        time_start__date=date
+    ).values_list('time_start', 'time_end')
+    return list(reservations)
 
+def exclude_overlapping_times(available_times, reserved_times, expertise_time):
+    result = []
+    for start_time, end_time in available_times:
+        overlap = False
+        
+        for res_start, res_end in reserved_times:
+            res_start_time = res_start.time()
+            res_end_time = res_end.time()
+            
+            # 排除刚好接在一起的情况
+            if end_time == res_start_time or start_time == res_end_time:
+                continue
+            
+            # 检查时间段是否重叠
+            if start_time < res_end_time and end_time > res_start_time:
+                print(f'worked:{start_time} ')
+                overlap = True
+                break
+            
+            start_datetime = datetime.combine(datetime.min, start_time)
+            
+            # Calculate end_datetime by adding expertise_time
+            end_datetime = start_datetime + expertise_time
+            
+            
+            # Check if end_datetime overlaps with reserved slot
+            if end_datetime >= res_start:
+                overlap = True
+                break
+            
+        if not overlap:
+            result.append((start_time, end_time))
+    
+    return result
+
+#只是一個用來跳轉的頁面
 def testing(request):
     context={}
     return render(request, "myApp/reservationTest.html", context)
 
 
-
-
+#應該不會有大變動，把來源改成session之類？
 @login_required
 def add_Reservation(request):
     if request.method == 'POST':
@@ -1383,10 +1420,9 @@ def add_Reservation(request):
 
             
             expertise_id = Expertise.objects.get(name=expertise_name)
+            expertise_time = expertise_id.time
             time_start = datetime.combine(scheduling.StartDate, time_obj)
-            time_end = time_start + timedelta(hours=1)
-
-        # 查询符合条件的排班记录
+            time_end = time_start + timedelta(hours=expertise_time.hour, minutes=expertise_time.minute)
             
             reservation = Reservation.objects.create(
                 ClientID=client,
@@ -1394,7 +1430,7 @@ def add_Reservation(request):
                 expertiseID=expertise_id,
                 time_start=time_start,
                 time_end=time_end,
-                Status=0  # 默认设置为reserved状态
+                Status=0
             )
             
             reservation.save()

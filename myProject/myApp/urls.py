@@ -15,6 +15,7 @@ urlpatterns = [
     path('doctor/manage/', views.docManage, name='doctor_management'),
     path('doctor/page/', views.docPage, name='doctor_page'),
     path('waitinglist/to/reservation/', views.waitingToResForC, name='waiting_to_reservation'),
+    #看不懂TT我自己寫了別的，如果這個能用用這個也行但我不會用
     #path('available/', views.available, name='available_times'),
     path('doctor/reserve/<int:doc_id>/', views.doctor_reserve_page, name='doctor_reserve_page'),
     path('clinic/reserve/<int:clinic_id>/', views.clinic_reserve_page, name='clinic_reserve_page'),
@@ -53,8 +54,11 @@ urlpatterns = [
     path('client/delete/reserve/', views.client_cancel_reservation, name='client_cancel_reservation'),
     path('doctor/delete/<str:doctor_email>/', views.delete_doctor, name='delete_doctor'),
     path('edit/doctor/<int:doctor_id>/', views.edit_doctor_schedule, name='edit_doctor_schedule'),
+    
+    #added by L
     path('doctor/expertise-list/<int:doctor_id>/', views.get_expertise_list, name = 'getexpertise'),
     path('get_doc_working/<int:doctor_id>/', views.get_doc_working, name = 'getworking'),
+    #我的版本的available顯示
     path('available/', views.get_available_times, name='get_available_times'),
     path('testing',views.testing,name='testing')
    
