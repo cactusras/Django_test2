@@ -18,7 +18,7 @@ class CustomUserForm(forms.ModelForm):
 class DoctorForm(forms.ModelForm):
     class Meta:
         model = Doctor
-        fields = ['email', 'name','phone_number','password','photo' ]
+        fields = ['email', 'name','phone_number','password','photo']
     def __init__(self, *args, **kwargs):
         super(DoctorForm, self).__init__(*args,**kwargs)
     #  self.fields['is_active'].initial = True
@@ -54,10 +54,10 @@ class SchedulingForm(forms.ModelForm):
         model = Scheduling
         fields = ['StartDate','EndDate']
         
-#class Doctor_ExpertiseForm(forms.ModelForm):
-#    class Meta:
-#        model = Doc_Expertise
-#        fields = ['DocID','Expertise_ID']
+class Doctor_ExpertiseForm(forms.ModelForm):
+   class Meta:
+       model = Doc_Expertise
+       fields = ['DocID','Expertise_ID']
 
 class ExpertiseForm(forms.ModelForm):
     class Meta:
@@ -67,7 +67,8 @@ class ExpertiseForm(forms.ModelForm):
 class ReservationForm(forms.ModelForm):
     class Meta:
         model = Reservation
-        fields = ['ClientID','SchedulingID','expertiseID','time_start','time_end','Status']
+       #fields = ['ClientID','SchedulingID','expertiseID','time_start','time_end','Status']
+        fields = ['ClientID','SchedulingID','expertiseID','time_start']
         
        
 class WaitingForm(forms.ModelForm):
@@ -131,6 +132,11 @@ class AuthenticationForm(forms.Form):
 			return self.user_cache.id
 		return None
 
+class TestingForm(forms.Form):
+    doctor_id = forms.IntegerField(label='Doctor ID')
+    date = forms.DateField(label='Date', widget=forms.DateInput(attrs={'type': 'date'}))
+    expertise_name = forms.CharField(label='Expertise Name', max_length=100)
+    expertise_list = forms.CharField(label='Expertise List', widget=forms.Textarea)
 
 
 

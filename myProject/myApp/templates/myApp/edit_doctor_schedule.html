@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- 样式和其他内容... -->
+</head>
+<body>
+    <h1>資料編輯</h1>
+
+    <h2>{{ doctor.name }} 的班表</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {{ working_hour_form.as_p }}
+        <button type="submit">保存班表</button>
+    </form>
+
+    <h2>{{ doctor.name }} 的排班</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+        {{ scheduling_form.as_p }}
+        <button type="submit">保存排班</button>
+    </form>
+
+    <h2>編輯 {{ doctor.name }} 的專長</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+        {{ doctor_expertise_form.as_p }}
+        <button type="submit">保存專長</button>
+    </form>
+</body>
+</html>

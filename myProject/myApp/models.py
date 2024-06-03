@@ -88,7 +88,7 @@ class Doctor(CustomUser):
     
     photo = models.ImageField(upload_to='doctors/',null=True,blank=True)
     clinicID = models.ForeignKey('Clinic', related_name='doctors', on_delete=models.CASCADE)  # 與 Clinic 關聯
-    exoerience = models.TextField(null=True,blank=True)
+    experience = models.TextField(null=True,blank=True)
     
 
     def __str__(self):
@@ -97,7 +97,7 @@ class Doctor(CustomUser):
 class Expertise(models.Model):
     
     name = models.CharField(max_length=100)
-    time = models.TimeField(default=time(hour=1))
+    time = models.TimeField()
 
     def __str__(self):
         return self.name
@@ -128,11 +128,11 @@ class Scheduling(models.Model):
     def WDforFront(self):
         return self.StartDate.weekday() + 1
     
-    def TimeSlotNumber(self):
-        duration = self.time_end - self.time_start
-        total_hours = int(duration.total_seconds() // 3600)  # Total hours between start and end
-        slot_numbers = [i + 1 for i in range(total_hours)]  # Generate slot numbers for each hour
-        return slot_numbers
+    # def TimeSlotNumber(self):
+    #     duration = self.time_end - self.time_start
+    #     total_hours = int(duration.total_seconds() // 3600)  # Total hours between start and end
+    #     slot_numbers = [i + 1 for i in range(total_hours)]  # Generate slot numbers for each hour
+    #     return slot_numbers
     
      
 class Reservation(models.Model):

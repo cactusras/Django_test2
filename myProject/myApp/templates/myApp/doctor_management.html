@@ -1,4 +1,4 @@
-{% load static %}
+{% comment %} {% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -70,7 +70,7 @@
 
                     <!--時段按鈕的彈跳視窗-->
 
-                <!--    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+           <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
 
                         <div class="modal-dialog modal-dialog-centered">
 
@@ -134,7 +134,7 @@
 
                         </div>
 
-                    </div> -->
+                    </div> 
                     <!--如果要用回checkbox的話 還有deleteCheckedRows()可以當eventListener-->
                     <button class="btn btn-outline-dark" type="button" onclick="clinPage(event)" id="btnClinPage" style="font-size: 20px; width: 160px; height: 40px;" data-bs-toggle="modal" data-bs-target="#exampleModal">
 
@@ -219,7 +219,7 @@
     
         //該診所現有醫生跟他們的資料顯示
         function doc_info() {
-            fetch('/success/')
+            fetch('/docManage/')
                 .then(response => response.json())
                 .then(data => {
                     const doctors = data.doctors;
@@ -318,5 +318,24 @@
         }
       
   </script>
+</body>
+</html> {% endcomment %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- 样式和其他内容... -->
+</head>
+<body>
+    <h1>醫生列表</h1>
+
+    <ul>
+        {% for doctor in doctors %}
+            <li>
+                <a href="{% url 'edit_doctor_schedule' doctor.id %}">{{ doctor.name }}</a>
+            </li>
+        {% endfor %}
+    </ul>
 </body>
 </html>
