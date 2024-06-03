@@ -45,7 +45,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const btnNav = document.getElementById('nav_btn');
   const barTitle = document.getElementById('barTitle');
   //const btnDocManage = document.getElementById('btnDocManage')
-  const btnLogout = document.getElementById('logoutButton')
 
   fetch('/check_authentication/')
   .then(response => {
@@ -60,13 +59,12 @@ document.addEventListener('DOMContentLoaded', function() {
         window.localStorage.setItem('isLogin', 'success')
         console.log('loginYes')
         btnNav.innerText = window.localStorage.getItem('username');
-        btnLogout.hidden = false;
+        
       }else{
         window.localStorage.setItem('isLogin', 'failed')
         console.log('loginNo')
         btnNav.innerText = '登入';
         barTitle.innerText = "註冊"
-        btnLogout.hidden = true;
       }
       //document.dispatchEvent(new CustomEvent('authChecked', { detail: window.isLogin }));
   })

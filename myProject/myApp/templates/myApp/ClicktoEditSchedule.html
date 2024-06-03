@@ -53,7 +53,7 @@
                             時段
                         </button>
                         <!--時段按鈕的彈跳視窗-->
-                        <form id="timePopForm">
+                        <form id="timePopForm" method="post">
                             {% csrf_token %}
                         <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered">
@@ -85,7 +85,7 @@
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">刪除</button>
-                                        <button type="submit" class="btn btn-primary" id="addTimeSlot">新增</button>
+                                        <button type="submit" class="btn btn-primary" id="addTimeSlot" onclick="timePopClick(event)">新增</button>
                                     </div>
                                        
                                 </div>
@@ -263,32 +263,34 @@
             }
         })*/
 
-        document.getElementById('timePopForm').addEventListener('submit', async function(event){
+        function timePopClick(event){
             event.preventDefault();
             console.log('hi')
-            const day_of_week = document.getElementById('daySelect').value;
+            /*const day_of_week = document.getElementById('daySelect').value;
             const start_time = document.getElementById('start_time').value;
-            const end_time = document.getElementById('end_time').value;
+            const end_time = document.getElementById('end_time').value;*/
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-            const data = {
+            /*const data = {
                 day_of_week: day_of_week,
                 start_time: start_time,
                 end_time: end_time
-            };
+            };*/
 
             let checkVlue = checkTime()
             if(checkVlue == 'success'){
+                const form = document.getElementById('timePopForm');
+                const formData = new FormData(form);
                 fetch(`/workingHour/upload/`,{
                     method: 'POST',
+                    body: formData,
                     headers: {
-                        'Content-Type': 'application/json',
                         'X-CSRFToken': csrfToken
                     },
-                    body: JSON.stringify(data)
+                    
                 })
                 .then(response => {
-                    if (!response.ok) {
+                    if (response.status != 204) {
                         throw new Error('Failed to add working_hour');
                     }
                     //const data = await response.json();
@@ -309,7 +311,7 @@
             }  else if(checkVlue == 'dayNotExist'){
                 alert('請選擇星期幾。');
             }
-        })
+        }
     
         document.getElementById('schedulingForm').addEventListener('submit', async function(event){
             event.preventDefault();

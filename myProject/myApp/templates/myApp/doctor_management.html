@@ -193,22 +193,14 @@
     <script src="{% static 'myApp/js/scripts.js' %}"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function(){
-
-            if(getIsLogin()){
-                document.getElementById('btnClinPage').innerText = "回到主頁"
-            }else{
-                document.getElementById('btnClinPage').innerText = "完成"
-            }
+            document.getElementById('btnClinPage').innerText = "回到主頁"
+            doc_info();
         })
         
 
         function clinPage(event){
             event.preventDefault();
-            if(getIsLogin()){
-                 window.location.href = '/clinic/home/'
-            }else{
-                window.location.href = '/loginP'
-            }
+            window.location.href = '/clinic/home/'
            
         }
 
@@ -230,7 +222,7 @@
                             <td>${doctor.name}</td>
                             <td>${doctor.email}</td>
                             <td>${doctor.phone_number}</td>
-                            <td>${doctor.experience}</td>
+                            <td>${doctor.exoerience}</td>
                             <td>
                                 <form class="delete-doctor-form">
                                     {% csrf_token %}
@@ -246,13 +238,15 @@
                     deleteForms.forEach(form => {
                         form.addEventListener('submit', function(event) {
                             event.preventDefault(); // 阻止表单默认提交行为
-        
+                            
+                        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
                             const doctorEmail = form.querySelector('button').dataset.doctorEmail;
         
                             fetch(`/doctor/delete/${doctorEmail}/`, {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
+                                    'X-CSRFToken': csrfToken
                                 },
                             })
                             .then(response => response.json())

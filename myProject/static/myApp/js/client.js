@@ -40,17 +40,20 @@ document.addEventListener('DOMContentLoaded', function() {
         const btnRegis = document.getElementById('btnClieRegis');
         const barTitle = document.getElementById('barTitle');
         const clieForm = document.getElementById('clientForm');
+        const btnLogout = document.getElementById('logoutButton')
         fetch_element();
         //canva11進入canva12   
         if (window.localStorage.getItem('isLogin') == 'success'){
             //console.log('cliejs46')
             barTitle.innerText = '患者資料'
             btnRegis.innerText = '回到主頁'
+            btnLogout.hidden = false;
             fetch_info(clieForm);
         }else if(window.localStorage.getItem('isLogin') == 'failed'){
             //console.log('cliejs46_no')
             barTitle.innerText = '註冊'
             btnRegis.innerText = '完成'
+            btnLogout.hidden = true;
         }
 })
 

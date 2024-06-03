@@ -1,10 +1,12 @@
 import json, simplejson
+import os
 from pathlib import Path
 from PIL import Image
 from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 #from rest_framework import serializers
 from myProject.encoder import CustomEncoder
+from .serializers import WorkingHourSerializer
 from .forms import DoctorForm,ClinicForm,ClientForm, LoginForm,SchedulingForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm
 from django.db.models import Q
 from django.db import connection
@@ -53,15 +55,10 @@ def user_login(request):
                     print('clinic')              
                     user_type = 'clinic'
                     return JsonResponse({'user_type': 'clinic', 'username': username,  'status': 'success'})
-                elif hasattr(user, 'experience'):  # 检查是否是医生
+                elif hasattr(user, 'doctor'):  # 检查是否是医生
                     print('doctor')
                     user_type = 'doctor'
-                    return JsonResponse({'user_type': 'client', 'username': username,  'status': 'success'})
-                elif hasattr(user, 'clinic'):  # 检查是否是诊所
-                    print('clinic')
-                    return JsonResponse({'user_type': 'clinic', 'username': username,  'status': 'success'})
-                elif hasattr(user, 'experience'):  # 检查是否是医生
-                    print('doctor')
+                    return JsonResponse({'user_type': 'doctor', 'username': username,  'status': 'success'})
 
 def add_client(request):
     if request.method == 'POST':
@@ -241,7 +238,9 @@ def add_clinic(request):
 #先將加入圖片放在這裡 但可能還有東西要改
 @login_required
 def add_doctor(request):
+    print('add doctor')
     if request.method == 'POST':
+        print('add doctor_post yes')
         doctor_form_data = request.session.get('doctor_form_data')
         expertise_list = request.session.get('doc_expertise_list', [])
         schedule_form_data = request.session.get('schedule_form_data')
@@ -256,31 +255,30 @@ def add_doctor(request):
             return JsonResponse({'message': 'Session data incomplete', 'status': 'error'})
 
         # Process photo if included in doctor_form_data
-        '''if 'photo' in doctor_form_data:
+        if doctor_form_data['photo'] is not None:
             photo_url = doctor_form_data.pop('photo', '')  # Remove photo from form data
             try:
-                image = Image.open(photo_url)
                 save_dir = Path('media/uploaded_files')
-                save_dir.mkdir(parents=True, exist_ok=True)  # Create directories if they don't exist
-                save_path = save_dir / Path(photo_url).name
-                image.save(save_path)
+                save_dir.mkdir(parents=True, exist_ok=True)
+                final_path = save_dir / Path(photo_url).name
+                os.rename(photo_url, final_path)
                 print("Photo saved successfully")
-                doctor_form_data['photo'] = save_path  # Update form data with saved photo path
+                doctor_form_data['photo'] = photo_url  # Update form data with saved photo path
             except Exception as e:
                 print(f"Error saving photo: {e}")
-                return JsonResponse({'message': 'Error saving photo', 'status': 'error'})'''
+                return JsonResponse({'message': 'Error saving photo', 'status': 'error'})
 
         clinic = Clinic.objects.get(id=request.user.id)
         doctor_form_data['clinicID'] = clinic
         email = doctor_form_data.pop('email')
         doctor, created = Doctor.objects.update_or_create(email=email, defaults=doctor_form_data)
         
-        Doc_Expertise.objects.filter(DocID_id=doctor.id).delete()
+        Doc_Expertise.objects.filter(DocID=doctor).delete()
         
         for expertise_data in expertise_list:
             expertise_name = expertise_data.get('name')
             expertise, created = Expertise.objects.get_or_create(name=expertise_name)
-            Doc_Expertise.objects.create(doctor=doctor, expertise=expertise)
+            Doc_Expertise.objects.create(DocID=doctor, Expertise_ID=expertise)
         
         for working_hour_data in working_hour_list:
             working_hour, created = WorkingHour.objects.update_or_create(
@@ -290,8 +288,9 @@ def add_doctor(request):
                 defaults=working_hour_data
             )
             Scheduling.objects.update_or_create(
-                doctor=doctor,
-                working_hour=working_hour,
+                DoctorID=doctor.id,
+                #WorkingHour=1,
+                #WorkingHour=working_hour,
                 defaults=schedule_form_data
             )
 
@@ -301,7 +300,14 @@ def add_doctor(request):
 
     return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
-
+def handle_uploaded_file(file):
+    save_dir = Path('media/temp_files')
+    save_dir.mkdir(parents=True, exist_ok=True)
+    save_path = save_dir / file.name
+    with open(save_path, 'wb+') as destination:
+        for chunk in file.chunks():
+            destination.write(chunk)
+    return str(save_path)
 
 @login_required    
 def Doc_uploading(request):
@@ -311,11 +317,18 @@ def Doc_uploading(request):
         except json.JSONDecodeError:
             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
         if doctor_form.is_valid():
-            request.session['doctor_form_data'] = doctor_form.cleaned_data
-            print('succeed adding', doctor_form.cleaned_data)
+            clean = doctor_form.cleaned_data
+            clean['password'] = make_password(clean['password'])
+            photo = request.FILES.get('photo')
+            if photo is not None:
+                photo_url = handle_uploaded_file(photo)
+                clean['photo'] = photo_url
+            request.session['doctor_form_data'] = clean
+            print('succeed adding', clean)
             doc_expertise_list = request.session.get('doc_expertise_list', None)
             return JsonResponse({'message': 'Doctor Session added', 'status': 'success'})
         else:
+            print('error : ', doctor_form.errors)
             return JsonResponse({'message': 'Invalid form data', 'errors': doctor_form.errors, 'status': 'error'})
     else:
         doctor_form = DoctorForm()
@@ -349,13 +362,13 @@ def DocExp_uploading(request):
 def workingHour_upload(request):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)  # 解析 JSON 数据
+            data = json.loads(request.POST)  # 解析 JSON 数据
             print('post succeed')
         except json.JSONDecodeError:
             print('post failed')
             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
         start_time_str = data.get('start_time')
-        end_time_str = data.get('end_time')
+        '''end_time_str = data.get('end_time')
         
 
         data = {
@@ -364,18 +377,27 @@ def workingHour_upload(request):
             'end_time' : end_time_str
             #'start_time' : start_time_str.strftime('%H:%M'),
             #'end_time' : end_time_str.strftime('%H:%M')
-        }
-        #print('type2 = ' , type(start_time_str)) 
-        working_hour_form = WorkingHourForm(data)
+        }'''
+        print('sttime = ', start_time_str) 
+        #working_hour_form = WorkingHourForm(data)
         print('before valid')
-        if working_hour_form.is_valid():
-            #print('after valid1')
+        serializer = WorkingHourSerializer(data=data)
+        if serializer.is_valid():
+            print('after valid1')
             working_hour_list = request.session.get('working_hour_list', [])
-            #print('first get list = ', working_hour_list)
-            #working_hour_list.append(working_hour_form.cleaned_data)
-            working_hour_list.append(data)
-            #print('succeed adding', working_hour_list)
+            print('first get list = ', working_hour_list)
+            # 添加新工作時間到列表中
+            working_hour_list.append(serializer.validated_data)
+            print('succeed adding', working_hour_list)
+            # 將工作時間列表保存回 session
+            request.session['working_hour_list'] = working_hour_list
+            print('finish')
 
+            #working_hour_list = request.session.get('working_hour_list', [])
+            
+            #working_hour_list.append(working_hour_form.cleaned_data)
+            #working_hour_list.append(data)
+            
             # 序列化 time 对象为字符串
             '''workingHour_data = []
             for item in working_hour_list:
@@ -386,20 +408,22 @@ def workingHour_upload(request):
                     print('type is datatimeE')
                     item['end_time'] = item['end_time'].strftime('%H:%M')
                 workingHour_data.append(item)'''
-            print('data = ', working_hour_list)
-            request.session['working_hour_list'] = working_hour_list
+            
+            #request.session['working_hour_list'] = working_hour_list
             #print('after valid3')
             #想除掉not serializable的bug 所以寫了這個(跟encoder.py 所以寫了這個(跟encoder.py) 但會導到cls的bug
             #serialized_data  = simplejson.dumps(working_hour_list, cls=CustomEncoder)
-            return JsonResponse({'message': 'Working hour data added successfully', 'status': 'success'})
-            #return HttpResponse(status=204)
+            #return JsonResponse({'message': 'Working hour data added successfully', 'status': 'success'})
+            return HttpResponse(status=204)
         else:
-            print('notvalid = ', working_hour_form.errors)
-            return JsonResponse({'message': 'Invalid form data', 'status': 'error'})
+            print('notvalid = ', serializer.errors)
+            #return JsonResponse({'message': 'Invalid form data', 'status': 'error'})
+            return HttpResponse('Invalid form data', status=400)
     else:
         working_hour_form = WorkingHourForm()
     
-    return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
+    #return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
+    return HttpResponse('Invalid request method', status=405)
 
 '''render版的workingHour_upload 對應到clicktoEditSchedule_new
 @login_required
@@ -478,8 +502,8 @@ def doc_session(request):
 #doctor_management中要抓此診所所有醫生的資料(這樣login_required要刪掉)
 @login_required
 def success(request):
-    clinic = Clinic.objects.get(user=request.user)
-    doctors = Doctor.objects.filter(clinic=clinic).values()  # QuerySet 转为字典列表
+    clinic = Clinic.objects.get(id=request.user.id)
+    doctors = Doctor.objects.filter(clinicID=clinic).values()  # QuerySet 转为字典列表
 
     data = {
         'clinic': {
@@ -1130,9 +1154,11 @@ def doctor_info(request):
             'name': user.name,
             'phone_number': user.phone_number,
             'password': user.password,
-            'photo_url': user.doctor.photo.url,
-            'experience': user.doctor.experience,
+            #'photo_url': user.doctor.photo.url,
+            'exoerience': user.doctor.exoerience,
         }
+        if user.doctor.photo and user.doctor.photo.name:
+           info['photo'] =  user.doctor.photo.url
         return JsonResponse({'status': 'success', 'data': info}, status=200)
     else:
         return JsonResponse({'status': 'error', 'error': 'User is not a doctor'}, status=400)

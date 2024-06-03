@@ -19,7 +19,7 @@ class CustomUserForm(forms.ModelForm):
 class DoctorForm(forms.ModelForm):
     class Meta:
         model = Doctor
-        fields = ['email', 'name','phone_number','password','photo' ]
+        fields = ['email', 'name','phone_number','password','photo','exoerience' ]
     def __init__(self, *args, **kwargs):
         super(DoctorForm, self).__init__(*args,**kwargs)
     #  self.fields['is_active'].initial = True

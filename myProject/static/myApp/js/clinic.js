@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const btnDocManage = document.getElementById('btnDocManage');
         const barTitle = document.getElementById('barTitle');
         const clinForm = document.getElementById('clinicForm')
+        const btnLogout = document.getElementById('logoutButton')
         fetch_element();
 
         //canva11進入canva12   
@@ -35,6 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
             barTitle.innerText = '診所資料'
             btnDocManage.hidden = false;
             btnRegis.innerText = '完成'
+            btnLogout.hidden = false;
             btnDocManage.addEventListener('click', function(){
                 window.location.href = "/doctor/manage"
             })
@@ -46,6 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
             btnRegis.innerText = '完成'
             btnDocManage.hidden = true;
             barTitle.innerText = '註冊'
+            btnLogout.hidden = true;
         }
 })
 
@@ -57,12 +60,12 @@ async function isUniqueLicense(license_number){
                 'Content-Type': 'application/json',
                 //'X-CSRFToken': getCookie('csrftoken')
             },
-            body: JSON.stringify({email: email})
+            body: JSON.stringify({license_number: license_number})
         });
         const uniqueLicense = await response.json();
         return uniqueLicense.isUnique;
     } catch (error) {
-        console.log('Error fetching registered emails:', error);
+        console.log('Error fetching registered license:', error);
         return false;
     }
 }
@@ -110,11 +113,8 @@ function fetch_info(formFilled){
         const data = await response.json();
 
         if (data.status === 'success') {
-            //const clinInfo = data.info;
-            //console.log("info_type = " + typeof(data.data) + "  info = " + data.data)
             const clinInfo = data.data;
             console.log(clinInfo.photo_url)
-            //console.log("info_type = " + typeof(data.data) + "  info = " + data.data)
             fillForm(clinInfo, formFilled);
         } else {
             console.error(data.error);

@@ -4,10 +4,8 @@
         phone_number: "",
         password: "",
         photo: null,
-        experience: ""
+        exoerience: ""
     };
-
-    var readyRegis = false;
 
     //存已經選過的 讓他disabled
     var expExist = [];
@@ -17,9 +15,9 @@
             docField['name'] = document.getElementById('name').value,
             docField['phone_number'] = document.getElementById('phone_number').value,
             docField['password'] = document.getElementById('password').value,
-            docField['experience'] = document.getElementById('experience').value,
+            docField['exoerience'] = document.getElementById('exoerience').value,
             docField['photo'] = document.getElementById('photo').files[0]
-            console.log('email' + docField['email']);
+            console.log('exoerience' + docField['exoerience']);
     }
 
     /*function toSchedule(event){
@@ -31,19 +29,25 @@
             //頁面加載後才能把這些element load進來
             const btnRegis = document.getElementById('btnDocRegis');
             const barTitle = document.getElementById('barTitle');
+            const docForm = document.getElementById('doctorForm');
+            const photoInput = document.getElementById('photo');
+            const btnLogout = document.getElementById('logoutButton')
             fetch_element();
                 
             //canva11進入canva12   
             if (window.localStorage.getItem('user_type') == 'doctor'){
                 barTitle.innerText = '醫生資料'
+                btnLogout.hidden = false;
                 btnRegis.addEventListener('click', function(){
                     window.location.href = "/clinic/home"
                 })
-                fetch_info();
+                fetch_info(docForm);
             }else if (window.localStorage.getItem('user_type') == 'clinic'){
                 barTitle.innerText = '註冊'
-                if(readyRegis){
-                    info_before_regis();
+                btnLogout.hidden = true;
+                if(window.localStorage.getItem('readyRegis') == 'yes'){
+                    info_before_regis(docForm);
+                    photoInput.hidden = true
                 }
             }
     })
@@ -131,23 +135,23 @@
     }
 
     //登入狀態從後端抓資料放到dataEdit
-    function fetch_info(){
+    function fetch_info(formFilled){
         fetch('/doctor_info/', {
             method: 'GET'
         })
-        .then(response => {
+        .then(async response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            return response.json(); // 解析 JSON 响应
-        })
-        .then(infoDic =>{
-            username = infoDic['name'];
-            for (var key in infoDic) {
-                if (infoDic.hasOwnProperty(key)) {
-                    //
-                    docField[key] = infoDic[key];
-                }
+            const data = await response.json();
+    
+            if (data.status === 'success') {
+                const docInfo = data.data;
+                //console.log(clinInfo.photo_url)
+                //console.log("info_type = " + typeof(data.data) + "  info = " + data.data)
+                fillForm(docInfo, formFilled);
+            } else {
+                console.error(data.error);
             }
         })   
         .catch(error => {
@@ -156,8 +160,7 @@
     }
     
     //編輯完班表之後回到醫生註冊頁會出現的資料
-    function info_before_regis(){
-        console.log('readyRegis = true')
+    function info_before_regis(filledForm){
         fetch('/doc/session/', {
             method: 'GET',
             headers: {
@@ -166,10 +169,14 @@
         })
         .then(response => response.json())
         .then(data => {
-            const doctorForm = document.getElementById('doctorForm');
+            //const doctorForm = document.getElementById('doctorForm');
             const doctorFormData = data.doctor_form_data;
+            if (doctorFormData['photo'] != ''){
+                doctorFormData['photo'] = '';
+            }
+            doctorFormData['password'] = window.localStorage.getItem('password')
             console.log(doctorFormData)
-            fillForm(doctorFormData, doctorForm)
+            fillForm(doctorFormData, filledForm)
         })
         .catch(error => {
             console.error('Error fetching session data:', error);
@@ -193,6 +200,8 @@
             const data = await response.json();
             // 处理成功响应，例如显示成功消息或重定向
             if(data.status == 'success'){
+                window.localStorage.setItem('readyRegis', 'no')
+                window.localStorage.setItem('password', '')
                 alert('Doctor added successfully!');
                 window.location.href = '/doctor/manage';
             }else{
@@ -247,7 +256,7 @@
         }    
         if (isValid) {
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
+            window.localStorage.setItem('password', docField.password)
             // 發送 AJAX 請求
             fetch('/doc/upload/', {
                 method: 'POST',
@@ -262,7 +271,7 @@
                 if (data.status === 'success') {
                     setTimeout(function(){console.log(data.info)}, 2000) 
                     alert(data.message);
-                    readyRegis = true;
+                    window.localStorage.setItem('readyRegis', 'yes')
                     window.location.href = '/click/schedule';
                 } else {
                     alert(data.message);
