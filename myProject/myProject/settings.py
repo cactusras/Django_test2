@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -76,9 +77,10 @@ TEMPLATES = [
 WSGI_APPLICATION = 'myProject.wsgi.application'
 
 AUTHENTICATION_BACKENDS = [
-    'myApp.backend.EmailBackend',
+    'myApp.backend.EmailBackend',  # Adjust to your app name
     'django.contrib.auth.backends.ModelBackend',
 ]
+
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -129,10 +131,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
-    Path.joinpath(BASE_DIR, 'static')
+    Path.joinpath(BASE_DIR, 'static/'),
+    Path.joinpath(BASE_DIR, 'static/myApp'),
 ]
 
 # Default primary key field type

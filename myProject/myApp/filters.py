@@ -39,11 +39,6 @@ class docClinicFilter(django_filters.FilterSet):
             )
         return queryset
 
-    
-    
-
-
-    
   
 
    

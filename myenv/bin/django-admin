@@ -1,4 +1,4 @@
-#!/Users/csh5138/Django_test2/myenv/bin/python3.12
+#!/Users/csh5138/Django_test2/myenv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

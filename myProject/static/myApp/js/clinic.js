@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             fetch_info(clinForm);
         }else if(window.localStorage.getItem('isLogin') == 'failed'){
-            btnRegis.innerText = '新增醫生'
+            btnRegis.innerText = '完成'
             btnDocManage.hidden = true;
             barTitle.innerText = '註冊'
 <<<<<<< Updated upstream
@@ -84,12 +84,12 @@ async function isUniqueLicense(license_number){
                 'Content-Type': 'application/json',
                 //'X-CSRFToken': getCookie('csrftoken')
             },
-            body: JSON.stringify({email: email})
+            body: JSON.stringify({license_number: license_number})
         });
         const uniqueLicense = await response.json();
         return uniqueLicense.isUnique;
     } catch (error) {
-        console.log('Error fetching registered emails:', error);
+        console.log('Error fetching registered license:', error);
         return false;
     }
 }
@@ -112,6 +112,20 @@ async function isUniqueEmail(email){
     }
 }
 
+function fillForm(data, form) {
+    if (!form) {
+        console.error('Form not found');
+        return;
+    }
+
+    Object.keys(data).forEach(key => {
+        const field = form.querySelector(`[name=${key}]`);
+        if (field) {
+            field.value = data[key];
+        }
+    });
+}
+
 function fetch_info(formFilled){
     fetch('/clinic_info/', {
         method: 'GET'
@@ -123,6 +137,7 @@ function fetch_info(formFilled){
         const data = await response.json();
         //return response.json(); // 解析 JSON 响应
         if (data.status === 'success') {
+            //顯示資料時不填入photo_url跟password(不影響後端)
             const clinInfo = data.data;
             //console.log("info_type = " + typeof(data.data) + "  info = " + data.data)
             fillForm(clinInfo, formFilled);

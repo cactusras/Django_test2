@@ -31,7 +31,7 @@
         <nav class="navbar navbar-expand-lg" style="background-color:#F0EAD6;  height: 100px;">
             <div class="container px-4 px-lg-5">
                 <img src="{% static 'myApp/assets/dental.png' %}" alt="DEN Logo">
-                <a class="navbar-brand" href="#!"  style="font-size: 24px;"> 牙醫預約平台</a>
+                <a class="navbar-brand" href="#!"  style="font-size: 24px;" onclick="mainPage(event)"> 牙醫預約平台</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                    
@@ -75,9 +75,10 @@
                         <br>
                         <div class="row">
                             <div class="col">
-                                <label for="password" class="required password">密碼</label>
-                                <div class="form-floating password">
-                                    <input type="password" class="form-control password" id="password" name="password" required>
+                                <label for="password" class="required loginHide">密碼</label>
+                                <div class="form-floating">
+                                    <input type="password" class="form-control loginHide" id="password" name="password">
+
                                 </div>
                             </div>
                             <div class="col">
@@ -137,13 +138,13 @@
                       </fieldset>
                      </form>
                     </div>
-
+                    <script src="{% static 'js/logout.js' %}" defer></script>
                     <!--設定登出按鈕-->
                     <button class="logout-button" id="logoutButton" onclick="redirectToPage()">登出</button>
                         <!--要轉跳到註冊頁面-->
                         <script>
                         function redirectToPage() {
-                            window.location.href = 'http://127.0.0.1:8000/database%E7%81%8F%E5%A0%9F%EE%94%8D/search/index.html';
+                            window.location.href = 'http://127.0.0.1:8000/home';
                         }
                         </script>
                     </div> 
