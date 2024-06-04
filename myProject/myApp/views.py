@@ -7,11 +7,6 @@ from django.http import HttpResponse, JsonResponse
 #from rest_framework import serializers
 from myProject.encoder import CustomEncoder
 from .serializers import WorkingHourSerializer
-from .forms import DoctorForm,ClinicForm,ClientForm, LoginForm,SchedulingForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm
-from django.http import HttpResponse, JsonResponse
-#from rest_framework import serializers
-from myProject.encoder import CustomEncoder
-from .serializers import WorkingHourSerializer
 from .forms import ClientUpdateForm, ClinicUpdateForm, DoctorForm,ClinicForm,ClientForm, LoginForm,SchedulingForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm
 from django.db.models import Q
 from django.db import connection
@@ -71,7 +66,7 @@ def add_client(request):
             data = json.loads(request.body)  # 解析 JSON 數據
         except json.JSONDecodeError:
             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
-    
+        
         password = data.get('password')
         email = data.get('email')
         # 創建一個包含數據的 QueryDict
@@ -79,7 +74,7 @@ def add_client(request):
             'email': email,
             'name': data.get('name'),
             'phone_number': data.get('phone_number'),
-            'password': password,  # 对密码进行哈希处理
+            'password': password,
             'address': data.get('address'),
             'birth_date': data.get('birth_date'),
             'gender': data.get('gender'),

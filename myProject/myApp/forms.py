@@ -47,11 +47,8 @@ class ClinicForm(forms.ModelForm):
         #fields = ['name', 'license_number','phone_number','address','introduction','photo','email','password' ]
         fields = ['email', 'name','phone_number','password','license_number','address','introduction','photo']
     def __init__(self, *args, **kwargs):
-        super(ClinicForm, self).__init__(*args,**kwargs)
         self.update = kwargs.pop('update', False)
         super(ClinicForm, self).__init__(*args, **kwargs)
-      #  self.fields['is_active'].initial = True
-      #  self.fields['is_admin'].initial = False
         
 
 class ClientUpdateForm(forms.ModelForm):

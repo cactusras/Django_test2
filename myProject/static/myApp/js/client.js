@@ -171,7 +171,14 @@ document.getElementById('clientForm').addEventListener('submit', async function(
         .then(data => {
             if (data.status === 'success') {
                 alert(data.message);
-                window.location.href = '/home';
+                if(window.localStorage.getItem('isLogin') == 'failed'){
+                    alert(data.message);
+                    window.location.href = '/loginP/';
+                }else{
+                    alert(data.message);
+                    window.localStorage.setItem('username', clieField.name)
+                    window.location.href = '/home/';
+                }
             } else {
                 alert(data.message);
             }
