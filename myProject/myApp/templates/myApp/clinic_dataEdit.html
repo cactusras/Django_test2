@@ -22,7 +22,7 @@
         <nav class="navbar navbar-expand-lg" style="background-color:#F0EAD6;  height: 100px;">
             <div class="container px-4 px-lg-5">
                 <img src="{% static 'myApp/assets/dental.png' %}" alt="DEN Logo">
-                <a class="navbar-brand" href="#!"  style="font-size: 24px;"> 牙醫預約平台</a>
+                <a class="navbar-brand" href="#!"  style="font-size: 24px;"  onclick="mainPage(event)"> 牙醫預約平台</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <div class="ms-auto">
@@ -66,9 +66,9 @@
                         <br>
                         <div class="row">
                             <div class="col">
-                                <label for="password" class="required">密碼</label>
+                                <label for="password" class="required loginHide">密碼</label>
                                 <div class="form-floating">
-                                    <input type="password" class="form-control half-width" id="password" name="password" required>
+                                    <input type="password" class="form-control half-width loginHide" id="password" name="password" required>
                                 </div>
                             </div>
                             <div class="col">
@@ -102,12 +102,12 @@
                                 </div>
                             </div>
                             <div class="col">
-                            <label for="photo">圖片</label>
+                            <label for="photo" class="loginHide">圖片</label>
                             <div class="form-floating">
-                                <input type="file" class="form-control-file" id="photo" name="photo">
+                                <input type="file" class="form-control-file loginHide" id="photo" name="photo">
                             </div>
                 
-                             <img src="{{ data.photo_url }}" alt="Clinic Photo">
+                            <!-- <img src="{{ data.photo_url }}" alt="Clinic Photo">-->
 
                         </div>
                         <!--管理醫師&完成按鈕-->

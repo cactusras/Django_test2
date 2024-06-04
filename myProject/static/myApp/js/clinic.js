@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const barTitle = document.getElementById('barTitle');
         const clinForm = document.getElementById('clinicForm')
         const btnLogout = document.getElementById('logoutButton')
+        const loginHide = document.querySelectorAll('.loginHide')
         fetch_element();
 
         //canva11進入canva12   
@@ -37,6 +38,9 @@ document.addEventListener('DOMContentLoaded', function() {
             btnDocManage.hidden = false;
             btnRegis.innerText = '完成'
             btnLogout.hidden = false;
+            loginHide.forEach(element => {
+                element.hidden = true
+            });
             btnDocManage.addEventListener('click', function(){
                 window.location.href = "/doctor/manage"
             })
@@ -113,8 +117,14 @@ function fetch_info(formFilled){
         const data = await response.json();
 
         if (data.status === 'success') {
+            //顯示資料時不填入photo_url跟password(不影響後端)
             const clinInfo = data.data;
-            console.log(clinInfo.photo_url)
+            if (clinInfo['photo'] != ''){
+                clinInfo['photo'] = '';
+            }
+            if (clinInfo['password'] != ''){
+                clinInfo['password'] = '';
+            }
             fillForm(clinInfo, formFilled);
         } else {
             console.error(data.error);

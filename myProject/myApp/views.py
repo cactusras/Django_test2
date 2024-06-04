@@ -66,13 +66,13 @@ def add_client(request):
             data = json.loads(request.body)  # 解析 JSON 數據
         except json.JSONDecodeError:
             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
-        
+        password = data.get('password')
         # 創建一個包含數據的 QueryDict
         data = {
             'email': data.get('email'),
             'name': data.get('name'),
             'phone_number': data.get('phone_number'),
-            'password': make_password(data.get('password')),  # 对密码进行哈希处理
+            'password': password,  # 对密码进行哈希处理
             'address': data.get('address'),
             'birth_date': data.get('birth_date'),
             'gender': data.get('gender'),
@@ -93,6 +93,10 @@ def add_client(request):
                 email=email,
                 defaults=cleaned_data
             )
+
+            if password:
+                client.password = make_password(password)
+                client.save()
 
             if created_client:
                 message = 'Client created successfully.'
@@ -621,49 +625,47 @@ def get_time_slots(schedule):
 #clinic 載入頁
 @login_required
 def clinic_load(request):
-    #return clinic main page
     user = request.user
     clinics = Clinic.objects.filter(user=user)
-    #診所
-    
-    #sched field
-    #DoctorID = models.ForeignKey('Doctor', related_name='scheduling', on_delete=models.CASCADE)
-    #WorkingHour = models.ForeignKey('WorkingHour', related_name='scheduling', on_delete=models.CASCADE)
-    #StartDate = models.DateField()
-    #EndDate = models.DateField()
-    
-    schedules = Scheduling.objects.filter(clinic=clinics)
-    #注意回傳值
-    reservations = Reservation.objects.filter(schedulesID = schedules)
+    schedules = Scheduling.objects.filter(clinic__in=clinics)
+    reservations = Reservation.objects.filter(schedulesID__in=schedules)
+
+    # Build the context as a dictionary
     context = {
-       
-    'clinic': clinics,
-    'schedules': schedules,
-    'reservations': reservations,
-    # Additional context variables:
-    'clinic_name': clinics[0].name,  # Assuming clinics is a list with a single clinic=?
-    #return w1,10:00=>11, w1 11:00=>12...so on
-    #前端需要處理
-    'schedule_list': [
-        {
-            'doctor_name': schedule.DoctorID.name,
-            'time_slots': get_time_slots(schedule),
-        }
-        for schedule in schedules
-    ],
-    
-    'reservation_list': [
-        {
-            'client_name': reservation.ClientID.name,
-            'appointment_date': reservation.time_start.date(),
-            'appointment_time': reservation.time_start.strftime('%H:%M'),
-            'expertise': reservation.expertiseID.name,  # Assuming Expertise has a 'name' field
-            'status': reservation.get_status_display(),  # Use get_status_display() method
-        }
-        for reservation in reservations
-    ],
+        'clinics': [
+            {
+                'id': clinic.id,
+                'name': clinic.name,
+                'address': clinic.address,
+                'phone_number': clinic.phone_number,
+                'email': clinic.email,
+            }
+            for clinic in clinics
+        ],
+        'schedules': [
+            {
+                'id': schedule.id,
+                'doctor_name': schedule.DoctorID.name,
+                'start_date': schedule.StartDate.strftime('%Y-%m-%d'),
+                'end_date': schedule.EndDate.strftime('%Y-%m-%d'),
+                'time_slots': get_time_slots(schedule),
+            }
+            for schedule in schedules
+        ],
+        'reservations': [
+            {
+                'id': reservation.id,
+                'client_name': reservation.ClientID.name,
+                'appointment_date': reservation.time_start.date().strftime('%Y-%m-%d'),
+                'appointment_time': reservation.time_start.strftime('%H:%M'),
+                'expertise': reservation.expertiseID.name,
+                'status': reservation.get_status_display(),
+            }
+            for reservation in reservations
+        ],
     }
-    return render(request, 'myApp/clinicPage.html', context)
+
+    return JsonResponse(context)
 
 
 

@@ -20,7 +20,7 @@
         <nav class="navbar navbar-expand-lg" style="background-color:#F0EAD6;  height: 100px;">
             <div class="container px-4 px-lg-5">
                 <img src="{% static 'myApp/assets/dental.png' %}" alt="DEN Logo">
-                <a class="navbar-brand" href="#!"  style="font-size: 24px;"> 牙醫預約平台</a>
+                <a class="navbar-brand" href="#!"  style="font-size: 24px;" onclick="mainPage(event)"> 牙醫預約平台</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <div class="ms-auto">
@@ -111,18 +111,18 @@
                                     </div>
                                 </div>
                                 <div class="col">
-                                    <label for="password" class="required">密碼</label>
+                                    <label for="password" class="required loginHide">密碼</label>
                                     <div class="form-floating">
-                                        <input type="password" class="form-control" id="password" name="password" required>
+                                        <input type="password" class="form-control loginHide" id="password" name="password" required>
                                     </div>
                                 </div>
                             </div>
                             <br>
                             <div class="row">
                                 <div class="col">
-                                    <label for="photo">個人相片</label>
+                                    <label for="photo" class="loginHide" id="photoLbl">個人相片</label>
                                     <div class="form-floating">
-                                        <input type="file" class="form-control-file" id="photo" name="photo">
+                                        <input type="file" class="form-control-file loginHide" id="photo" name="photo">
                                     </div>
                                 </div>
                                 <div class="col">
@@ -151,7 +151,7 @@
                     <!--設定完成按鈕-->
                     <form id="regisBtn_Form">
                         {% csrf_token %}
-                        <button id="btnDocRegis" class="rectangle-button" type="submit" onclick="clickRegis()">完成</button>
+                        <button id="btnDocRegis" class="rectangle-button" type="submit" onclick="clickRegis(event)">完成</button>
                     </form> 
                     </div> 
         </section>

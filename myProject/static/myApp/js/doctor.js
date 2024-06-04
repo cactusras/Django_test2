@@ -31,23 +31,31 @@
             const barTitle = document.getElementById('barTitle');
             const docForm = document.getElementById('doctorForm');
             const photoInput = document.getElementById('photo');
+            const photoLabel = document.getElementById('photoLbl');
+            const loginHide = document.querySelectorAll('.loginHide')
             const btnLogout = document.getElementById('logoutButton')
             fetch_element();
                 
             //canva11進入canva12   
             if (window.localStorage.getItem('user_type') == 'doctor'){
                 barTitle.innerText = '醫生資料'
+                btnRegis.innerText = '回到主頁'
                 btnLogout.hidden = false;
                 btnRegis.addEventListener('click', function(){
                     window.location.href = "/clinic/home"
                 })
+                loginHide.forEach(element => {
+                    element.hidden = true;
+                });
                 fetch_info(docForm);
             }else if (window.localStorage.getItem('user_type') == 'clinic'){
                 barTitle.innerText = '註冊'
                 btnLogout.hidden = true;
+                btnRegis.innerText = '完成'
                 if(window.localStorage.getItem('readyRegis') == 'yes'){
                     info_before_regis(docForm);
                     photoInput.hidden = true
+                    photoLabel.hidden = true
                 }
             }
     })
@@ -147,6 +155,12 @@
     
             if (data.status === 'success') {
                 const docInfo = data.data;
+                if (docInfo['photo'] != ''){
+                    docInfo['photo'] = '';
+                }
+                if (docInfo['password'] != ''){
+                    docInfo['password'] = '';
+                }
                 //console.log(clinInfo.photo_url)
                 //console.log("info_type = " + typeof(data.data) + "  info = " + data.data)
                 fillForm(docInfo, formFilled);
@@ -183,35 +197,40 @@
         });
     }
 
-    function clickRegis(){
+    function clickRegis(event){
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        fetch('/add/doctor/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFTOKEN' : csrfToken
-            },
-            body: JSON.stringify({}),
-        })
-        .then(async response => {
-            if (!response.ok) {
-                throw new Error('Failed to add doctor');
-            }
-            const data = await response.json();
-            // 处理成功响应，例如显示成功消息或重定向
-            if(data.status == 'success'){
-                window.localStorage.setItem('readyRegis', 'no')
-                window.localStorage.setItem('password', '')
-                alert('Doctor added successfully!');
-                window.location.href = '/doctor/manage';
-            }else{
-                alert('Error : ' + data.message)
-            }
-        })
-        .catch(error => {
-            // 处理错误情况，例如显示错误消息给用户
-            alert('Error adding doctor: ' + error.message);
-        });
+        if(window.localStorage.getItem('user_type') == 'clinic'){
+            fetch('/add/doctor/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFTOKEN' : csrfToken
+                },
+                body: JSON.stringify({}),
+            })
+            .then(async response => {
+                if (!response.ok) {
+                    throw new Error('Failed to add doctor');
+                }
+                const data = await response.json();
+                // 处理成功响应，例如显示成功消息或重定向
+                if(data.status == 'success'){
+                    window.localStorage.setItem('readyRegis', 'no')
+                    window.localStorage.setItem('password', '')
+                    alert('Doctor added successfully!');
+                    window.location.href = '/doctor/manage';
+                }else{
+                    alert('Error : ' + data.message)
+                }
+            })
+            .catch(error => {
+                // 处理错误情况，例如显示错误消息给用户
+                alert('Error adding doctor: ' + error.message);
+            });
+        }else if(window.localStorage.getItem('user_type') == 'doctor'){
+            event.preventDefault()
+            window.location.href = '/doctor/page'
+        }
     }
 
     document.getElementById('doctorForm').addEventListener('submit', async function(event){
