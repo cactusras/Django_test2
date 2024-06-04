@@ -1288,6 +1288,7 @@ def get_doc_working(request, doctor_id):
     
     return JsonResponse({'working_hours': working_hours})
 
+#以下是處理可預約時間顯示的功能
 #if chosen date < 'start_date': scheduling.StartDate,'end_date': scheduling.EndDate, and chosen date.weekday()+1, exists in the doctor's workinghour.weekday,
 def get_available_times(request):
     if request.method == 'GET':
@@ -1323,6 +1324,7 @@ def get_available_times(request):
                     available_times.append((current_datetime.time(), next_datetime.time()))
                     current_datetime = next_datetime
                     
+                    
 
         # 检查可用时间段是否与已有预约重叠
         available_times = sorted(available_times, key=lambda x: x[0])  # 按照开始时间排序
@@ -1356,7 +1358,7 @@ def exclude_overlapping_times(available_times, reserved_times, expertise_time):
             if end_time == res_start_time or start_time == res_end_time:
                 continue
             
-            # 检查时间段是否重叠
+            # 時間段是否重疊
             if start_time < res_end_time and end_time > res_start_time:
                 print(f'worked:{start_time} ')
                 overlap = True
@@ -1364,14 +1366,15 @@ def exclude_overlapping_times(available_times, reserved_times, expertise_time):
             
             start_datetime = datetime.combine(datetime.min, start_time)
             
+            #這邊我在試圖處理時間重疊項目問題
+            #現在的問題是如果我在12:00要預約2小時項目，但醫生在13:00-14:00已經有預約,那就不應該顯示12:00
             # Calculate end_datetime by adding expertise_time
-            end_datetime = start_datetime + expertise_time
+            # end_datetime = start_datetime + expertise_time
             
-            
-            # Check if end_datetime overlaps with reserved slot
-            if end_datetime >= res_start:
-                overlap = True
-                break
+            # # Check if end_datetime overlaps with reserved slot
+            # if end_datetime >= res_start:
+            #     overlap = True
+            #     break
             
         if not overlap:
             result.append((start_time, end_time))
