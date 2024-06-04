@@ -111,75 +111,6 @@ def add_client(request):
         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
     
 
-# @login_required
-# def add_Reservation(request):
-#     check = False
-#     if request.method == 'POST':
-        
-#         form = ReservationForm(request.POST)
-#         if form.is_valid():
-#             user_id = request.user.id
-#             doctor_id = form.cleaned_data['doctor'].id  # 使用字段名来获取数据
-#             date = form.cleaned_data['date']
-
-#             # 获取其他表单数据
-#             expertise_id = form.cleaned_data['expertise'].id
-#             starting_time = form.cleaned_data['starting_time']
-
-#             # 获取医生排班信息
-#             try:
-#                 scheduling = Scheduling.objects.get(DoctorID=doctor_id, StartDate__lte=date, EndDate__gte=date)
-#                 scheduling_id = scheduling.id
-#                 expertise = Expertise.objects.get(id=expertise_id)
-#                 check = False
-#             except Scheduling.DoesNotExist:
-#                 return HttpResponse('No scheduling found for this doctor on selected date')
-#             except Expertise.DoesNotExist:
-#                 return HttpResponse('Expertise not found')
-
-#             # 计算预约结束时间
-#             timeS = datetime.strptime(starting_time, '%Y-%m-%d %H:%M:%S')
-#             expertise_duration = timedelta(hours=expertise.time.hour, minutes=expertise.time.minute)
-#             ending_time = timeS + expertise_duration
-
-#             # 检查医生是否在工作时间内
-#             day_of_week = timeS.weekday() + 1
-#             working_hours = WorkingHour.objects.filter(
-#                 day_of_week=day_of_week,
-#                 start_time__lte=timeS.time(),
-#                 end_time__gte=ending_time.time()
-#             )
-
-#             if not working_hours.exists():
-#                 return HttpResponse('Doctor is not working during this time')
-
-#             # 创建预约或加入等候列表
-#             if scheduling_id:
-#                 if form.cleaned_data['is_waiting']:
-#                     waiting_form = WaitingForm(request.POST)
-#                     if waiting_form.is_valid():
-#                         # 在等候列表中添加记录
-#                         waiting_form.save(commit=False)
-#                         waiting_form.instance.is_waiting = True
-#                         waiting_form.instance.ClientID = user_id
-#                         waiting_form.instance.SchedulingID = scheduling_id
-#                         waiting_form.instance.expertiseID = expertise_id
-#                         waiting_form.instance.time_start = timeS
-#                         waiting_form.instance.time_end = ending_time
-#                         waiting_form.save()
-#                         return HttpResponse('Added to waiting list')
-#                     else:
-#                         return HttpResponse('Waiting form not valid')
-#                 else:
-#                     # 创建预约记录
-#                     form.save()
-#                     return HttpResponse('Reservation successfully created')
-#             else:
-#                 return HttpResponse('Invalid scheduling ID')
-#     else:
-#         form = ReservationForm()
-#     return render(request, 'myApp/reservationTest.html', {'form': form})
-
 #clinic posting
 def add_clinic(request):
     if request.method == 'POST':
@@ -535,76 +466,88 @@ def delete_doctor(request, doctor_email):
 
 @csrf_exempt
 def doctor_clinic_search_view(request):
-    # Apply the filter
-    filter = docClinicFilter(request.GET, queryset=docClinicSearch.objects.all())
+    if request.method == 'GET':
+        # Get the search query from the request
+        search_query = request.GET.get('query', '')
+        
+        #還有什麼條件都能在這裡加
 
-    # Retrieve detailed information for each filtered doctor
-    detailed_doctors = []
-    detailed_clinics = []
-    for result in filter.qs:
-        doctor_details = {
-            'doc_id': result.doc_id,
-            'doc_name': result.doc_name,  # Changed from result.name to result.doc_name
-            'clinic_name': result.clinic_name,
-            'clinic_adress': result.clinic_adress,
-            'doc_exp': result.exp_name
-        }
-        detailed_doctors.append(doctor_details)
+        # Apply the filter
+        filter = docClinicFilter(
+            queryset=docClinicSearch.objects.filter(
+                Q(doc_name__icontains=search_query) | Q(clinic_name__icontains=search_query) |
+                Q(clinic_address__icontains=search_query) | Q(clinic_introduction__icontains=search_query)|
+                Q(exp_name__icontains=search_query)
+            )
+        )
 
-        clinic_details = {
-            'clinic_id': result.clinic_id,
-            'clinic_name': result.clinic_name,
-            'clinic_adress': result.clinic_adress,
-            'clinic_introduction': result.clinic_introduction,
-            'doc_exp': result.exp_name
-        }
-        detailed_clinics.append(clinic_details)  # Changed from detailed_doctors to detailed_clinics
-
-    # Combine doctor details
-    doc_final = []
-    for doc in detailed_doctors:
-        # Check if the doctor already exists in doc_final
-        existing_doctor = next((item for item in doc_final if item['doc_name'] == doc['doc_name']), None)
-        if existing_doctor:
-            # Append the expertise to the existing doctor's expertise list
-            existing_doctor['doc_exp'].append(doc['doc_exp'])
-        else:
-            # Create a new dictionary for the doctor
-            new_doctor = {
-                'doc_id': doc['doc_id'],
-                'doc_name': doc['doc_name'],
-                'clinic_name': doc['clinic_name'],
-                'clinic_adress': doc['clinic_adress'],
-                'doc_exp': [doc['doc_exp']]  # Initialize doc_exp as a list
+        # Retrieve detailed information for each filtered doctor
+        detailed_doctors = []
+        detailed_clinics = []
+        for result in filter.qs:
+            doctor_details = {
+                'doc_id': result.doc_id,
+                'doc_name': result.doc_name,
+                'clinic_name': result.clinic_name,
+                'clinic_address': result.clinic_address,
+                'doc_exp': result.exp_name
             }
-            doc_final.append(new_doctor)
+            detailed_doctors.append(doctor_details)
 
-    # Combine clinic details
-    clinic_final = []
-    for clinic in detailed_clinics:
-        # Check if the clinic already exists in clinic_final
-        existing_clinic = next((item for item in clinic_final if item['clinic_name'] == clinic['clinic_name']), None)
-        if existing_clinic:
-            # Append the expertise to the existing clinic's expertise list
-            existing_clinic['doc_exp'].append(clinic['doc_exp'])
-        else:
-            # Create a new dictionary for the clinic
-            new_clinic = {
-                'clinic_id': clinic['clinic_id'],
-                'clinic_name': clinic['clinic_name'],
-                'clinic_adress': clinic['clinic_adress'],
-                'clinic_introduction': clinic['clinic_introduction'],
-                'doc_exp': [clinic['doc_exp']]  # Initialize doc_exp as a list
+            clinic_details = {
+                'clinic_id': result.clinic_id,
+                'clinic_name': result.clinic_name,
+                'clinic_address': result.clinic_address,
+                'clinic_introduction': result.clinic_introduction,
+                'doc_exp': result.exp_name
             }
-            clinic_final.append(new_clinic)
+            detailed_clinics.append(clinic_details)
 
-    # Prepare data to be returned as JsonResponse
-    data = {
-        'doctors': doc_final,
-        'clinics': clinic_final,
-    }
+        # Combine doctor details
+        doc_final = []
+        for doc in detailed_doctors:
+            # Check if the doctor already exists in doc_final
+            existing_doctor = next((item for item in doc_final if item['doc_name'] == doc['doc_name']), None)
+            if existing_doctor:
+                # Append the expertise to the existing doctor's expertise list
+                existing_doctor['doc_exp'].append(doc['doc_exp'])
+            else:
+                # Create a new dictionary for the doctor
+                new_doctor = {
+                    'doc_id': doc['doc_id'],
+                    'doc_name': doc['doc_name'],
+                    'clinic_name': doc['clinic_name'],
+                    'clinic_address': doc['clinic_address'],
+                    'doc_exp': [doc['doc_exp']]
+                }
+                doc_final.append(new_doctor)
 
-    return JsonResponse(data)
+        # Combine clinic details
+        clinic_final = []
+        for clinic in detailed_clinics:
+            # Check if the clinic already exists in clinic_final
+            existing_clinic = next((item for item in clinic_final if item['clinic_name'] == clinic['clinic_name']), None)
+            if existing_clinic:
+                # Append the expertise to the existing clinic's expertise list
+                existing_clinic['doc_exp'].append(clinic['doc_exp'])
+            else:
+                # Create a new dictionary for the clinic
+                new_clinic = {
+                    'clinic_id': clinic['clinic_id'],
+                    'clinic_name': clinic['clinic_name'],
+                    'clinic_address': clinic['clinic_address'],
+                    'clinic_introduction': clinic['clinic_introduction'],
+                    'doc_exp': [clinic['doc_exp']]
+                }
+                clinic_final.append(new_clinic)
+
+        # Prepare data to be returned as JsonResponse
+        data = {
+            'doctors': doc_final,
+            'clinics': clinic_final,
+        }
+
+        return JsonResponse(data)
     
 #schedule tomeslot(輸入start time end time，每一小時割一次)
 def get_time_slots(schedule):
@@ -622,6 +565,11 @@ def get_time_slots(schedule):
         current_time += time_delta
 
     return time_slots
+
+
+def searchTest(request):
+    context={}
+    return render(request, "myApp/searchTest.html", context)
 
 #clinic 載入頁
 @login_required
@@ -1325,7 +1273,6 @@ def get_available_times(request):
                     current_datetime = next_datetime
                     
                     
-
         # 检查可用时间段是否与已有预约重叠
         available_times = sorted(available_times, key=lambda x: x[0])  # 按照开始时间排序
         reserved_times = get_reserved_times(doctor_id, chosen_date)
@@ -1377,7 +1324,6 @@ def exclude_overlapping_times(available_times, reserved_times, expertise_time):
 def testing(request):
     context={}
     return render(request, "myApp/reservationTest.html", context)
-
 
 #應該不會有大變動，把來源改成session之類？
 @login_required
@@ -1435,3 +1381,4 @@ def add_Reservation(request):
             return JsonResponse({'error': f'Failed to add reservation: {e}'}, status=400)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor and Clinic Search</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+    <h1>Doctor and Clinic Search Results</h1>
+
+    <!-- Add a search input -->
+    <div>
+        <label for="search">Search:</label>
+        <input type="text" id="search" name="search">
+        <button onclick="search()">Search</button>
+    </div>
+
+    <div id="doctors">
+        <h2>Doctors</h2>
+        <ul id="doctor-list"></ul>
+    </div>
+
+    <div id="clinics">
+        <h2>Clinics</h2>
+        <ul id="clinic-list"></ul>
+    </div>
+
+    <script>
+        function search() {
+            var query = $("#search").val();
+            $.getJSON("doctor/clinic/search/?query=" + query, function(data) {
+                // Clear existing results
+                $("#doctor-list").empty();
+                $("#clinic-list").empty();
+
+                var doctors = data.doctors;
+                var clinics = data.clinics;
+
+                
+
+                // Populate doctors list
+                $.each(doctors, function(index, doctor) {
+                    var doctorItem = "<li>" + doctor.doc_name + " - " + doctor.clinic_name + "</li>";
+                    $("#doctor-list").append(doctorItem);
+                });
+
+                // Populate clinics list
+                $.each(clinics, function(index, clinic) {
+                    var clinicItem = "<li>" + clinic.clinic_name + " - " + clinic.clinic_address + "</li>";
+                    $("#clinic-list").append(clinicItem);
+                });
+            });
+        }
+    </script>
+</body>
+</html>

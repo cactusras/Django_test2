@@ -235,13 +235,13 @@ class docClinicSearch(models.Model):
     doc_name = models.CharField(max_length=100) #d.name    
     clinic_id = models.IntegerField() #d.clinicid
     clinic_name = models.CharField(max_length=100)  #c.name
-    clinic_adress = models.TextField()#c.adress
+    clinic_address = models.TextField()#c.adress
     clinic_introduction = models.TextField(blank=True, null=True)#c.introduction
     exp_id = models.IntegerField()#e.id
     exp_name = models.CharField(max_length=100)#e.name
     scheduling_id = models.IntegerField()#ms.id
-    start_date = models.DateField()#ms.start_date
-    end_date = models.DateField()#ms.end_date
+    StartDate = models.DateField()#ms.start_date
+    EndDate = models.DateField()#ms.end_date
     workinghour_id = models.IntegerField()#w.WorkingHour_id
     day_of_week = models.IntegerField(choices=DAY_CHOICES)#w.day_of_week
     start_time = models.TimeField()#w.start_time

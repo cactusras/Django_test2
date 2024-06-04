@@ -60,7 +60,8 @@ urlpatterns = [
     path('get_doc_working/<int:doctor_id>/', views.get_doc_working, name = 'getworking'),
     #我的版本的available顯示
     path('available/', views.get_available_times, name='get_available_times'),
-    path('testing',views.testing,name='testing')
+    path('testing',views.testing,name='testing'),
+    path('Searchtesting',views.searchTest,name='Stesting')
    
     
 ]
