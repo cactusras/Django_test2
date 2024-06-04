@@ -28,12 +28,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const btnDocManage = document.getElementById('btnDocManage');
         const barTitle = document.getElementById('barTitle');
         const clinForm = document.getElementById('clinicForm')
-<<<<<<< Updated upstream
-=======
         const btnLogout = document.getElementById('logoutButton')
         const loginHide = document.querySelectorAll('.loginHide')
         const pwInput = document.getElementById('password')
->>>>>>> Stashed changes
         fetch_element();
 
         //canva11進入canva12   
@@ -41,14 +38,11 @@ document.addEventListener('DOMContentLoaded', function() {
             barTitle.innerText = '診所資料'
             btnDocManage.hidden = false;
             btnRegis.innerText = '完成'
-<<<<<<< Updated upstream
-=======
             btnLogout.hidden = false;
             pwInput.required = false
             loginHide.forEach(element => {
                 element.hidden = true
             });
->>>>>>> Stashed changes
             btnDocManage.addEventListener('click', function(){
                 window.location.href = "/doctor/manage"
             })
@@ -57,11 +51,8 @@ document.addEventListener('DOMContentLoaded', function() {
             btnRegis.innerText = '完成'
             btnDocManage.hidden = true;
             barTitle.innerText = '註冊'
-<<<<<<< Updated upstream
-=======
             btnLogout.hidden = true;
             pwInput.required = true;
->>>>>>> Stashed changes
         }
 })
 
@@ -150,20 +141,6 @@ function fetch_info(formFilled){
     });
 }
 
-function fillForm(data, form) {
-    if (!form) {
-        console.error('Form not found');
-        return;
-    }
-
-    Object.keys(data).forEach(key => {
-        const field = form.querySelector(`[name=${key}]`);
-        if (field) {
-            field.value = data[key];
-        }
-    });
-}
-
 document.getElementById('clinicForm').addEventListener('submit', async function(event){
     let isValid = false;
     console.log("clicked regis")
@@ -219,10 +196,6 @@ document.getElementById('clinicForm').addEventListener('submit', async function(
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-<<<<<<< Updated upstream
-                alert(data.message);
-                window.location.href = '/loginP';
-=======
                 if(window.localStorage.getItem('isLogin') == 'success'){
                     alert(data.message);
                     window.localStorage.setItem('username', clinField.name)
@@ -231,7 +204,6 @@ document.getElementById('clinicForm').addEventListener('submit', async function(
                     alert(data.message);
                     window.location.href = '/loginP';
                 }
->>>>>>> Stashed changes
             } else {
                 alert(data.message);
             }

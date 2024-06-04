@@ -494,7 +494,7 @@ def scheduling_upload(request):
         except json.JSONDecodeError:
             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
 
-        data = {,
+        data = {
                 'StartDate' : data.get('StartDate'),
                 'EndDate' : data.get('EndDate')
             }
@@ -1277,32 +1277,5 @@ def check_reservations(request):
 
     return JsonResponse({'message': 'Checked and updated reservations if necessary.'})
 
-#如果是Status = 2或3的話 就不執行而是跳jsonresponse
-#變數名有待確認
-def client_cancel_reservation(request):
-
-    if request.method == 'GET':
-        reserveID = request.GET.get('reservationId')
-        if not reserveID:
-            return JsonResponse({'dlteSuccess': False, 'message': 'No reservation ID provided'}, status=400)
-        
-        reservation = get_object_or_404(Reservation, id=reserveID)
-
-        if reservation.Status in [2, 3]:
-            return JsonResponse({'dlteSuccess': False, 'message': 'Reservation cannot be cancelled'}, status=400)
-        else:
-            reservation.delete()
-            return JsonResponse({'dlteSuccess': True, 'message': 'Reservation cancelled successfully'})
-
-    return JsonResponse({'dlteSuccess': False, 'message': 'Invalid request method'}, status=405)
-
-@csrf_exempt
-def user_logout(request):
-    if request.method == 'POST':
-        logout(request)
-        print('logged out')
-        return JsonResponse({'message': 'Logged out successfully', 'status': 'success'})
-    else:
-        return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
 
