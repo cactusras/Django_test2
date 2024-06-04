@@ -235,33 +235,6 @@
     <!-- <script src="{% static 'myApp/js/doctor.js' %}"></script>
     Custom JS to handle adding time slots -->
     <script>
-        /*var timePopForm = document.getElementById('timePopForm');
-        timePopForm.addEventListener('submit', function(event){
-            event.preventDefault();
-            checkVlue = checkTime();
-            if(checkVlue == 'success'){
-                timePopForm.submit();
-                // Close the modal
-                const modal = document.getElementById('staticBackdrop');
-                const modalInstance = bootstrap.Modal.getInstance(modal);
-                modalInstance.hide();
-            }else if(checkVlue == 'timeInvalid'){
-                alert('選擇的時間範圍無效。請選擇以下區間段之一：10:00-14:00，15:00-18:00，19:00-21:00。');
-            }else if(checkVlue == 'timeWrong'){
-                alert('請選擇正確的開始和結束時間。結束時間必須晚於開始時間。');
-            }  else if(checkVlue == 'dayNotExist'){
-                alert('請選擇星期幾。');
-            }        
-        });*/
-
-        /*document.addEventListener("DOMContentLoaded", function(){
-            const table = document.querySelector('table tbody');
-            for(let row in table.rows){
-                for(let cell in row.cells){
-                    cell.style.height = '5%'
-                }
-            }
-        })*/
 
         function timePopClick(event){
             event.preventDefault();
@@ -293,6 +266,7 @@
                     if (response.status != 204) {
                         throw new Error('Failed to add working_hour');
                     }
+                    //這是我想說避免jsonresponse所以先註解掉的 但之後如果可以成功return jsonresponse要加回來 return http的話我不確定 再問一下chatgpt
                     //const data = await response.json();
                     alert('working_hour added successfully!');
                     // Close the modal

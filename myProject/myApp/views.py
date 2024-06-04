@@ -371,7 +371,7 @@ def workingHour_upload(request):
         except json.JSONDecodeError:
             print('post failed')
             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
-        start_time_str = data.get('start_time')
+        start_time_str = data.get('start_time') #type(start_time_str) == str
         '''end_time_str = data.get('end_time')
         
 
@@ -385,6 +385,7 @@ def workingHour_upload(request):
         print('sttime = ', start_time_str) 
         #working_hour_form = WorkingHourForm(data)
         print('before valid')
+        #取代form來驗證input的資料型態(連到serializers.py)
         serializer = WorkingHourSerializer(data=data)
         if serializer.is_valid():
             print('after valid1')
@@ -415,10 +416,10 @@ def workingHour_upload(request):
             
             #request.session['working_hour_list'] = working_hour_list
             #print('after valid3')
-            #想除掉not serializable的bug 所以寫了這個(跟encoder.py 所以寫了這個(跟encoder.py) 但會導到cls的bug
+            #想除掉not serializable的bug 所以寫了這個(跟encoder.py) 但會導到cls的bug
             #serialized_data  = simplejson.dumps(working_hour_list, cls=CustomEncoder)
             #return JsonResponse({'message': 'Working hour data added successfully', 'status': 'success'})
-            return HttpResponse(status=204)
+            return HttpResponse(status=204) #我想說改用http看看 但還是有bug 也可能是我json沒有接收好httpresponse? 我不確定
         else:
             print('notvalid = ', serializer.errors)
             #return JsonResponse({'message': 'Invalid form data', 'status': 'error'})

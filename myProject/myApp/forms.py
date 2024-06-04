@@ -51,7 +51,7 @@ class WorkingHourForm(forms.ModelForm):
         model = WorkingHour
         fields = ['day_of_week','start_time','end_time']
         #print('form finish')
-    '''不確定到底有沒有用到 但先放著
+    '''把views傳過來的資料從str轉成time的型態 讓form驗證
      def clean_start_time(self):
         start_time = self.cleaned_data['start_time']
         start_time_str = start_time.strftime('%H:%M')
