@@ -27,6 +27,7 @@
     </div>
 
     <script>
+        {% comment %} gpt生成的，如果還有要顯示的條件在這裡加一加就好 {% endcomment %}
         function search() {
             var query = $("#search").val();
             $.getJSON("doctor/clinic/search/?query=" + query, function(data) {
@@ -36,8 +37,6 @@
 
                 var doctors = data.doctors;
                 var clinics = data.clinics;
-
-                
 
                 // Populate doctors list
                 $.each(doctors, function(index, doctor) {

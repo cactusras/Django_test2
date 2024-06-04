@@ -1,3 +1,68 @@
+document.addEventListener('DOMContentLoaded', function() {
+  const btnNav = document.getElementById('nav_btn');
+  const barTitle = document.getElementById('barTitle');
+  //const btnDocManage = document.getElementById('btnDocManage')
+
+  fetch('/check_authentication/')
+  .then(response => {
+      if (response.ok) {
+          return response.json();
+      } else {
+          throw new Error('Network response was not ok');
+      }
+  })
+  .then(data => {
+      if (data.is_authenticated) {
+        window.localStorage.setItem('isLogin', 'success')
+        console.log('loginYes')
+        btnNav.innerText = window.localStorage.getItem('username');
+        
+      }else{
+        window.localStorage.setItem('isLogin', 'failed')
+        console.log('loginNo')
+        btnNav.innerText = '登入';
+        barTitle.innerText = "註冊"
+      }
+      //document.dispatchEvent(new CustomEvent('authChecked', { detail: window.isLogin }));
+  })
+  .catch(error => {
+      console.log('Error checking authentication:', error);
+  });
+})
+  
+function navBtn_listener(event){
+  event.preventDefault();
+  console.log("click nav_btn")
+  if (window.localStorage.getItem('isLogin') == 'success') {
+    let usertype = window.localStorage.getItem('user_type')
+    if(usertype == 'client'){
+      window.location.href = '/client/data/edit'
+    }else if(usertype == 'clinic'){
+      window.location.href = '/clinic/data/edit'
+    }else if(usertype == 'doctor'){
+      window.location.href = '/doctor/data/edit'
+    }
+  }else if(window.localStorage.getItem('isLogin') == 'failed'){
+    window.location.href = '/loginP'
+  }
+}
+
+function mainPage(event){
+  event.preventDefault();
+  if (window.localStorage.getItem('isLogin') == 'success') {
+    let usertype = window.localStorage.getItem('user_type')
+    if(usertype == 'client'){
+      window.location.href = '/home'
+    }else if(usertype == 'clinic'){
+      window.location.href = '/clinic/home'
+    }else if(usertype == 'doctor'){
+      window.location.href = '/doctor/page'
+    }
+  }else if(window.localStorage.getItem('isLogin') == 'failed'){
+    window.location.href = '/home'
+  }
+}
+
 // http://jsonblob.com/1221767613406633984
 /*function displayUsers(users) {
     var usersElement = document.getElementById("users");
@@ -39,80 +104,3 @@ $('#date1').datetimepicker({
 
   //fetch使用者是否登入了 並設window變數(整個project都可取得)
 //window.isLogin = "";
-
-
-document.addEventListener('DOMContentLoaded', function() {
-  const btnNav = document.getElementById('nav_btn');
-  const barTitle = document.getElementById('barTitle');
-  //const btnDocManage = document.getElementById('btnDocManage')
-  const btnLogout = document.getElementById('logoutButton')
-
-  fetch('/check_authentication/')
-  .then(response => {
-      if (response.ok) {
-          return response.json();
-      } else {
-          throw new Error('Network response was not ok');
-      }
-  })
-  .then(data => {
-      if (data.is_authenticated) {
-        //console.log(data.username)
-        window.localStorage.setItem('isLogin', 'success')
-        console.log('loginYes')
-        btnNav.innerText = window.localStorage.getItem('username');
-        btnLogout.hidden = false;
-      }else{
-        window.localStorage.setItem('isLogin', 'failed')
-        console.log('loginNo')
-        btnNav.innerText = '登入';
-        barTitle.innerText = "註冊"
-        btnLogout.hidden = true;
-      }
-      document.dispatchEvent(new CustomEvent('authChecked', { detail: window.isLogin }));
-  })
-  .catch(error => {
-      console.log('Error checking authentication:', error);
-  });
-})
-  
-function navBtn_listener(event){
-  event.preventDefault();
-  console.log("click nav_btn")
-  if (window.localStorage.getItem('isLogin') == 'success') {
-    let usertype = window.localStorage.getItem('user_type')
-    if(usertype == 'client'){
-      window.location.href = '/client/data/edit'
-    }else if(usertype == 'clinic'){
-      window.location.href = '/clinic/data/edit'
-    }else if(usertype == 'doctor'){
-      window.location.href = '/doctor/data/edit'
-    }
-  }else if(window.localStorage.getItem('isLogin') == 'failed'){
-    window.location.href = '/loginP'
-  }
-  /*fetch('/fetch/user_type/')
-  .then(response => {
-      if (response.ok) {
-          return response.json();
-      } else {
-          throw new Error('Network response was not ok');
-      }
-  })
-  .then(data => {
-      if (data.isLogin == 'success') {
-        if(data.user_type == 'client'){
-          window.location.href = '/client/data/edit'
-        }else if(data.user_type == 'clinic'){
-          window.location.href = '/clinic/data/edit'
-        }else if(data.user_type == 'doctor'){
-          window.location.href = '/doctor/data/edit'
-        }
-      }else{
-        window.location.href = '/loginP'
-      }
-  })
-  .catch(error => {
-      console.log('Error checking authentication:', error);
-  });*/
-}

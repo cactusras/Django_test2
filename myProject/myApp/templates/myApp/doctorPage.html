@@ -39,7 +39,7 @@
               <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
               <div class="collapse navbar-collapse" id="navbarSupportedContent">
                   <div class="ms-auto">
-                      <button class="btn btn-outline-dark" type="submit" style="font-size: 20px;" id="nav_btn">
+                      <button class="btn btn-outline-dark" type="submit" style="font-size: 20px;" id="nav_btn" onclick="navBtn_listener(event)">
                           <i class="bi bi-person-fill"></i>
                           牙醫
                       </button>
@@ -61,73 +61,11 @@
                             <!-- 各時段詳細資訊 -->
                           <div class="col d-flex justify-content-center" style="background-color:#FFFFF0; border: 1px solid #ada089; height:500px; font-size: 20px; overflow: auto;">
                             <table class="table table-hover">
-                              <thead>
-                                {% for reservation in reservation_list %}
-                            <tr>
-                                <td>{{ reservation.appointment_date}}</td>
-                                <td>{{ reservation.appointment_time }}</td>
-                                <td>{{ reservation.client_name }}</td>
-                                <td>{{ reservation.expertise }}</td>
-                                <!--暫定覺得status是文字 是btn什麼的話之後再調-->
-                                <td>{{ reservation.status }}</td>
-                            </tr>
-                            {% endfor %}
-                                      <!--<tr>
-                                        <th scope="row">星期一</th>
-                                        <td>10:00-14:00 XXX先生 項目</td>
-                                      </tr>
-
-                                      <tr>
-                                        <th scope="row">星期二</th>
-                                        <td>10:00-14:00 XXX先生 項目</td>
-                                      </tr>
-
-                                      <tr>
-                                        <th scope="row">星期二</th>
-                                        <td>10:00-14:00 XXX先生 項目</td>
-                                      </tr>
-
-                                      <tr>
-                                        <th scope="row">星期二</th>
-                                        <td>10:00-14:00 XXX先生 項目</td>
-                                      </tr>
-
-                                      <tr>
-                                        <th scope="row">星期二</th>
-                                        <td>10:00-14:00 XXX先生 項目</td>
-                                      </tr>
-
-                                      <tr>
-                                        <th scope="row">星期二</th>
-                                        <td>10:00-14:00 XXX先生 項目</td>
-                                      </tr>
-
-                                      <tr>
-                                        <th scope="row">星期二</th>
-                                        <td>10:00-14:00 XXX先生 項目</td>
-                                      </tr>
-
-                                     <tr>
-                                        <th scope="row">星期二</th>
-                                        <td>10:00-14:00 XXX先生 項目</td>
-                                      </tr>
-
-                                     <tr>
-                                        <th scope="row">星期二</th>
-                                        <td>10:00-14:00 XXX先生 項目</td>
-                                      </tr>
-
-                                      <tr>
-                                        <th scope="row">星期一</th>
-                                        <td>10:00-14:00 XXX先生 項目</td>
-                                      </tr>
-
-                                      <tr>
-                                        <th scope="row">星期一</th>
-                                        <td>10:00-14:00 XXX先生 項目</td>
-                                      </tr>-->
-                                    </tbody>
-                                  </table>    
+                              <thead></thead>
+                              <tbody id="doctor_reserve_body">
+                                      
+                              </tbody>
+                            </table>    
                         </div>
                         
                       </div>
@@ -144,6 +82,32 @@
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
             <!-- Core theme JS-->
             <script src="{% static 'myApp/js/scripts.js' %}"></script>
-        
+            <script>
+
+              document.addEventListener("DOMContentLoaded", function(){
+                doc_reserve_info();
+            })
+
+              function doc_reserve_info() {
+                fetch('/doctor/page/loading/')
+                    .then(response => response.json())
+                    .then(data => {
+                        const reservations = data.reservation_list;
+                        const tableBody = document.getElementById('doctor_reserve_body');
+                        reservations.forEach(reservation => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${reservation.appointment_date}</td>
+                                <td>${reservation.appointment_time}</td>
+                                <td>${reservation.client_name}</td>
+                                <td>${reservation.expertise}</td>
+                                <td>${reservation.status}</td>
+                            `;
+                            tableBody.appendChild(row);
+                        });
+                      })
+                    .catch(error => console.error('Error:', error));
+              }
+            </script>
     </body>
 </html>

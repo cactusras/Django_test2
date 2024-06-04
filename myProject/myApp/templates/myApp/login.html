@@ -1,49 +1,341 @@
-<!-- {% load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Login</title>
-</head>
-<body>
-    <h1>Login</h1>
-    <form method="post" action="{% url 'login' %}">
-        {% csrf_token %}
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required><br>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br>
-        <button type="submit">Login</button>
-    </form>
-    {% if error_message %}
-        <p>{{ error_message }}</p>
-    {% endif %}
-</body>
-</html> -->
-<!DOCTYPE html>
-<html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{% static 'myApp/assets/favicon.ico' %}" />
+    <link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+    <link rel="stylesheet" type="text/css" href="vendor/animate/animate.css">
+    <link rel="stylesheet" type="text/css" href="vendor/css-hamburgers/hamburgers.min.css">
+    <link rel="stylesheet" type="text/css" href="vendor/animsition/css/animsition.min.css">
+    <link rel="stylesheet" type="text/css" href="vendor/select2/select2.min.css">
+    <link rel="stylesheet" type="text/css" href="vendor/daterangepicker/daterangepicker.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'myApp/css/util.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'myApp/css/main.css' %}">
     <title>Login</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <style>
+
+        .container-login100 {
+            padding-top: 80px; 
+             font-family: "Titillium Web", sans-serif;
+        }
+
+        .wrap-input100 {
+            width: 100%;
+            position: relative;
+            border-bottom: 2px solid #d9d9d9;
+            margin-bottom: 30px;
+        }
+
+        .input100 {
+            font-size: 15px;
+            color: #555555;
+            line-height: 1.2;
+            display: block;
+            width: 100%;
+            background: transparent;
+            height: 45px;
+            padding: 0 5px 0 38px;
+          font-family: "Titillium Web", sans-serif;
+        }
+
+        .focus-input100::before {
+            content: "";
+            display: block;
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #555555;
+            transition: all 0.4s;
+        }
+
+        .wrap-input100.focus-input100::before {
+            width: 100%;
+        }
+
+        .wrap-input100.focus-input100::after {
+            color: #F0EAD6;
+        }
+
+        .container-login100-form-btn {
+            padding-top: 20px; /* Adjusted padding */
+        }
+
+
+        .login100-form-btn {
+            background-color: #F0EAD6;
+            color: #555555;
+            font-family: "Titillium Web", sans-serif;
+        }
+
+        .wrap-input100 .dropdown {
+        position: relative;
+        width: 100%;
+        margin-bottom: 30px;
+        }
+
+        .wrap-input100 .dropdown-toggle {
+            width: 100%;
+        }
+
+        .wrap-input100 .dropdown-menu {
+            width: 100%;
+        }
+
+        .wrap-input100 .dropdown,
+        .wrap-input100 .dropdown-toggle {
+            background-color: #F0EAD6;
+            color: #555555;
+            border: 1px solid #d9d9d9;
+        }
+
+        .wrap-input100 .dropdown-menu {
+            width: 100%;
+            background-color: #F0EAD6;
+        }
+
+        .wrap-input100 .dropdown select {
+            border: none; 
+            outline: none; 
+        }
+
+        .wrap-input100 p {
+            font-size: 15px;
+            color: #929292;
+          font-family: "Titillium Web", sans-serif;
+        }
+    </style>
 </head>
+
 <body>
-    <div class="container">
-        <h2 class="mt-5">Login</h2>
-        <form id= 'loginForm' method="post" action="{% url 'login' %}">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" class="form-control" id="email" name="email" required>
+
+    <div class="limiter">
+        <div class="container-login100">
+            <div class="wrap-login100">
+                <form id="loginForm" class="login100-form validate-form">
+                  {% csrf_token %}
+                   <fieldset>
+                    <legend class="login100-form-title p-b-26">
+                        <img src="{% static 'myApp/assets/dental.png' %}" alt="dental" style="width: 200px;" >
+                    </legend>
+
+                   
+
+                     <div class="wrap-input100 validate-input">
+                        <p>Identity</p>
+                        <div class="wrap-input100 dropdown">
+                            <select class="input100" name="userType">
+                                <option value="Doctor">患者</option>
+                                <option value="Client">醫生</option>
+                                <option value="Clinic">診所</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="wrap-input100 validate-input">
+                            <input class="input100" type="email" name="email" id="email" autocomplete="email">
+                            <span class="focus-input100" data-placeholder="Email"></span>
+                    </div>
+                    
+                    <div class="wrap-input100 validate-input" data-validate="Enter password">
+                        <span class="btn-show-pass">
+                           <i class="zmdi zmdi-eye"></i>
+                        </span>
+                        <input class="input100" type="password" name="password" id="password">
+                      <span class="focus-input100" data-placeholder="Password"></span>
+                    </div>
+
+                    <div class="container-login100-form-btn">
+                        <div class="wrap-login100-form-btn">
+                            <div class="login100-form-bgbtn"></div>
+                            <button class="login100-form-btn" type="submit">
+                                Login
+                            </button>
+                        </div>
+                    </div>
+                   </fieldset> 
+                </form>
+
+                <br>
+
+                    <div class="container px-4">
+                        <div class="row gx-5">
+                          <div class="col">
+                            <button type="button" onclick="clieRegis(event)" class="btn btn-primary" style="background-color: #F0EAD6; border-color: #F0EAD6; color: #333;">
+                                患者註冊
+                            </button>
+                          </div>
+                          <div class="col">
+                            <button type="button" onclick="clinRegis(event)" class="btn btn-primary" style="background-color: #F0EAD6; border-color: #F0EAD6; color: #333;">
+                                診所註冊
+                            </button>
+                          </div>
+                        </div>
+                      </div>
             </div>
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" class="form-control" id="password" name="password" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Login</button>
-        </form>
+        </div>
     </div>
-    <script src="{% static 'myApp/js/login.js' %}"></script>
+
+    <div id="dropDownSelect1"></div>
+
+    <!--<script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+    <script src="vendor/animsition/js/animsition.min.js"></script>
+    <script src="vendor/bootstrap/js/popper.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+    <script src="vendor/select2/select2.min.js"></script>
+    <script src="vendor/daterangepicker/moment.min.js"></script>
+    <script src="vendor/daterangepicker/daterangepicker.js"></script>
+    <script src="vendor/countdowntime/countdowntime.js"></script>-->
+    <script src="{% static 'myApp/js/scripts.js' %}"></script>
+
+    <script type="text/javascript">
+
+        function clieRegis(event){
+            event.preventDefault();
+            window.location.href = "/client/data/edit";
+        }
+
+        function clinRegis(event){
+            event.preventDefault();
+            window.location.href = "/clinic/data/edit";
+        }
+
+        /* 加入email 
+        let data = {
+            "example@example.com": "password123",
+            "another@example.com": "password456",
+        };*/
+
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent default form submission
+    
+            const formData = new FormData(this); // Use 'this' to refer to the form element
+        
+            // Send the form data to the server
+            fetch('/login/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value // Ensure you include the CSRF token
+                }
+            })
+            .then(response => {
+                console.log('Response received:', response);
+                return response.json();
+            })
+            .then(data => {
+                // print("to js")
+                window.localStorage.clear()
+                window.localStorage.setItem('user_type', data.user_type)
+                window.localStorage.setItem('username', data.username)
+                if (data.status === 'success') {
+                    if(data.user_type == 'client'){
+                        // alert('Login success: ' + data.message);
+                        window.location.href = '/home/'; // Redirect to the home page
+                    }else if(data.user_type == 'clinic'){
+                        // alert('Login success: ' + data.message);
+                        window.location.href = '/clinic/home/'; // Redirect to the home page
+                    }else if(data.user_type == 'doctor'){
+                        // alert('Login success: ' + data.message);
+                        window.location.href = '/doctor/page/'; // Redirect to the home page
+                    }else{
+    
+                    }
+                } else {
+                    alert('Login failed: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+        });
+        
+        /*document.getElementById('loginForm').addEventListener('submit', function(event){
+            event.preventDefault(); // 阻止默認表單提交
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            const loginData = {
+                email: email,
+                password: password
+            };
+
+            console.log('loginData:', loginData);
+            console.log('csrfToken:', csrfToken);
+
+            fetch("/loginP/login_view/", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken':  csrfToken
+                },
+                body: JSON.stringify(loginData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    console.log("data.status = success")
+                    console.log(data.user_type)
+                    window.localStorage.clear()
+                    window.localStorage.setItem('user_type', data.user_type)
+                    window.localStorage.setItem('username', data.username)
+                    if (data.user_type === 'client') {
+                        window.location.href = '/home';
+                    } else if (data.user_type === 'clinic') {
+                        window.location.href = '/clinic/home';
+                    } else if (data.user_type === 'doctor') {
+                        window.location.href = '/doctor/page';
+                    }
+                    
+                } else {
+                    console.log('Login failed');
+                    // 處理登錄失敗情況，例如顯示錯誤消息
+                }
+            })
+            .catch(error => {
+                console.log('Error:', error);
+                // 處理錯誤情況
+            });
+        });*/
+
+        /*function login(event) {
+            let emailInput = document.querySelector("input[name='useremail']");
+            let passwordInput = document.querySelector("input[name='password']");
+    
+            let email = emailInput.value;
+            let password = passwordInput.value;
+    
+            if (data[email] != undefined) {
+                if (data[email] == password) {
+                    window.alert("Success");
+                } else {
+                    window.alert("Login failed. Password Failure.");
+                    // Clear the input values
+                    passwordInput.value = "";
+                }
+            } else {
+                window.alert("Login failed. Email error or does not exist");
+                // Clear the input values
+                emailInput.value = "";
+                passwordInput.value = "";
+            }
+            event.preventDefault();
+        }*/
+    
+        //document.querySelector(".login100-form-btn").addEventListener("click", login(event));
+    </script>
+    
+
 </body>
+
 </html>

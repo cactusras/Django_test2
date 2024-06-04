@@ -1,4 +1,4 @@
-{% comment %} {% load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,14 +20,14 @@
     <nav class="navbar navbar-expand-lg" style="background-color:#F0EAD6;  height: 100px;">
         <div class="container px-4 px-lg-5">
             <img src="{% static 'myApp/assets/dental.png' %}" alt="DEN Logo">
-            <a class="navbar-brand" href="#!"  style="font-size: 24px;"> 牙醫預約平台</a>
+            <a class="navbar-brand" href="#!"  style="font-size: 24px;" onclick="mainPage(event)"> 牙醫預約平台</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <div class="ms-auto">
-                    <!--<button class="btn btn-outline-dark" type="submit"  style="font-size: 20px;">
+                    <button class="btn btn-outline-dark" type="submit" id="nav_btn" onclick="navBtn_listener(event)" style="font-size: 20px;">
                         <i class="bi bi-person-fill"></i>
                         使用者
-                    </button>-->
+                    </button>
                 </div>
             </div>
         </div>
@@ -52,7 +52,7 @@
                                 <th scope="col">刪除</th>
                             </tr>
                         </thead>
-                        <tbody id="doctor_info_body">s
+                        <tbody id="doctor_info_body">
                         </tbody>
                     </table>
 
@@ -70,7 +70,7 @@
 
                     <!--時段按鈕的彈跳視窗-->
 
-           <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <!--    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
 
                         <div class="modal-dialog modal-dialog-centered">
 
@@ -134,7 +134,7 @@
 
                         </div>
 
-                    </div> 
+                    </div> -->
                     <!--如果要用回checkbox的話 還有deleteCheckedRows()可以當eventListener-->
                     <button class="btn btn-outline-dark" type="button" onclick="clinPage(event)" id="btnClinPage" style="font-size: 20px; width: 160px; height: 40px;" data-bs-toggle="modal" data-bs-target="#exampleModal">
 
@@ -143,40 +143,7 @@
                         回到主頁
 
                     </button>
-
-
-                    <!-- 如果要用回checkbox的話可以加這個彈跳視窗
-                    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-
-                        <div class="modal-dialog">
-
-                            <div class="modal-content">
-
-                                <div class="modal-header">
-
-                                    <h5 class="modal-title" id="exampleModalLabel">更新通知</h5>
-
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-
-                                </div>
-
-                                <div class="modal-body align-items-center" style="text-align: center;">
-
-                                    已刪除並更新
-
-                                </div>
-
-                                <div class="modal-footer">
-
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div> -->      
+    
                       
                   </div>
                 </div>
@@ -193,22 +160,14 @@
     <script src="{% static 'myApp/js/scripts.js' %}"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function(){
-
-            if(getIsLogin()){
-                document.getElementById('btnClinPage').innerText = "回到主頁"
-            }else{
-                document.getElementById('btnClinPage').innerText = "完成"
-            }
+            document.getElementById('btnClinPage').innerText = "回到主頁"
+            doc_info();
         })
         
 
         function clinPage(event){
             event.preventDefault();
-            if(getIsLogin()){
-                 window.location.href = '/clinic/home/'
-            }else{
-                window.location.href = '/loginP'
-            }
+            window.location.href = '/clinic/home/'
            
         }
 
@@ -219,7 +178,7 @@
     
         //該診所現有醫生跟他們的資料顯示
         function doc_info() {
-            fetch('/docManage/')
+            fetch('/success/')
                 .then(response => response.json())
                 .then(data => {
                     const doctors = data.doctors;
@@ -230,7 +189,7 @@
                             <td>${doctor.name}</td>
                             <td>${doctor.email}</td>
                             <td>${doctor.phone_number}</td>
-                            <td>${doctor.experience}</td>
+                            <td>${doctor.exoerience}</td>
                             <td>
                                 <form class="delete-doctor-form">
                                     {% csrf_token %}
@@ -246,13 +205,15 @@
                     deleteForms.forEach(form => {
                         form.addEventListener('submit', function(event) {
                             event.preventDefault(); // 阻止表单默认提交行为
-        
+                            
+                        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
                             const doctorEmail = form.querySelector('button').dataset.doctorEmail;
         
                             fetch(`/doctor/delete/${doctorEmail}/`, {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
+                                    'X-CSRFToken': csrfToken
                                 },
                             })
                             .then(response => response.json())
@@ -318,24 +279,5 @@
         }
       
   </script>
-</body>
-</html> {% endcomment %}
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <!-- 样式和其他内容... -->
-</head>
-<body>
-    <h1>醫生列表</h1>
-
-    <ul>
-        {% for doctor in doctors %}
-            <li>
-                <a href="{% url 'edit_doctor_schedule' doctor.id %}">{{ doctor.name }}</a>
-            </li>
-        {% endfor %}
-    </ul>
 </body>
 </html>

@@ -24,8 +24,10 @@ function checkVlue(){
 function fetch_element(){
         clieField['email'] = document.getElementById('email').value
         clieField['name'] = document.getElementById('name').value,
-        clieField['phone_number'] = document.getElementById('phone_number').value,
-        clieField['password'] = document.getElementById('password').value,
+        clieField['phone_number'] = document.getElementById('phone_number').value;
+        if(window.localStorage.getItem('isLogin') == 'failed'){
+            clieField['password'] = document.getElementById('password').value
+        }          
         clieField['address'] = document.getElementById('address').value,
         clieField['birth_date'] = document.getElementById('birth_date').value
         clieField['gender'] = document.getElementById('gender').value
@@ -40,32 +42,38 @@ document.addEventListener('DOMContentLoaded', function() {
         const btnRegis = document.getElementById('btnClieRegis');
         const barTitle = document.getElementById('barTitle');
         const clieForm = document.getElementById('clientForm');
+        const btnLogout = document.getElementById('logoutButton');
+        const loginHide = document.querySelectorAll('.loginHide');
+        const pwInput = document.getElementById('password')
         fetch_element();
-
         //canva11進入canva12   
         if (window.localStorage.getItem('isLogin') == 'success'){
-            console.log('cliejs46')
+            //console.log('cliejs46')
             barTitle.innerText = '患者資料'
             btnRegis.innerText = '回到主頁'
+            btnLogout.hidden = false;
+            pwInput.required = false
+            loginHide.forEach(element => {
+                element.hidden = true;
+            });
             fetch_info(clieForm);
-      
         }else if(window.localStorage.getItem('isLogin') == 'failed'){
-            console.log('cliejs46_no')
+            //console.log('cliejs46_no')
             barTitle.innerText = '註冊'
             btnRegis.innerText = '完成'
-          
+            btnLogout.hidden = true;
+            pwInput.required = true
         }
 })
 
 function click_regis(event){
     event.preventDefault();
-    if (window.isLogin){
+    if (window.localStorage.getItem('isLogin') == 'success'){
         window.location.href = '/home'
     }else{
         window.location.href = "/loginP"
     }
 }
-
 
 async function isUniqueEmail(email){
     try {
@@ -96,24 +104,17 @@ function fetch_info(formFilled){
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        //return response.json(); // 解析 JSON 响应
         if (data.status === 'success') {
             const clieInfo = data.data;
-            //console.log("info_type = " + typeof(data.data) + "  info = " + data.data)
+            if (clieInfo['password'] != ''){
+                clieInfo['password'] = '';
+            }
             fillForm(clieInfo, formFilled);
         } else {
             console.error(data.error);
         }
     })
-    // .then(infoDic =>{
-    //     username = infoDic['name'];
-    //     for (var key in infoDic) {
-    //         if (infoDic.hasOwnProperty(key)) {
-    //             //
-    //             clieField[key] = infoDic[key];
-    //         }
-    //     }
-    // })   
+
     .catch(error => {
         console.log('Error:', error);
     });
@@ -155,11 +156,15 @@ document.getElementById('clientForm').addEventListener('submit', async function(
                     alert("Phone number cannot exceed 15 digits");
                     return;
                 } else {
-                    // 要串資料庫把所有的clinic email先找出來      
-                    if (!await isUniqueEmail(email)) {
-                        alert("Email already registered");
-                        return;
-                    }else{
+                    if(window.localStorage.getItem('isLogin') == 'failed'){
+                        // 要串資料庫把所有的clinic email先找出來      
+                        if (!await isUniqueEmail(clieField.email)) {
+                            alert("Email already registered");
+                            return;
+                        }else{
+                            isValid = true;
+                        }
+                    }else if(window.localStorage.getItem('isLogin') == 'success'){
                         isValid = true;
                     }
                 }
@@ -182,7 +187,11 @@ document.getElementById('clientForm').addEventListener('submit', async function(
         .then(data => {
             if (data.status === 'success') {
                 alert(data.message);
-                window.location.href = '/loginP/';
+                if(window.localStorage.getItem('isLogin') == 'failed'){
+                    window.location.href = '/loginP/';
+                }else{
+                    window.location.href = '/home/';
+                }
             } else {
                 alert(data.message);
             }

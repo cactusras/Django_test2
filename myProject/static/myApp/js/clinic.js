@@ -28,6 +28,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const btnDocManage = document.getElementById('btnDocManage');
         const barTitle = document.getElementById('barTitle');
         const clinForm = document.getElementById('clinicForm')
+        const btnLogout = document.getElementById('logoutButton')
+        const loginHide = document.querySelectorAll('.loginHide')
         fetch_element();
 
         //canva11進入canva12   
@@ -35,6 +37,10 @@ document.addEventListener('DOMContentLoaded', function() {
             barTitle.innerText = '診所資料'
             btnDocManage.hidden = false;
             btnRegis.innerText = '完成'
+            btnLogout.hidden = false;
+            loginHide.forEach(element => {
+                element.hidden = true
+            });
             btnDocManage.addEventListener('click', function(){
                 window.location.href = "/doctor/manage"
             })
@@ -43,22 +49,12 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             fetch_info(clinForm);
         }else if(window.localStorage.getItem('isLogin') == 'failed'){
-            btnRegis.innerText = '新增醫生'
+            btnRegis.innerText = '完成'
             btnDocManage.hidden = true;
             barTitle.innerText = '註冊'
+            btnLogout.hidden = true;
         }
 })
-
-function regis_click(event){
-    event.preventDefault();
-    if (window.isLogin) {
-        
-        window.location.href = "/clinic/home";
-    } else {
-        
-        window.location.href = "/doctor/manage";
-    }
-}
 
 async function isUniqueLicense(license_number){
     try {
@@ -68,12 +64,12 @@ async function isUniqueLicense(license_number){
                 'Content-Type': 'application/json',
                 //'X-CSRFToken': getCookie('csrftoken')
             },
-            body: JSON.stringify({email: email})
+            body: JSON.stringify({license_number: license_number})
         });
         const uniqueLicense = await response.json();
         return uniqueLicense.isUnique;
     } catch (error) {
-        console.log('Error fetching registered emails:', error);
+        console.log('Error fetching registered license:', error);
         return false;
     }
 }
@@ -110,7 +106,6 @@ function fillForm(data, form) {
     });
 }
 
-
 function fetch_info(formFilled){
     fetch('/clinic_info/', {
         method: 'GET'
@@ -122,11 +117,14 @@ function fetch_info(formFilled){
         const data = await response.json();
 
         if (data.status === 'success') {
-            //const clinInfo = data.info;
-            //console.log("info_type = " + typeof(data.data) + "  info = " + data.data)
+            //顯示資料時不填入photo_url跟password(不影響後端)
             const clinInfo = data.data;
-            console.log(clinInfo.photo_url)
-            //console.log("info_type = " + typeof(data.data) + "  info = " + data.data)
+            if (clinInfo['photo'] != ''){
+                clinInfo['photo'] = '';
+            }
+            if (clinInfo['password'] != ''){
+                clinInfo['password'] = '';
+            }
             fillForm(clinInfo, formFilled);
         } else {
             console.error(data.error);
@@ -188,8 +186,13 @@ document.getElementById('clinicForm').addEventListener('submit', async function(
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                alert(data.message);
-                window.location.href = '/loginP';
+                if(window.localStorage.getItem('isLogin') == 'success'){
+                    alert(data.message);
+                    window.location.href = '/clinic/home';
+                }else{
+                    alert(data.message);
+                    window.location.href = '/loginP';
+                }
             } else {
                 alert(data.message);
             }
