@@ -1344,38 +1344,30 @@ def get_reserved_times(doctor_id, date):
         time_start__date=date
     ).values_list('time_start', 'time_end')
     return list(reservations)
-
 def exclude_overlapping_times(available_times, reserved_times, expertise_time):
     result = []
     for start_time, end_time in available_times:
         overlap = False
         
+        # 将当前可用时间段转换为 datetime 对象以便于比较
+        start_datetime = datetime.combine(datetime.min, start_time)
+        end_datetime = datetime.combine(datetime.min, start_time) + expertise_time
+        
         for res_start, res_end in reserved_times:
             res_start_time = res_start.time()
             res_end_time = res_end.time()
-            
-            # 排除刚好接在一起的情况
-            if end_time == res_start_time or start_time == res_end_time:
-                continue
-            
-            # 時間段是否重疊
-            if start_time < res_end_time and end_time > res_start_time:
-                print(f'worked:{start_time} ')
+
+            # 将预约时间段转换为 datetime 对象
+            res_start_datetime = datetime.combine(datetime.min, res_start_time)
+            res_end_datetime = datetime.combine(datetime.min, res_end_time)
+
+            # 判断是否有重叠
+            if (start_datetime < res_end_datetime and end_datetime > res_start_datetime) or \
+               (start_datetime <= res_start_datetime and end_datetime > res_start_datetime) or \
+               (start_datetime < res_end_datetime and end_datetime >= res_end_datetime):
                 overlap = True
                 break
-            
-            start_datetime = datetime.combine(datetime.min, start_time)
-            
-            #這邊我在試圖處理時間重疊項目問題
-            #現在的問題是如果我在12:00要預約2小時項目，但醫生在13:00-14:00已經有預約,那就不應該顯示12:00
-            # Calculate end_datetime by adding expertise_time
-            # end_datetime = start_datetime + expertise_time
-            
-            # # Check if end_datetime overlaps with reserved slot
-            # if end_datetime >= res_start:
-            #     overlap = True
-            #     break
-            
+
         if not overlap:
             result.append((start_time, end_time))
     
