@@ -36,7 +36,7 @@ class CustomUserManager(BaseUserManager):
 
 # 自定義的使用者模型
 class CustomUser(AbstractBaseUser):
-    email = models.EmailField(unique=True)
+    email = models.EmailField()
     name = models.CharField(max_length=100)
     phone_number = models.CharField(max_length=35)
     #password = models.CharField(max_length=128)
@@ -76,7 +76,7 @@ class Client(CustomUser):
 
 class Clinic(CustomUser):
    
-    license_number = models.CharField(max_length=50, unique=True)
+    license_number = models.CharField(max_length=50)
     address = models.TextField()
     introduction = models.TextField(blank=True, null=True)
     photo = models.ImageField(upload_to='clinics/',blank=True, null=True)

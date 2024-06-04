@@ -4,7 +4,11 @@ from . import views
 urlpatterns = [
     path('home/',views.home, name = 'home'),
     path('loginP/', views.loginP, name='loginP'),
+<<<<<<< Updated upstream
     path('client/reserve/', views.clieReserve, name='client_reservation'),
+=======
+    path('login/', views.user_login, name='login'),
+>>>>>>> Stashed changes
     path('client/data/edit/', views.cliedataEd, name='client_data_edit'),
     path('clinic/data/edit/', views.clinDataEd, name='clinic_data_edit'),
     path('doctor/data/edit/', views.docDataEd, name='doctor_data_edit'),
@@ -32,7 +36,6 @@ urlpatterns = [
     path('scheduling/upload/', views.scheduling_upload, name='scheduling_upload'),
     path('success/', views.success, name='success'),
     path('clieReserveRecord/', views.clieReserveRecord, name='clieReserveRecord'),
-    path('dentalLogin/', views.dentalLogin, name='dentalLogin'),
     path('isUniqueEmail_clin/', views.isUniqueEmail_clin, name='isUniqueEmail_clin'),
     path('isUniqueLicense_clin/', views.isUniqueLicense_clin, name='isUniqueLicense_clin'),
     path('isUniqueEmail_clie/', views.isUniqueEmail_clie, name='isUniqueEmail_clie'),

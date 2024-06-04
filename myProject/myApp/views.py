@@ -2,8 +2,16 @@ import json
 from pathlib import Path
 from PIL import Image
 from django.shortcuts import render,redirect, get_object_or_404
+<<<<<<< Updated upstream
 from django.http import HttpResponse
 from .forms import DoctorForm,ClinicForm,ClientForm, LoginForm,SchedulingForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm
+=======
+from django.http import HttpResponse, JsonResponse
+#from rest_framework import serializers
+from myProject.encoder import CustomEncoder
+from .serializers import WorkingHourSerializer
+from .forms import ClientUpdateForm, ClinicUpdateForm, DoctorForm,ClinicForm,ClientForm, LoginForm,SchedulingForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm
+>>>>>>> Stashed changes
 from django.db.models import Q
 from django.db import connection
 from django.contrib.auth.decorators import login_required
@@ -114,20 +122,38 @@ def add_client(request):
         except json.JSONDecodeError:
             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
         
+<<<<<<< Updated upstream
+=======
+        password = data.get('password')
+        email = data.get('email')
+>>>>>>> Stashed changes
         # 創建一個包含數據的 QueryDict
         data = {
-            'email': data.get('email'),
+            'email': email,
             'name': data.get('name'),
             'phone_number': data.get('phone_number'),
+<<<<<<< Updated upstream
             'password': make_password(data.get('password')),
+=======
+            'password': password,
+>>>>>>> Stashed changes
             'address': data.get('address'),
             'birth_date': data.get('birth_date'),
             'gender': data.get('gender'),
             'occupation': data.get('occupation'),
             'notify': data.get('notify')
         }
+        print('password here = ', password)
+        try:
+            client = Client.objects.get(email=email)
+        except Client.DoesNotExist:
+            client = None
 
-        form = ClientForm(data)
+        
+        if client:
+            form = ClientUpdateForm(data)
+        else:
+            form = ClientForm(data)
         if form.is_valid():
             cleaned_data = form.cleaned_data
 
@@ -158,13 +184,21 @@ def add_client(request):
                 defaults=cleaned_data
             )
 
+<<<<<<< Updated upstream
+=======
+            if password != '':
+                client.password = make_password(data['password'])
+                client.save()
+
+>>>>>>> Stashed changes
             if created_client:
                 message = 'Client created successfully.'
             else:
-                message = 'Client updated successfully.'
+                message = "Client updated successfully."
 
             return JsonResponse({'message': message, 'status': 'success'})
         else:
+            print('error = ', form.errors)
             return JsonResponse({'message': 'Invalid form data', 'errors': form.errors, 'status': 'error'})
     else:
         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
@@ -260,6 +294,7 @@ def add_Reservation(request):
 def add_clinic(request):
     if request.method == 'POST':
         try:
+<<<<<<< Updated upstream
             form = ClinicForm(request.POST, request.FILES)
         except json.JSONDecodeError:
             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
@@ -297,10 +332,67 @@ def add_clinic(request):
                 message = 'Client created successfully.'
             else:
                 message = 'Client updated successfully.'
+=======
+            # 檢查用戶是否存在
+            email = request.POST.get('email')
+            if email:
+                try:
+                    clinic = Clinic.objects.get(email=email)
+                    update_clinic = True  # 更新現有診所
+                except Clinic.DoesNotExist:
+                    update_clinic = False  # 新建診所
+            else:
+                update_clinic = False
+            if update_clinic:
+                form = ClinicUpdateForm(request.POST)
+            else:
+                form = ClinicForm(request.POST, request.FILES)
+            if form.is_valid():
+                cleaned_data = form.cleaned_data
+                print(cleaned_data)
+                cleaned_data['is_active'] = True
+                cleaned_data['is_admin'] = False
+>>>>>>> Stashed changes
 
-            return JsonResponse({'message': message, 'status': 'success'})
-        else:
-            return JsonResponse({'message': 'Invalid form data', 'errors': form.errors, 'status': 'error'})
+                #如果為資料更新則不進入此判斷
+                if 'photo' in cleaned_data:
+                    #(註冊時)如果有選擇加照片
+                    if cleaned_data['photo'] is not None:
+                        # photo = cleaned_data.pop('photo')
+                        photo = cleaned_data['photo']
+                        image = Image.open(photo)
+                        print("photo opend")
+                        # Define the save path using Path from pathlib
+                        save_dir = Path('media/uploaded_files')
+                        save_dir.mkdir(parents=True, exist_ok=True)  # Create directories if they don't exist
+                        save_path = save_dir / photo.name
+                        image.save(save_path)
+                        print("photo saved")
+                        photo_path = f'uploaded_files/{photo.name}'
+                        cleaned_data['photo'] = photo_path
+                        print("photo path saved to clean_data")
+
+                # Prepare data for update_or_create
+                email = cleaned_data.pop('email')
+                clinic, created_clinic = Clinic.objects.update_or_create(
+                    email=email,
+                    defaults=cleaned_data
+                )
+
+                if 'password' in cleaned_data:
+                    clinic.password = make_password(cleaned_data['password'])
+                    clinic.save()
+
+                if created_clinic:
+                    message = 'Clinic created successfully.'
+                else:
+                    message = 'Clinic updated successfully.'
+
+                return JsonResponse({'message': message, 'status': 'success'})
+            else:
+                return JsonResponse({'message': 'Invalid form data', 'errors': form.errors, 'status': 'error'})
+        except json.JSONDecodeError:
+            return JsonResponse({'message': '無效的 JSON', 'status': 'error'})
     else:
         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
@@ -1018,10 +1110,6 @@ def home(request):
     context={}
     return render(request, "myApp/searchPage.html", context)
 
-def clieReserve(request):
-    context={}
-    return render(request, "myApp/client_reservation.html", context)
-
 def cliedataEd(request):
     context={}
     return render(request, "myApp/client_dataEdit.html", context)
@@ -1064,10 +1152,6 @@ def clieReserveRecord(request):
     context={}
     return render(request, "myApp/UserAppointmentRecords.html", context)
 
-
-def dentalLogin(request):
-    context={}
-    return render(request, "myApp/dentalLogin.html", context)
 
 # 用filter查看所有诊所/醫生/病患的email資料是否已存在
 @csrf_exempt
@@ -1206,21 +1290,20 @@ def check_reservations(request):
 #如果是Status = 2或3的話 就不執行而是跳jsonresponse
 #變數名有待確認
 def client_cancel_reservation(request):
-
     if request.method == 'GET':
-        reserveID = request.GET.get('reservationID')
-        reservation = get_object_or_404(Reservation, reservationID=reserveID)
+        reserveID = request.GET.get('reservationId')
+        if not reserveID:
+            return JsonResponse({'dlteSuccess': False, 'message': 'No reservation ID provided'}, status=400)
+        
+        reservation = get_object_or_404(Reservation, id=reserveID)
 
-        if (reservation.Status == 2 or reservation.Status == 3):
-            return JsonResponse({'dlteSuccess': False,}) #不能取消
+        if reservation.Status in [2, 3]:
+            return JsonResponse({'dlteSuccess': False, 'message': 'Reservation cannot be cancelled'}, status=400)
         else:
-        # 删除预约
             reservation.delete()
-            return JsonResponse({'dlteSuccess': True,}) #可以取消
-        
-        
-    
-    return render(request, 'UserAppointmentRecords.html')
+            return JsonResponse({'dlteSuccess': True, 'message': 'Reservation cancelled successfully'})
+
+    return JsonResponse({'dlteSuccess': False, 'message': 'Invalid request method'}, status=405)
 
 @csrf_exempt
 def user_logout(request):

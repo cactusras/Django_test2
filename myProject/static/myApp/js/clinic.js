@@ -28,6 +28,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const btnDocManage = document.getElementById('btnDocManage');
         const barTitle = document.getElementById('barTitle');
         const clinForm = document.getElementById('clinicForm')
+<<<<<<< Updated upstream
+=======
+        const btnLogout = document.getElementById('logoutButton')
+        const loginHide = document.querySelectorAll('.loginHide')
+        const pwInput = document.getElementById('password')
+>>>>>>> Stashed changes
         fetch_element();
 
         //canva11進入canva12   
@@ -35,17 +41,27 @@ document.addEventListener('DOMContentLoaded', function() {
             barTitle.innerText = '診所資料'
             btnDocManage.hidden = false;
             btnRegis.innerText = '完成'
+<<<<<<< Updated upstream
+=======
+            btnLogout.hidden = false;
+            pwInput.required = false
+            loginHide.forEach(element => {
+                element.hidden = true
+            });
+>>>>>>> Stashed changes
             btnDocManage.addEventListener('click', function(){
                 window.location.href = "/doctor/manage"
-            })
-            btnRegis.addEventListener('click', function(){
-                window.location.href = "/clinic/home"
             })
             fetch_info(clinForm);
         }else if(window.localStorage.getItem('isLogin') == 'failed'){
             btnRegis.innerText = '新增醫生'
             btnDocManage.hidden = true;
             barTitle.innerText = '註冊'
+<<<<<<< Updated upstream
+=======
+            btnLogout.hidden = true;
+            pwInput.required = true;
+>>>>>>> Stashed changes
         }
 })
 
@@ -154,17 +170,21 @@ document.getElementById('clinicForm').addEventListener('submit', async function(
                     alert("Phone number cannot exceed 15 digits");
                     return;
                 } else {
-                    // 要串資料庫把所有的clinic email先找出來      
-                    if (!await isUniqueEmail(clinField['email'])) {
-                        alert("Email already registered");
-                        return;
-                    }else{
-                        if (!await isUniqueLicense(clinField['license_number'])) {
-                            alert("License already registered");
+                    if(window.localStorage.getItem('isLogin') == 'failed'){
+                        // 要串資料庫把所有的clinic email先找出來      
+                        if (!await isUniqueEmail(clinField['email'])) {
+                            alert("Email already registered");
                             return;
                         }else{
-                            isValid = true;
+                            if (!await isUniqueLicense(clinField['license_number'])) {
+                                alert("License already registered");
+                                return;
+                            }else{
+                                isValid = true;
+                            }
                         }
+                    }else if(window.localStorage.getItem('isLogin') == 'success'){
+                        isValid = true;
                     }
                 }
             }
@@ -184,8 +204,19 @@ document.getElementById('clinicForm').addEventListener('submit', async function(
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
+<<<<<<< Updated upstream
                 alert(data.message);
                 window.location.href = '/loginP';
+=======
+                if(window.localStorage.getItem('isLogin') == 'success'){
+                    alert(data.message);
+                    window.localStorage.setItem('username', clinField.name)
+                    window.location.href = '/clinic/home';
+                }else{
+                    alert(data.message);
+                    window.location.href = '/loginP';
+                }
+>>>>>>> Stashed changes
             } else {
                 alert(data.message);
             }
@@ -196,31 +227,4 @@ document.getElementById('clinicForm').addEventListener('submit', async function(
         });
     }
 
-    /*const clinicForm = new FormData(document.getElementById("clinicForm"));
-
-    //html元素name == elements[]中的name == model中的attribute name
-    // 发送 POST 请求到 Django 后端视图
-    fetch('/clinic_dataEdit/add_clinic/', {
-        method: 'POST',
-        body: JSON.stringify(clinField),
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json(); // 如果后端返回 JSON 数据，则解析
-    })
-    .then(data => {
-        console.log('Success:', data);
-        window.location.href = "clinic_dataEdit.html";
-        // 到login之後要有一個變數辨認診所是否為第一次登入 是的話就進clinic_login_docManage
-    })
-    .catch(error => {
-        console.log('Error:', error);
-        // 处理错误情况，例如显示错误消息给用户
-    });*/
 });

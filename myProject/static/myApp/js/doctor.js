@@ -19,16 +19,17 @@
             docField['photo'] = document.getElementById('photo').files[0]
             console.log('email' + docField['email']);
     }
-
-    /*function toSchedule(event){
-        event.preventDefault();
-        window.location.href = '/click/schedule'
-    }*/
     
     document.addEventListener('DOMContentLoaded', function() {
             //頁面加載後才能把這些element load進來
             const btnRegis = document.getElementById('btnDocRegis');
             const barTitle = document.getElementById('barTitle');
+<<<<<<< Updated upstream
+=======
+            const docForm = document.getElementById('doctorForm');
+           const loginHide = document.querySelectorAll('.loginHide')
+            const btnLogout = document.getElementById('logoutButton')
+>>>>>>> Stashed changes
             fetch_element();
                 
             //canva11進入canva12   

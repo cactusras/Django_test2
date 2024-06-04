@@ -246,7 +246,12 @@
                     deleteForms.forEach(form => {
                         form.addEventListener('submit', function(event) {
                             event.preventDefault(); // 阻止表单默认提交行为
+<<<<<<< Updated upstream
         
+=======
+                            
+                            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+>>>>>>> Stashed changes
                             const doctorEmail = form.querySelector('button').dataset.doctorEmail;
         
                             fetch(`/doctor/delete/${doctorEmail}/`, {

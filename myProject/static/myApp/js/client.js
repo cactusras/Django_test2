@@ -24,8 +24,13 @@ function checkVlue(){
 function fetch_element(){
         clieField['email'] = document.getElementById('email').value
         clieField['name'] = document.getElementById('name').value,
+<<<<<<< Updated upstream
         clieField['phone_number'] = document.getElementById('phone_number').value,
         clieField['password'] = document.getElementById('password').value,
+=======
+        clieField['phone_number'] = document.getElementById('phone_number').value;
+        clieField['password'] = document.getElementById('password').value
+>>>>>>> Stashed changes
         clieField['address'] = document.getElementById('address').value,
         clieField['birth_date'] = document.getElementById('birth_date').value
         clieField['gender'] = document.getElementById('gender').value
@@ -43,18 +48,17 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch_element();
         //canva11進入canva12   
         if (window.localStorage.getItem('isLogin') == 'success'){
-            //console.log('cliejs46')
             barTitle.innerText = '患者資料'
             btnRegis.innerText = '回到主頁'
             fetch_info(clieForm);
             pwClass = document.querySelectorAll('.password')
         }else if(window.localStorage.getItem('isLogin') == 'failed'){
-            //console.log('cliejs46_no')
             barTitle.innerText = '註冊'
             btnRegis.innerText = '完成'
         }
 })
 
+<<<<<<< Updated upstream
 function click_regis(event){
     event.preventDefault();
     if (window.isLogin){
@@ -64,6 +68,8 @@ function click_regis(event){
     }
 }
 
+=======
+>>>>>>> Stashed changes
 async function isUniqueEmail(email){
     try {
         const response = await fetch('/isUniqueEmail_clie/', {
@@ -175,7 +181,18 @@ document.getElementById('clientForm').addEventListener('submit', async function(
         .then(data => {
             if (data.status === 'success') {
                 alert(data.message);
+<<<<<<< Updated upstream
                 window.location.href = '/home';
+=======
+                if(window.localStorage.getItem('isLogin') == 'failed'){
+                    alert(data.message);
+                    window.location.href = '/loginP/';
+                }else{
+                    alert(data.message);
+                    window.localStorage.setItem('username', clieField.name)
+                    window.location.href = '/home/';
+                }
+>>>>>>> Stashed changes
             } else {
                 alert(data.message);
             }
