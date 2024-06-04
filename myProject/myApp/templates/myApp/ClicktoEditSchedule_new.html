@@ -24,9 +24,10 @@
 
 <body>
                         <!--時段按鈕的彈跳視窗-->
-                        <form id="timePopForm" method="POST" action="{% url "working_hour_upload" %}">
+                        <form id="timePopForm" method="POST" action="{% url workingHour/upload/%}">
                             {% csrf_token %}
                             {{form.as_p }}
+                            <button type="submit">Submit</button>
                         </form>
 </body>                        
 </html>

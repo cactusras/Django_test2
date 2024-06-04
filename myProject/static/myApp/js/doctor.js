@@ -19,11 +19,6 @@
             docField['photo'] = document.getElementById('photo').files[0]
             console.log('exoerience' + docField['exoerience']);
     }
-
-    /*function toSchedule(event){
-        event.preventDefault();
-        window.location.href = '/click/schedule'
-    }*/
     
     document.addEventListener('DOMContentLoaded', function() {
             //頁面加載後才能把這些element load進來
@@ -59,15 +54,6 @@
                 }
             }
     })
-    
-    /*function click_regis(event){
-        event.preventDefault();
-        if (window.localStorage.getItem('isLogin') == 'success') {
-            window.location.href = "/doctor_dataEdit";
-        } else if(window.localStorage.getItem('isLogin') == 'failed'){
-            window.location.href = "/login";
-        }
-    }*/
     
     async function isUniqueEmail(email){
         try {

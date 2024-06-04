@@ -117,7 +117,31 @@ class Doc_Expertise(models.Model):
         #null = True,
         related_name='doctor_exp_license'
     )
-     
+
+class WorkingHour(models.Model):
+    DAYCHOICES = (
+        (1, 'Monday'),
+        (2, 'Tuesday'),
+        (3, 'Wednesday'),
+        (4, 'Thursday'),
+        (5, 'Friday'),
+        (6, 'Saturday'),
+        (7, 'Sunday')
+    )
+
+    #hiring = models.ForeignKey('Hiring', related_name='working_hours', on_delete=models.CASCADE)
+    day_of_week = models.IntegerField(choices=DAYCHOICES)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+
+    # class Meta:
+    #     unique_together = ('day_of_week', 'start_time', 'end_time')
+    #     ordering = ['day_of_week', 'start_time']
+
+    def __str__(self):
+        day_name = dict(self.DAY_CHOICES)[self.day_of_week]
+        return f"{day_name}: {self.start_time.strftime('%H:%M')} - {self.end_time.strftime('%H:%M')}"
+
 class Scheduling(models.Model):
     DoctorID = models.ForeignKey('Doctor', related_name='scheduling', on_delete=models.CASCADE)
    #Reservation = models.ForeignKey('Reservation', related_name='scheduling', on_delete=models.CASCADE)
@@ -194,31 +218,6 @@ class Waiting(models.Model):
     def __str__(self):
         return f"{self.client.name} waiting for doctor{self.SchedulingID.DoctorID}, clinic {self.SchedulingID.DoctorID.clnicID}"
 
-
-class WorkingHour(models.Model):
-    DAY_CHOICES = [
-        (1, 'Monday'),
-        (2, 'Tuesday'),
-        (3, 'Wednesday'),
-        (4, 'Thursday'),
-        (5, 'Friday'),
-        (6, 'Saturday'),
-        (7, 'Sunday')
-    ]
-
-    #hiring = models.ForeignKey('Hiring', related_name='working_hours', on_delete=models.CASCADE)
-    day_of_week = models.IntegerField(choices=DAY_CHOICES)
-    start_time = models.TimeField()
-    end_time = models.TimeField()
-
-    class Meta:
-        unique_together = ('day_of_week', 'start_time', 'end_time')
-        ordering = ['day_of_week', 'start_time']
-
-    def __str__(self):
-        day_name = dict(self.DAY_CHOICES)[self.day_of_week]
-        return f"{day_name}: {self.start_time.strftime('%H:%M')} - {self.end_time.strftime('%H:%M')}"
-    
     
 class docClinicSearch(models.Model):
     DAY_CHOICES = [
