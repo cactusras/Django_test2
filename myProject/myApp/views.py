@@ -395,12 +395,13 @@ def DocExp_uploading(request):
 def workingHour_upload(request):
     if request.method == 'POST':
         try:
-            data = json.loads(request.POST)  # 解析 JSON 数据
+            data_string = request.body.decode('utf-8')
+            data = json.loads(data_string)  # 解析 JSON 数据
             print('post succeed')
         except json.JSONDecodeError:
             print('post failed')
             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
-        start_time_str = data.get('start_time') #type(start_time_str) == str
+        start_time_str = data['start_time'] #type(start_time_str) == str
         '''end_time_str = data.get('end_time')
         
 

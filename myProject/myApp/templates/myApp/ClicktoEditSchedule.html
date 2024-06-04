@@ -26,7 +26,7 @@
     <nav class="navbar navbar-expand-lg" style="background-color:#F0EAD6; height: 100px;">
         <div class="container px-4 px-lg-5">
             <img src="{% static 'myApp/assets/dental.png' %}" alt="DEN Logo">
-            <a class="navbar-brand" href="#!" style="font-size: 24px;">牙醫預約平台</a>
+            <a class="navbar-brand" href="#!" style="font-size: 24px;" onclick="mainPage(event)">牙醫預約平台</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
      
@@ -53,7 +53,7 @@
                             時段
                         </button>
                         <!--時段按鈕的彈跳視窗-->
-                        <form id="timePopForm" method="post">
+                        <form id="timePopForm">
                             {% csrf_token %}
                         <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered">
@@ -85,7 +85,7 @@
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">刪除</button>
-                                        <button type="submit" class="btn btn-primary" id="addTimeSlot" onclick="timePopClick(event)">新增</button>
+                                        <button type="submit" class="btn btn-primary" id="addTimeSlot">新增</button>
                                     </div>
                                        
                                 </div>
@@ -237,19 +237,20 @@
     Custom JS to handle adding time slots -->
     <script>
 
+        /*這個先不要刪 如果json不可序列化的bug排除的話再從下面的submit timePopFunction改回來
         function timePopClick(event){
             event.preventDefault();
             console.log('hi')
             /*const day_of_week = document.getElementById('daySelect').value;
             const start_time = document.getElementById('start_time').value;
-            const end_time = document.getElementById('end_time').value;*/
+            const end_time = document.getElementById('end_time').value;
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
             /*const data = {
                 day_of_week: day_of_week,
                 start_time: start_time,
                 end_time: end_time
-            };*/
+            };
 
             let checkVlue = checkTime()
             if(checkVlue == 'success'){
@@ -286,8 +287,43 @@
             }  else if(checkVlue == 'dayNotExist'){
                 alert('請選擇星期幾。');
             }
-        }
+        }*/
     
+        document.getElementById('timePopForm').addEventListener('submit', function(event){
+            event.preventDefault();
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const data = {
+                day_of_week: document.getElementById('daySelect').value,
+                start_time: document.getElementById('start_time').value,
+                end_time: document.getElementById('end_time').value,
+            };
+            const json_data = JSON.stringify(data)
+            fetch(`/workingHour/upload/`,{
+                method: 'POST',
+                body: json_data,
+                headers: {
+                    'X-CSRFToken': csrfToken
+                },
+                
+            })
+            .then(response => {
+                if (response.status != 204) {
+                    throw new Error('Failed to add working_hour');
+                }
+                //這是我想說避免jsonresponse所以先註解掉的 但之後如果可以成功return jsonresponse要加回來 return http的話我不確定 再問一下chatgpt
+                //const data = await response.json();
+                alert('working_hour added successfully!');
+                // Close the modal
+                const modal = document.getElementById('staticBackdrop');
+                const modalInstance = bootstrap.Modal.getInstance(modal);
+                modalInstance.hide();
+            })
+            .catch(error => {
+                console.error('Error fetching working_hour list:', error);
+                // 处理错误情况
+            });
+        })
+
         document.getElementById('schedulingForm').addEventListener('submit', async function(event){
             event.preventDefault();
             const StartDate = document.getElementById('StartDate').value;

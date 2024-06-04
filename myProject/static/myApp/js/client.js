@@ -144,13 +144,17 @@ document.getElementById('clientForm').addEventListener('submit', async function(
                     alert("Phone number cannot exceed 15 digits");
                     return;
                 } else {
-                    // 要串資料庫把所有的clinic email先找出來      
-                    if (!await isUniqueEmail(clieField.email)) {
-                        alert("Email already registered");
-                        return;
+                    if(window.localStorage.getItem('isLogin') == 'failed'){
+                        // 要串資料庫把所有的clinic email先找出來      
+                        if (!await isUniqueEmail(clieField.email)) {
+                            alert("Email already registered");
+                            return;
+                        }else{
+                            isValid = true;
+                        }
                     }else{
                         isValid = true;
-                    }                        
+                    }                                             
                 }
             }
     }  
