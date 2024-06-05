@@ -160,10 +160,12 @@ class Reservation(models.Model):
     #原本應該是直觀用來看客戶醫生診所預約關係
     #改成scheduling之後應該就變成直觀能看到醫生不一定有診所
     def __str__(self):
-        return f"{self.client.name} reservation for doctor{self.SchedulingID.DoctorID}, clinic {self.SchedulingID.DoctorID.clnicID}"
+        return f"{self.ClientID.name} reservation for doctor{self.SchedulingID.DoctorID}, clinic {self.SchedulingID.DoctorID.clinicID}"
     
     def update_status(self, new_status):
-        if new_status in self.STATUS_CHOICES:
+        print('new = ', new_status, ' type = ', type(new_status))
+        valid_statuses = [status[0] for status in self.STATUS_CHOICES]
+        if new_status in valid_statuses:
             self.Status = new_status
             self.save()
         else:
@@ -192,7 +194,7 @@ class Waiting(models.Model):
     
 
     def __str__(self):
-        return f"{self.client.name} waiting for doctor{self.SchedulingID.DoctorID}, clinic {self.SchedulingID.DoctorID.clnicID}"
+        return f"{self.client.name} waiting for doctor{self.SchedulingID.DoctorID}, clinic {self.SchedulingID.DoctorID.clinicID}"
 
 
 class WorkingHour(models.Model):

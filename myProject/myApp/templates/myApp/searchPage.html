@@ -224,7 +224,6 @@
                                 const doctorDiv = document.createElement('div');
                                 doctorDiv.classList.add('doctor');
                                 doctorDiv.innerHTML = `
-                                    <h3>${doctor.doc_name}</h3>
                                     <h3 class="doctor-name" data-doc-id="${doctor.doc_id}">${doctor.doc_name}</h3>
                                     <p><strong>Clinic:</strong> ${doctor.clinic_name}</p>
                                     <p><strong>Address:</strong> ${doctor.clinic_address}</p>
@@ -245,21 +244,30 @@
                             const clinicTitle = document.createElement('h2');
                             clinicTitle.textContent = 'Clinics';
                             resultsContainer.appendChild(clinicTitle);
-                
+                        
                             data.clinics.forEach(clinic => {
                                 const clinicDiv = document.createElement('div');
                                 clinicDiv.classList.add('clinic');
+                                
                                 clinicDiv.innerHTML = `
-                                    <h3>${clinic.clinic_name}</h3>
+                                    <h3 class="clinic-name" data-clinic-id="${clinic.clinic_id}">${clinic.clinic_name}</h3>
                                     <p><strong>Address:</strong> ${clinic.clinic_address}</p>
                                     <p><strong>Introduction:</strong> ${clinic.clinic_introduction}</p>
                                     <p><strong>Expertise:</strong> ${clinic.doc_exp.join(', ')}</p>
                                 `;
+                                
                                 resultsContainer.appendChild(clinicDiv);
                             });
+                        
+                            // 确保事件监听器绑定在元素添加到文档后
+                            document.querySelectorAll('.clinic-name').forEach(element => {
+                                element.addEventListener('click', function() {
+                                    const clinic_id = this.getAttribute('data-clinic-id');
+                                    console.log(clinic_id);  // 确认可以获取到clinic_id
+                                    window.location.href = `clinic/reserve/${clinic_id}/`;
+                                });
+                            });
                         }
-
-
 
                     })
                     .catch(error => {

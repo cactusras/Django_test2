@@ -73,7 +73,7 @@
         <nav class="navbar navbar-expand-lg" style="background-color:#F0EAD6;  height: 100px;">
             <div class="container px-4 px-lg-5">
                 <img src="{% static 'myApp/assets/dental.png' %}" alt="DEN Logo">
-                <a class="navbar-brand" href="#!"  style="font-size: 24px;" onclick="mainPage(event)"> 牙醫預約平台</a>
+                <a class="navbar-brand" href="#!"  style="font-size: 24px;"> 牙醫預約平台</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
@@ -81,8 +81,8 @@
                         <li class="nav-item"><a class="nav-link" href="#!" style="font-size: 20px;">紀錄</a></li>
                         <li class="nav-item"><a class="nav-link" href="#!" style="font-size: 20px;">Q&A</a></li>
                     </ul>
-                    <form class="d-flex" style="text-align: right; margin-right: 10px;">
-                        <button class="btn btn-outline-dark" type="submit"  style="font-size: 20px;">
+                    <form class="d-flex">
+                        <button class="btn btn-outline-dark" type="submit"  style="font-size: 20px;" id = 'nav_btn' onclick='navBtn_listener(event)'>
                             <i class="bi bi-person-fill"></i>
                             登入
                         </button>
@@ -144,13 +144,13 @@
                                 <!-- 可用时间选项将由 JavaScript 动态添加 -->
                             </select>
                         </br>
-                           <label for="expertise_list">医生的项目列表：</label>
+                           {% comment %} <label for="expertise_list">医生的项目列表：</label>
                             <ul id="expertise_list"></ul> <!-- 用于显示项目列表 -->
                         
                             <label for="working_hours">医生的上班时间：</label>
-                            <ul id="working_hours"></ul> <!-- 用于显示上班时间 -->
+                            <ul id="working_hours"></ul> <!-- 用于显示上班时间 --> {% endcomment %}
                        
-                            <button type="submit">预约</button>
+                            <button type="submit">預約</button>
                         </form>
 
 
@@ -246,7 +246,9 @@
                          <script src="{% static 'myApp/js/scripts.js' %}" ></script>
 
 <script>
+   
     document.addEventListener('DOMContentLoaded', function () {
+       
         const doctorIdInput = {{ doctor.id }};
         const expertiseDropdown = document.getElementById('expertiseDropdown');
         const workingHoursContainer = document.getElementById('working_hours');
@@ -318,30 +320,6 @@
 </script>
 
      <script>
-                            $(document).ready(function() {
-                                var docId = {{ doc_id }}; // 使用 Django 模板语法获取医生ID
-                            
-                                $.ajax({
-                                    type: 'GET',
-                                    url: `/reserve/doctor/${docId}/`,  // 替换成你的 Django URL 模式
-                                    success: function(response) {
-                                        var doctorData = JSON.parse(response.doctor)[0].fields;  // 解析 JSON 响应
-                            
-                                        // 在页面上显示医生信息
-                                        $('#doctor-info').html(`
-                                            <h2>${doctorData.name}</h2>
-                                            <p>Specialty: ${doctorData.expertise}</p>
-                                            <p>Email: ${doctorData.email}</p>
-                                            <!-- Add more fields as needed -->
-                                        `);
-                                    },
-                                    error: function(xhr, status, error) {
-                                        var errorMessage = JSON.parse(xhr.responseText).error;
-                                        alert(errorMessage);  // 如果请求失败，显示错误消息
-                                    }
-                                });
-                            });
-                            
 
                             let currentButtonId = null;
                             const confirmedButtons = new Set();

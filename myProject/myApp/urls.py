@@ -35,7 +35,7 @@ urlpatterns = [
     path('reservation/status/change/finished/<int:reservation_id>/', views.reservationStFn, name='reservation_status_finished'),
     path('reservation/status/change/cancelledbydoc/<int:reservation_id>/', views.reservationStCbD, name='reservation_status_cancelled_by_doctor'),
     path('home/doctor/reserve/<int:doc_id>/', views.doctor_reserve_page, name='doctor_reserve_page'),
-    path('clinic/reserve/<int:clinic_id>/', views.clinic_reserve_page, name='clinic_reserve_page'),
+    path('home/clinic/reserve/<int:clinic_id>/', views.clinic_reserve_page, name='clinic_reserve_page'),
     path('clinic/doctor/<int:doctor_id>/reserve/', views.clinic_reserve_doctor_confirmed, name='clinic_reserve_doctor_confirmed'),
     #add_time(改過) 下面這有一個我的版本的
     #path('available/', views.get_available_times, name='available_times'),
@@ -71,7 +71,11 @@ urlpatterns = [
     path('available/', views.get_available_times, name='get_available_times'),
     path('testing',views.testing,name='testing'),
     path('Searchtesting',views.searchTest,name='Stesting'),
-    path('home/doctor/reserve/<int:doctor_id>/add/reservation/',views.add_Reservation, name ='added')
+    path('home/doctor/reserve/<int:doctor_id>/add/reservation/',views.add_Reservation, name ='added'),
+    path('doctor/delete/<str:doctor_email>/', views.delete_doctor, name='delete_doctor'),
+    path('doctor/expertise-list/<int:doctor_id>/', views.get_expertise_list_doc, name = 'get_expertise_list_doc'),
+    path('clinic/expertise-list/<int:clinic_id>/', views.get_expertise_list_clin, name = 'get_expertise_list_clin'),
+    path('doctor-list/expertise/<int:expertise_id>/', views.get_doctor_from_exp, name = 'get_doctor_from_exp'),
     
     
     
