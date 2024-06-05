@@ -906,25 +906,28 @@ def doctorPage_loading(request):
 @login_required        
 def clientRecord_loading(request):
     user = request.user
-    client = Client.objects.filter(id = user.id)
-    reservations = Reservation.objects.filter(ClientID=client.id).order_by('-time_start')
+    client = Client.objects.get(id=user.id)
+    reservations = Reservation.objects.filter(ClientID=client).order_by('-time_start')
     
-    reservation_list = [
-        {
+    reservation_list = []
+    for reservation in reservations:
+        scheduling = reservation.SchedulingID
+        doctor = scheduling.DoctorID
+        clinic = doctor.clinicID
+        reservation_list.append({
             'id': reservation.id,
-            'client_name': reservation.ClientID.name,
-            'appointment_date': reservation.time_start.date(),
+            'appointment_date': reservation.time_start.strftime('%Y-%m-%d'),
             'appointment_time': reservation.time_start.strftime('%H:%M'),
             'expertise': reservation.expertiseID.name,
+            'doctor_name': doctor.name,
+            'clinic_name': clinic.name,
             'status': reservation.get_status_display(),
-        }
-        for reservation in reservations
-    ]
+        })
 
     context = {
         'reservation_list': reservation_list,
     }
-
+    print('context = ', context)
     return JsonResponse(context)
 
 #預約頁面日期選下去，計算可預約時間
@@ -937,7 +940,7 @@ def add_times(time1, duration):
 
 def available(request):
     # Get doctor_id, date, and expertise_name from the GET request
-    doctor_id = request.session.get('doctor_id')
+    doctor_id = request.get('doctor_id')
     date_str = request.GET.get('date')
     date_reserve = datetime.strptime(date_str, '%Y-%m-%d').date()
     week_day = date_reserve.weekday()+1
@@ -1041,7 +1044,6 @@ def available(request):
     # Return available reservation choices as a JSON response
     return JsonResponse({'reserve_choices': reserve_choices})
 
-#login check身份別，django 自帶，用isinstance分身份
 
 #存疑，（應該）現在這邊必須要候補時段跟被取消的預約時段一模一樣才卡的進去
 @login_required
@@ -1085,6 +1087,7 @@ def waitingToResForC(request):
     # Return the formatted waiting list data as JSON
     return JsonResponse({'waiting_list': waiting_list_data})
 
+
 def home(request):
     context={}
     return render(request, "myApp/searchPage.html", context)
@@ -1100,10 +1103,6 @@ def clinDataEd(request):
 def docDataEd(request):
     context={}
     return render(request, "myApp/doctor_dataEdit.html", context)
-
-def clinReserve(request):
-    context={}
-    return render(request, "myApp/clinic_reserve.html", context)
 
 def docDataEd(request):
     context={}
@@ -1261,21 +1260,11 @@ def client_info(request):
 
 #如果是Status = 2或3的話 就不執行而是跳jsonresponse
 #變數名有待確認
-def client_cancel_reservation(request):
-    if request.method == 'GET':
-        reserveID = request.GET.get('reservationId')
-        if not reserveID:
-            return JsonResponse({'dlteSuccess': False, 'message': 'No reservation ID provided'}, status=400)
-        
-        reservation = get_object_or_404(Reservation, id=reserveID)
+def client_cancel_reservation(request, reservation_id):
+    reservation = get_object_or_404(Reservation, id=reservation_id)
+    reservation.delete()
+    return JsonResponse({'dlteSuccess': True, 'message': 'Reservation cancelled successfully'})
 
-        if reservation.Status in [2, 3]:
-            return JsonResponse({'dlteSuccess': False, 'message': 'Reservation cannot be cancelled'}, status=400)
-        else:
-            reservation.delete()
-            return JsonResponse({'dlteSuccess': True, 'message': 'Reservation cancelled successfully'})
-
-    return JsonResponse({'dlteSuccess': False, 'message': 'Invalid request method'}, status=405)
 
 @csrf_exempt
 def user_logout(request):
@@ -1334,3 +1323,10 @@ def get_doctor_from_exp(request, expertise_id):
         })
     print(" ", doctor_list)
     return JsonResponse({'doctor_list': doctor_list})
+
+@login_required
+def cancel_reservation(request, reservation_id):
+    reservation = get_object_or_404(Reservation, id=reservation_id)
+    reservation.Status = 5  # Set status to 'cancelled by doc'
+    reservation.save()
+    return JsonResponse({'status': 'success', 'message': 'Reservation status updated to cancelled.'})
