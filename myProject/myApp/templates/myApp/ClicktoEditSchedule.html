@@ -64,7 +64,7 @@
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <select class="form-select" id="daySelect" name="daySelect" aria-label="Default select example" required>
+                                        <select class="form-select" id="day_of_week" name="day_of_week" aria-label="Default select example" required>
                                             <option selected disabled value="">選擇星期</option>
                                             <option value="1">週一</option>
                                             <option value="2">週二</option>
@@ -104,7 +104,7 @@
                            <input type="date"  min="2024-05-20" id="EndDate" name="EndDate"/>
                         </div>
 
-                        <table class="table table-bordered" style="border: 1px solid #ada089;">
+                        <table class="table table-bordered" style="border: 1px solid #ada089;" id = "schedule_table">
                             <thead>
                                 <tr>
                                     <th scope="col"><i class="bi bi-clock-fill"></i></th>
@@ -236,102 +236,133 @@
     <!-- <script src="{% static 'myApp/js/doctor.js' %}"></script>
     Custom JS to handle adding time slots -->
     <script>
-
-        function timePopClick(event){
+        function timePopClick(event) {
             event.preventDefault();
-            console.log('hi')
-            /*const day_of_week = document.getElementById('daySelect').value;
-            const start_time = document.getElementById('start_time').value;
-            const end_time = document.getElementById('end_time').value;*/
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-            /*const data = {
-                day_of_week: day_of_week,
-                start_time: start_time,
-                end_time: end_time
-            };*/
-
-            let checkVlue = checkTime()
-            if(checkVlue == 'success'){
-                const form = document.getElementById('timePopForm');
-                const formData = new FormData(form);
-                
-                // Print the form data
-                formData.forEach((value, key) => {
-                    console.log(key + ': ' + value);
-                });
-
-
-                fetch(`/workingHour/upload/`,{
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRFToken': csrfToken
-                    },
-                    
-                })
-                .then(response => {
-                    if (response.status != 204) {
-                        throw new Error('Failed to add working_hour');
-                    }
-                    //這是我想說避免jsonresponse所以先註解掉的 但之後如果可以成功return jsonresponse要加回來 return http的話我不確定 再問一下chatgpt
-                    //const data = await response.json();
-                    alert('working_hour added successfully!');
-                    // Close the modal
-                    const modal = document.getElementById('staticBackdrop');
-                    const modalInstance = bootstrap.Modal.getInstance(modal);
-                    modalInstance.hide();
-                })
-                .catch(error => {
-                    console.error('Error fetching working_hour list:', error);
-                    // 处理错误情况
-                });
-            }else if(checkVlue == 'timeInvalid'){
-                alert('選擇的時間範圍無效。請以一個小時為區間做選擇，並選擇時間表上的區段。');
-            }else if(checkVlue == 'timeWrong'){
-                alert('請選擇正確的開始和結束時間。結束時間必須晚於開始時間。');
-            }  else if(checkVlue == 'dayNotExist'){
-                alert('請選擇星期幾。');
+            let checkValue = checkTime();
+            if (checkValue !== 'success') {
+                alert('Error: ' + checkValue);
+                return;
             }
+            const day_of_week = document.getElementById('day_of_week').value;
+            // console.log("day_of: ", day_of_week)
+            const start_time = document.getElementById('start_time').value;
+            // console.log("First_get_startTime: ", start_time);
+            const end_time = document.getElementById('end_time').value;
+            
+            // const formData = new FormData(form);
+            // Convert FormData to a plain object
+            const working_hour = {
+                'day_of_week': day_of_week,
+                'start_time': start_time,
+                'end_time': end_time
+            };
+            let working_hour_list= JSON.parse(localStorage.getItem('working_hour_list')) || [];
+            working_hour_list.push(working_hour);
+            localStorage.setItem('working_hour_list', JSON.stringify(working_hour_list));
+
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                console.log(`${key}: ${value}`); // This loop iterates through all local storage, not just working hours
+            }
+            
+            const rowIndex = getRowIndex(start_time)+1;
+
+            // Verify if rowIndex is within the range 0 to 8
+            if (rowIndex >= 0 && rowIndex <= 8) {
+                const table = document.getElementById('schedule_table'); // Ensure you have the correct table ID
+                const row = table.rows[rowIndex];
+                const cell = row.cells[day_of_week];
+                const initialWidth = cell.offsetWidth;
+                const initialHeight = cell.offsetHeight;
+                console.log('h = ' + initialHeight);
+                cell.style.backgroundColor = '#6D6460';
+                cell.style.width = `${initialWidth}px`;
+            }else{
+                console.log("no row")
+            }
+
+            alert('Working hour added successfully!');
+
+            // Close the modal
+            const modal = document.getElementById('staticBackdrop');
+            const modalInstance = bootstrap.Modal.getInstance(modal);
+            modalInstance.hide();
         }
-    
+
         document.getElementById('schedulingForm').addEventListener('submit', async function(event){
             event.preventDefault();
             const StartDate = document.getElementById('StartDate').value;
             const EndDate = document.getElementById('EndDate').value;
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            // const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
+            if (!StartDate || !EndDate) {
+                alert("請填寫開始日期和結束日期。");
+                return;
+            }
+            
             if(StartDate > EndDate){
                  alert("請選擇正確的開始和結束日期。結束日期必須晚於開始日期。")
                  return;
              }
             const data = {
-                StartDate: StartDate,
-                EndDate: EndDate
+                'StartDate': StartDate,
+                'EndDate': EndDate
             };
-    
-            fetch(`/scheduling/upload/`,{
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify(data)
-            })
-            .then(async response => {
-                if (!response.ok) {
-                    throw new Error('Failed to add scheduling');
-                }
-                const data = await response.json();
-                // 处理成功响应，例如显示成功消息或重定向
-                alert('scheduling added successfully!');
-                window.location.href = '/doctor/data/edit';
+            localStorage.setItem('schedulingForm', JSON.stringify(data));
+
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                console.log(`${key}: ${value}`); // This loop iterates through all local storage, not just working hours
+            }
+            alert("成功加入schedule到localstorage")
+            window.location.href = '/doctor/data/edit';
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                console.log(`${key}: ${value}`); // This loop iterates through all local storage, not just working hours
+            }
+
+            // fetch(`/scheduling/upload/`,{
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //         'X-CSRFToken': csrfToken
+            //     },
+            //     body: JSON.stringify(data)
+            // })
+            // .then(async response => {
+            //     if (!response.ok) {
+            //         throw new Error('Failed to add scheduling');
+            //     }
+            //     const data = await response.json();
+            //     // 处理成功响应，例如显示成功消息或重定向
+            //     alert('scheduling added successfully!');
+            //     window.location.href = '/doctor/data/edit';
                     
-            })
-            .catch(error => {
-                console.error('Error fetching scheduling list:', error);
-                // 处理错误情况
-            });
+            // })
+            // .then(data => {
+            //     if (data.status === 'success') {
+            //         const localStorageData = data.localStorageData;
+            //         // Store the JSON string in local storage
+            //         localStorage.setItem('doctorData', localStorageData);
+            //         for (let i = 0; i < localStorage.length; i++) {
+            //             const key = localStorage.key(i);
+            //             const value = localStorage.getItem(key);
+            //             console.log(`${key}: ${value}`);
+            //         }
+            //         setTimeout(function(){console.log(data.info)}, 2000) 
+            //         alert(data.message);
+            //         window.localStorage.setItem('readyRegis', 'yes')
+            //     } else {
+            //         alert(data.message);
+            //     }
+            // })
+            // .catch(error => {
+            //     console.error('Error fetching scheduling list:', error);
+            //     // 处理错误情况
+            // });
         })
 
         /*var scheduleForm = document.getElementById('schedulingForm');
@@ -367,6 +398,7 @@
         });
 
         function getRowIndex(startTime) {
+            console.log("startTime_for_mapping: ", startTime);
             const timeMapping = {
                 '10:00': 0,
                 '11:00': 1,
@@ -383,14 +415,14 @@
 
         function checkTime() {
             console.log('checkTime');
-            const daySelect = document.getElementById('daySelect');
             const startTime = document.getElementById('start_time').value;
             const endTime = document.getElementById('end_time').value;
+            const daySelect = document.getElementById('day_of_week');
             const selectedDay = daySelect.value;
             console.log("st = "+startTime+"  et = "+endTime+"  sDay = "+selectedDay)
             // Validate the times
             if(selectedDay != ""){
-                if (startTime && endTime && endTime > startTime) {
+                if (startTime && endTime && endTime > startTime ) {
                     // Check if the time range fits within any of the allowed intervals
                     const validIntervals = [
                         {start: '10:00', end: '11:00'},
@@ -406,20 +438,7 @@
                     const isValid = validIntervals.some(interval => startTime >= interval.start && endTime <= interval.end);
 
                     if (isValid) {
-                        // Get the table and the row based on the selected times
-                        const table = document.querySelector('table tbody');
-                        let row = table.rows[getRowIndex(startTime)];
-
-                        if (row) {
-                            const cell = row.cells[selectedDay];
-                            const initialWidth = cell.offsetWidth;
-                            const initialHeight = cell.offsetHeight;
-                            console.log('h = ' + initialHeight)
-                            cell.style.backgroundColor = '#6D6460'
-                            cell.style.width = `${initialWidth}px`;
-                        }
                         return "success";
-                        
                     } else {
                         return "timeInvalid"
                         //alert('選擇的時間範圍無效。請選擇以下區間段之一：10:00-14:00，15:00-18:00，19:00-21:00。');
@@ -427,7 +446,6 @@
                 } else {
                     return "timeWrong";
                 // alert('請選擇正確的開始和結束時間。結束時間必須晚於開始時間。');
-
                 }
             }else{
                 return "dayNotExist"

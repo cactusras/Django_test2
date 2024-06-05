@@ -88,7 +88,7 @@ class Doctor(CustomUser):
     
     photo = models.ImageField(upload_to='doctors/',null=True,blank=True)
     clinicID = models.ForeignKey('Clinic', related_name='doctors', on_delete=models.CASCADE)  # 與 Clinic 關聯
-    exoerience = models.TextField(null=True,blank=True)
+    experience = models.TextField(null=True,blank=True)
     
 
     def __str__(self):
@@ -119,7 +119,7 @@ class Doc_Expertise(models.Model):
     )
 
 class WorkingHour(models.Model):
-    DAYCHOICES = (
+    DAY_CHOICES = (
         (1, 'Monday'),
         (2, 'Tuesday'),
         (3, 'Wednesday'),
@@ -130,7 +130,7 @@ class WorkingHour(models.Model):
     )
 
     #hiring = models.ForeignKey('Hiring', related_name='working_hours', on_delete=models.CASCADE)
-    day_of_week = models.IntegerField(choices=DAYCHOICES)
+    day_of_week = models.IntegerField(choices=DAY_CHOICES)
     start_time = models.TimeField()
     end_time = models.TimeField()
 
@@ -138,9 +138,9 @@ class WorkingHour(models.Model):
     #     unique_together = ('day_of_week', 'start_time', 'end_time')
     #     ordering = ['day_of_week', 'start_time']
 
-    def __str__(self):
-        day_name = dict(self.DAY_CHOICES)[self.day_of_week]
-        return f"{day_name}: {self.start_time.strftime('%H:%M')} - {self.end_time.strftime('%H:%M')}"
+    # def __str__(self):
+    #     day_name = dict(self.DAY_CHOICES)[self.day_of_week]
+    #     return f"{day_name}: {self.start_time.strftime('%H:%M')} - {self.end_time.strftime('%H:%M')}"
 
 class Scheduling(models.Model):
     DoctorID = models.ForeignKey('Doctor', related_name='scheduling', on_delete=models.CASCADE)
@@ -234,7 +234,7 @@ class docClinicSearch(models.Model):
     doc_name = models.CharField(max_length=100) #d.name    
     clinic_id = models.IntegerField() #d.clinicid
     clinic_name = models.CharField(max_length=100)  #c.name
-    clinic_adress = models.TextField()#c.adress
+    clinic_address = models.TextField()#c.address
     clinic_introduction = models.TextField(blank=True, null=True)#c.introduction
     exp_id = models.IntegerField()#e.id
     exp_name = models.CharField(max_length=100)#e.name

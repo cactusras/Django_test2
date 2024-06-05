@@ -328,23 +328,32 @@ def Doc_uploading(request):
             doctor_form = DoctorForm(request.POST, request.FILES)
         except json.JSONDecodeError:
             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
+
         if doctor_form.is_valid():
             clean = doctor_form.cleaned_data
             clean['password'] = make_password(clean['password'])
             photo = request.FILES.get('photo')
+
             if photo is not None:
                 photo_url = handle_uploaded_file(photo)
                 clean['photo'] = photo_url
-            request.session['doctor_form_data'] = clean
-            print('succeed adding', clean)
-            doc_expertise_list = request.session.get('doc_expertise_list', None)
-            return JsonResponse({'message': 'Doctor Session added', 'status': 'success'})
+
+            # Store data in local storage
+            localStorage_data = json.dumps(clean)  # Convert data to JSON string
+            # Use JavaScript to access localStorage (see client-side code)
+
+            return JsonResponse({
+                'message': 'Doctor Data added',
+                'status': 'success',
+                'localStorageData': localStorage_data  # Send data to client-side
+            })
         else:
             print('error : ', doctor_form.errors)
             return JsonResponse({'message': 'Invalid form data', 'errors': doctor_form.errors, 'status': 'error'})
     else:
         doctor_form = DoctorForm()
-    return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
+        return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
+
 
 # doc/expertise/upload/
 @login_required
@@ -370,19 +379,21 @@ def DocExp_uploading(request):
     else:
         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
-# workingHour/upload/
+#直接在js存到session，不用這個method了
+#workingHour/upload/
 @login_required
 def workingHour_upload(request):
     print('hi')
     if request.method == 'POST':
         print('post here')
-        print(request.POST)
+        print(request.POST)  # Print raw POST data
         try:
             working_hour_form = WorkingHourForm(request.POST)
-            working_hour_form.errors
+            print("Form data:", working_hour_form.data)  # Print form data before validation
+            # working_hour_form.errors
         except json.JSONDecodeError:
             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
-
+        
         if working_hour_form.is_valid():
             print('valid here')
             working_hour_list = request.session.get('working_hour_list', [])
@@ -393,12 +404,12 @@ def workingHour_upload(request):
             # Return a success JSON response
             return JsonResponse({'message': 'Working hour added to session successfully!', 'status': 'success'})
         else:
-            print(working_hour_form.errors)
+            print("Form errors:", working_hour_form.errors)  # Print form errors
             # Return an error JSON response with form errors
             return JsonResponse({'message': 'Form validation failed', 'errors': working_hour_form.errors, 'status': 'error'})
     else:
         working_hour_form = WorkingHourForm()
-    return JsonResponse({'message': 'end function', 'status': 'error'})
+    return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
 # scheduling/upload/
 @login_required
@@ -424,8 +435,13 @@ def scheduling_upload(request):
             scheduling_data['StartDate'] = data.get('StartDate')
             scheduling_data['EndDate'] = data.get('EndDate')
         
-            request.session['schedule_form_data'] = scheduling_data
-            return JsonResponse({'message': 'Scheduling data added successfully', 'status': 'success'})
+            # request.session['schedule_form_data'] = scheduling_data
+            return JsonResponse({
+                'message': 'Doctor Data added',
+                'status': 'success',
+                'localStorageData': scheduling_data  # Send data to client-side
+            })
+            # return JsonResponse({'message': 'Scheduling data added successfully', 'status': 'success'})
         else:
             print('notvalid = ', schedule_form.errors)
             return JsonResponse({'message': 'Invalid form data', 'errors': schedule_form.errors, 'status': 'error'})
@@ -462,15 +478,20 @@ def add_doctor(request):
     print('add doctor')
     if request.method == 'POST':
         print('add doctor_post yes')
-        doctor_form_data = request.session.get('doctor_form_data')
-        expertise_list = request.session.get('doc_expertise_list', [])
-        schedule_form_data = request.session.get('schedule_form_data')
-        working_hour_list = request.session.get('working_hour_list', [])
+        request_data_json = request.body.decode()  # Decode raw bytes to string
+        print('Request Data JSON:', request_data_json)
+        request_data = json.loads(request_data_json).get('requestData')  # Parse JSON string
+
+        doctor_form_data = request_data.get('doctorData')
+        expertise_list = request_data.get('expertises')
+        schedule_form_data = request_data.get('schedulingForm')
+        working_hour_list = request_data.get('working_hour_list')
+        clinicName = request_data.get('clinicName')
 
         print('doc_info = ', doctor_form_data , '  exp_info = ', expertise_list, '  working_hours = ', working_hour_list, '  schedule = ', schedule_form_data)
 
-        '''if not (doctor_form_data and expertise_list and schedule_form_data and working_hour_list):
-            return JsonResponse({'message': 'Session data incomplete', 'status': 'error'})'''
+        # if not (doctor_form_data and expertise_list and schedule_form_data and working_hour_list):
+        #     return JsonResponse({'message': 'Session data incomplete', 'status': 'error'})
         
         if not (doctor_form_data and expertise_list and schedule_form_data):
             return JsonResponse({'message': 'Session data incomplete', 'status': 'error'})
@@ -489,34 +510,50 @@ def add_doctor(request):
                 print(f"Error saving photo: {e}")
                 return JsonResponse({'message': 'Error saving photo', 'status': 'error'})
 
-        clinic = Clinic.objects.get(id=request.user.id)
+        clinic = Clinic.objects.get(name=clinicName)#理論上要用id才能取到唯一
         doctor_form_data['clinicID'] = clinic
         email = doctor_form_data.pop('email')
         doctor, created = Doctor.objects.update_or_create(email=email, defaults=doctor_form_data)
         
         Doc_Expertise.objects.filter(DocID=doctor).delete()
         
-        for expertise_data in expertise_list:
-            expertise_name = expertise_data.get('name')
-            expertise, created = Expertise.objects.get_or_create(name=expertise_name)
-            Doc_Expertise.objects.create(DocID=doctor, Expertise_ID=expertise)
+        if isinstance(expertise_list, list):
+            for expertise_data in expertise_list:
+                if isinstance(expertise_data, dict):
+                    expertise_name = expertise_data.get('name')
+                    if expertise_name:  # Ensure the name exists
+                        expertise, created = Expertise.objects.get_or_create(name=expertise_name)
+                        Doc_Expertise.objects.update_or_create(DocID=doctor, Expertise_ID=expertise)
+                else:
+                    print(f"1 Expected dict but got {type(expertise_data)}: {expertise_data}")
+        else:
+            print(f"2 Expected list but got {type(expertise_list)}: {expertise_list}")
         
-        for working_hour_data in working_hour_list:
-            working_hour, created = WorkingHour.objects.update_or_create(
-                day_of_week=working_hour_data['day_of_week'],
-                start_time=working_hour_data['start_time'],
-                end_time=working_hour_data['end_time'],
-                defaults=working_hour_data
-            )
-            Scheduling.objects.update_or_create(
-                DoctorID=doctor.id,
-                #WorkingHour=1,
-                #WorkingHour=working_hour,
-                defaults=schedule_form_data
-            )
-
+        if isinstance(working_hour_list, list):
+            for working_hour_data in working_hour_list:
+                if isinstance(working_hour_data, dict):
+                    working_hour, created = WorkingHour.objects.update_or_create(
+                        day_of_week=working_hour_data.get('day_of_week'),
+                        start_time=working_hour_data.get('start_time'),
+                        end_time=working_hour_data.get('end_time'),
+                        defaults=working_hour_data
+                    )
+                    start_date = schedule_form_data.get('StartDate')
+                    # end_date = schedule_form_data.get('EndDate')
+                    
+                    Scheduling.objects.update_or_create(
+                        DoctorID=doctor,
+                        WorkingHour=working_hour,  # Assuming WorkingHour is a foreign key in Scheduling model
+                        StartDate=start_date,
+                        # EndDate=end_date,
+                        defaults=schedule_form_data
+                    )
+                else:
+                    print(f"3 Expected dict but got {type(working_hour_data)}: {working_hour_data}")
+        else:
+            print(f"4 Expected list but got {type(working_hour_list)}: {working_hour_list}")
         # Clear session data after successful processing
-        request.session.flush()
+        # request.session.flush()
         return JsonResponse({'message': 'Doctor added successfully', 'status': 'success'})
 
     return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
@@ -1200,7 +1237,7 @@ def doctor_info(request):
             'phone_number': user.phone_number,
             'password': user.password,
             #'photo_url': user.doctor.photo.url,
-            'exoerience': user.doctor.exoerience,
+            'experience': user.doctor.experience,
         }
         if user.doctor.photo and user.doctor.photo.name:
            info['photo'] =  user.doctor.photo.url
