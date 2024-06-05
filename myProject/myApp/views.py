@@ -6,7 +6,6 @@ from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 #from rest_framework import serializers
 from myProject.encoder import CustomEncoder
-from .serializers import WorkingHourSerializer
 from .forms import ClientUpdateForm, ClinicUpdateForm, DoctorForm,ClinicForm,ClientForm, LoginForm,SchedulingForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm
 from django.db.models import Q
 from django.db import connection
@@ -86,9 +85,9 @@ def add_client(request):
             client = Client.objects.get(email=email)
         except Client.DoesNotExist:
             client = None
-
+        print('data = ', data)
         if client:
-            form = ClientUpdateForm(data)
+            form = ClientUpdateForm(data, instance=client)
         else:
             form = ClientForm(data)
         if form.is_valid():
@@ -217,8 +216,9 @@ def add_clinic(request):
                     update_clinic = False  # 新建診所
             else:
                 update_clinic = False
+            print('type = ', type(clinic))
             if update_clinic:
-                form = ClinicUpdateForm(request.POST)
+                form = ClinicUpdateForm(request.POST, instance=clinic)
             else:
                 form = ClinicForm(request.POST, request.FILES)
             if form.is_valid():
@@ -658,7 +658,6 @@ def get_time_slots(schedule):
 #clinic 載入頁
 @login_required
 def clinic_load(request):
-    print('clinic_load')
     user = request.user
     clinic = Clinic.objects.get(id=user.id)
     doctors = Doctor.objects.filter(clinicID=user.id)
@@ -846,12 +845,11 @@ def clinic_reserve_doctor_confirmed(request):
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-
 @login_required
 def doctorPage_loading(request):
     user = request.user
     doctor = get_object_or_404(Doctor, id=user.id)
-    working_hours = WorkingHour.objects.filter(DoctorID=doctor.id)
+    # working_hours = WorkingHour.objects.filter(DoctorID=doctor)
     
     today = now().date()
     start_of_week = today - timedelta(days=today.weekday())
@@ -865,23 +863,31 @@ def doctorPage_loading(request):
     
     reservations = Reservation.objects.filter(
         SchedulingID__in=schedules,
-        status__in=[0, 2, 3],
+        Status__in=[0, 2, 3],
         time_start__date__range=[start_of_week, end_of_week]
     )
 
-    reservation_list = [
-        {
-            'client_name': reservation.ClientID.name,
-            'appointment_date': reservation.time_start.date(),
-            'starting': reservation.time_start.strftime('%H:%M'),
+    reservation_list = []
+    for reservation in reservations:
+        client_name = reservation.ClientID.name
+        client_gender = reservation.ClientID.gender
+        if client_gender == 'male':
+            client_name += " 先生"
+        elif client_gender == 'female':
+            client_name += " 小姐"
+        
+        day_of_week = reservation.time_start.strftime('%A')
+        reservation_list.append({
+            'id': reservation.id,
+            'client_name': client_name,
+            'appointment_date': reservation.time_start.date().isoformat(),
+            'day_of_week': day_of_week,
+            'starting': reservation.time_start.time().strftime('%H:%M'),
             'expertise': reservation.expertiseID.name,
-            'ending': reservation.time_end.strftime('%H:%M'),
             'status': reservation.get_status_display(),
-            'WDforfront': reservation.WDforFront(),
-            'OccupiedHour': reservation.TimeSlotNumber(),
-        }
-        for reservation in reservations
-    ]
+        })
+    
+
 
     schedule_list = [
         {
@@ -891,6 +897,10 @@ def doctorPage_loading(request):
             'valid_from': schedule.StartDate,
             'valid_to': schedule.EndDate,
             'WDforfront': schedule.WDforFront(),
+            'OccupiedHour': Reservation().TimeSlotNumber(
+                start_time=schedule.WorkingHour.start_time,
+                end_time=schedule.WorkingHour.end_time
+            ),
         }
         for schedule in schedules
     ]
@@ -901,7 +911,6 @@ def doctorPage_loading(request):
     }
     
     return JsonResponse(context)
-
 
 @login_required        
 def clientRecord_loading(request):
@@ -1208,7 +1217,7 @@ def doctor_info(request):
             'phone_number': user.phone_number,
             'password': user.password,
             #'photo_url': user.doctor.photo.url,
-            'exoerience': user.doctor.exoerience,
+            'experience': user.doctor.experience,
         }
         if user.doctor.photo and user.doctor.photo.name:
            info['photo'] =  user.doctor.photo.url
@@ -1226,14 +1235,12 @@ def clinic_info(request):
             'password': user.password,
             'address': user.clinic.address,
             'license_number': user.clinic.license_number,
-            #'photo_url': user.clinic.photo.url,
-            #'photo_url': user.clinic.photo.url,
             'introduction': user.clinic.introduction,
         }
-        '''if user.clinic.photo and user.clinic.photo.name:
-           info['photo_url'] =  user.clinic.photo.url'''
-        print("info = ", info)
+        if 'photo' in info:
+            del info['photo']
         print('photo = ', user.clinic.photo, '  name = ', user.clinic.photo.name)
+        print("info = ", info)
         return JsonResponse({'status': 'success', 'data': info}, status=200)
     else:
         return JsonResponse({'status': 'error', 'error': 'User is not a clinic'}, status=400)

@@ -4,7 +4,7 @@
         phone_number: "",
         password: "",
         photo: null,
-        exoerience: ""
+        experience: ""
     };
 
     //存已經選過的 讓他disabled
@@ -15,9 +15,9 @@
             docField['name'] = document.getElementById('name').value,
             docField['phone_number'] = document.getElementById('phone_number').value,
             docField['password'] = document.getElementById('password').value,
-            docField['exoerience'] = document.getElementById('exoerience').value,
+            docField['experience'] = document.getElementById('experience').value,
             docField['photo'] = document.getElementById('photo').files[0]
-            console.log('exoerience' + docField['exoerience']);
+            console.log('experience' + docField['experience']);
     }
     
     document.addEventListener('DOMContentLoaded', function() {

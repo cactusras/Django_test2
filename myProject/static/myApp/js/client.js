@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const btnLogout = document.getElementById('logoutButton');
         const loginHide = document.querySelectorAll('.loginHide');
         const pwInput = document.getElementById('password')
+        const emailShow = document.getElementById('emailShow')
         fetch_element();
         //canva11進入canva12   
         if (window.localStorage.getItem('isLogin') == 'success'){
@@ -51,7 +52,11 @@ document.addEventListener('DOMContentLoaded', function() {
             btnLogout.hidden = false;
             pwInput.required = false
             loginHide.forEach(element => {
-                element.hidden = true;
+                if (element.tagName.toLowerCase() === 'label') {
+                    element.style.display = 'none'
+                } else {
+                    element.type = 'hidden'
+                }
             });
             fetch_info(clieForm);
             pwClass = document.querySelectorAll('.password')
@@ -60,6 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
             btnRegis.innerText = '完成'
             btnLogout.hidden = true;
             pwInput.required = true
+            emailShow.style.display = 'none'
         }
 })
 
@@ -69,7 +75,6 @@ async function isUniqueEmail(email){
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                //'X-CSRFToken': getCookie('csrftoken')
             },
             body: JSON.stringify({email: email})
         });
@@ -77,7 +82,6 @@ async function isUniqueEmail(email){
         return uniqueEmail.isUnique;
     } catch (error) {
         console.log('Error fetching registered emails:', error);
-        //alert('Error checking email availability');
         return false;
     }
 }
@@ -96,6 +100,10 @@ function fetch_info(formFilled){
             const clieInfo = data.data;
             if (clieInfo['password'] != ''){
                 clieInfo['password'] = '';
+            }
+            document.getElementById('emailShow').innerText = clieInfo['email']
+            if(!clieInfo['notify']){
+                notify.checked = false
             }
             fillForm(clieInfo, formFilled);
         } else {
@@ -174,7 +182,6 @@ document.getElementById('clientForm').addEventListener('submit', async function(
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                alert(data.message);
                 if(window.localStorage.getItem('isLogin') == 'failed'){
                     alert(data.message);
                     window.location.href = '/loginP/';

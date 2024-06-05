@@ -36,7 +36,7 @@ class CustomUserManager(BaseUserManager):
 
 # 自定義的使用者模型
 class CustomUser(AbstractBaseUser):
-    email = models.EmailField()
+    email = models.EmailField(unique=True)
     name = models.CharField(max_length=100)
     phone_number = models.CharField(max_length=35)
     #password = models.CharField(max_length=128)
@@ -76,7 +76,7 @@ class Client(CustomUser):
 
 class Clinic(CustomUser):
    
-    license_number = models.CharField(max_length=50)
+    license_number = models.CharField(max_length=50, unique=True)
     address = models.TextField()
     introduction = models.TextField(blank=True, null=True)
     photo = models.ImageField(upload_to='clinics/',blank=True, null=True)
@@ -88,7 +88,7 @@ class Doctor(CustomUser):
     
     photo = models.ImageField(upload_to='doctors/',null=True,blank=True)
     clinicID = models.ForeignKey('Clinic', related_name='doctors', on_delete=models.CASCADE)  # 與 Clinic 關聯
-    exoerience = models.TextField(null=True,blank=True)
+    experience = models.TextField(null=True,blank=True)
     
 
     def __str__(self):
@@ -118,6 +118,22 @@ class Doc_Expertise(models.Model):
         related_name='doctor_exp_license'
     )
      
+class WorkingHour(models.Model):
+
+    DAY_CHOICES = (
+        (1, 'Monday'),
+        (2, 'Tuesday'),
+        (3, 'Wednesday'),
+        (4, 'Thursday'),
+        (5, 'Friday'),
+        (6, 'Saturday'),
+        (7, 'Sunday')
+    )
+    #hiring = models.ForeignKey('Hiring', related_name='working_hours', on_delete=models.CASCADE)
+    day_of_week = models.IntegerField(choices=DAY_CHOICES)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+
 class Scheduling(models.Model):
     DoctorID = models.ForeignKey('Doctor', related_name='scheduling', on_delete=models.CASCADE)
    #Reservation = models.ForeignKey('Reservation', related_name='scheduling', on_delete=models.CASCADE)
@@ -128,11 +144,11 @@ class Scheduling(models.Model):
     def WDforFront(self):
         return self.StartDate.weekday() + 1
     
-    def TimeSlotNumber(self):
-        duration = self.time_end - self.time_start
-        total_hours = int(duration.total_seconds() // 3600)  # Total hours between start and end
-        slot_numbers = [i + 1 for i in range(total_hours)]  # Generate slot numbers for each hour
-        return slot_numbers
+    #def TimeSlotNumber(self):
+    #    duration = self.time_end - self.time_start
+    #    total_hours = int(duration.total_seconds() // 3600)  # Total hours between start and end
+    #    slot_numbers = [i + 1 for i in range(total_hours)]  # Generate slot numbers for each hour
+    #    return slot_numbers
     
      
 class Reservation(models.Model):
@@ -207,30 +223,6 @@ class Waiting(models.Model):
         return f"{self.client.name} waiting for doctor{self.SchedulingID.DoctorID}, clinic {self.SchedulingID.DoctorID.clnicID}"
 
 
-class WorkingHour(models.Model):
-    DAY_CHOICES = [
-        (1, 'Monday'),
-        (2, 'Tuesday'),
-        (3, 'Wednesday'),
-        (4, 'Thursday'),
-        (5, 'Friday'),
-        (6, 'Saturday'),
-        (7, 'Sunday')
-    ]
-
-    #hiring = models.ForeignKey('Hiring', related_name='working_hours', on_delete=models.CASCADE)
-    day_of_week = models.IntegerField(choices=DAY_CHOICES)
-    start_time = models.TimeField()
-    end_time = models.TimeField()
-
-    class Meta:
-        unique_together = ('day_of_week', 'start_time', 'end_time')
-        ordering = ['day_of_week', 'start_time']
-
-    def __str__(self):
-        day_name = dict(self.DAY_CHOICES)[self.day_of_week]
-        return f"{day_name}: {self.start_time.strftime('%H:%M')} - {self.end_time.strftime('%H:%M')}"
-    
     
 class docClinicSearch(models.Model):
     DAY_CHOICES = [
@@ -247,7 +239,7 @@ class docClinicSearch(models.Model):
     doc_name = models.CharField(max_length=100) #d.name    
     clinic_id = models.IntegerField() #d.clinicid
     clinic_name = models.CharField(max_length=100)  #c.name
-    clinic_adress = models.TextField()#c.adress
+    clinic_address = models.TextField()#c.address
     clinic_introduction = models.TextField(blank=True, null=True)#c.introduction
     exp_id = models.IntegerField()#e.id
     exp_name = models.CharField(max_length=100)#e.name

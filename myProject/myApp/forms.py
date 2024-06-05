@@ -19,7 +19,7 @@ class CustomUserForm(forms.ModelForm):
 class DoctorUpdateForm(forms.ModelForm):
     class Meta:
         model = Doctor
-        fields = ['email', 'name','phone_number','exoerience' ]
+        fields = ['email', 'name','phone_number','experience' ]
     def __init__(self, *args, **kwargs):
         self.update = kwargs.pop('update', False)
         super(DoctorUpdateForm, self).__init__(*args, **kwargs)
@@ -27,19 +27,23 @@ class DoctorUpdateForm(forms.ModelForm):
 class DoctorForm(forms.ModelForm):
     class Meta:
         model = Doctor
-        fields = ['email', 'name','phone_number','password','photo','exoerience' ]
+        fields = ['email', 'name','phone_number','password','photo','experience' ]
     def __init__(self, *args, **kwargs):
         self.update = kwargs.pop('update', False)
         super(DoctorForm, self).__init__(*args, **kwargs)
 
 class ClinicUpdateForm(forms.ModelForm):
+    email = forms.EmailField(required=True)
+    license_number = forms.CharField(required=True)
+
     class Meta:
         model = Clinic
         #fields = ['name', 'license_number','phone_number','address','introduction','photo','email','password' ]
         fields = ['email', 'name','phone_number','license_number','address','introduction']
     def __init__(self, *args, **kwargs):
-        self.update = kwargs.pop('update', False)
         super(ClinicUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['email'].validators = []
+        self.fields['license_number'].validators = []
 
 class ClinicForm(forms.ModelForm):
     class Meta:
@@ -47,17 +51,19 @@ class ClinicForm(forms.ModelForm):
         #fields = ['name', 'license_number','phone_number','address','introduction','photo','email','password' ]
         fields = ['email', 'name','phone_number','password','license_number','address','introduction','photo']
     def __init__(self, *args, **kwargs):
-        self.update = kwargs.pop('update', False)
-        super(ClinicForm, self).__init__(*args, **kwargs)
+        super(ClinicForm, self).__init__(*args,**kwargs)
         
 
 class ClientUpdateForm(forms.ModelForm):
+    email = forms.EmailField(required=True)
+    
     class Meta:
         model = Client
-        fields = [ 'email','name','phone_number','address','birth_date','gender','occupation','notify']
-    
+        fields = ['email', 'name', 'phone_number', 'address', 'birth_date', 'gender', 'occupation', 'notify']
+
     def __init__(self, *args, **kwargs):
-        super(ClientUpdateForm, self).__init__(*args,**kwargs)
+        super(ClientUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['email'].validators = []
 
 class ClientForm(forms.ModelForm):
     class Meta:
@@ -74,25 +80,6 @@ class WorkingHourForm(forms.ModelForm):
         model = WorkingHour
         fields = ['day_of_week','start_time','end_time']
         #print('form finish')
-    '''把views傳過來的資料從str轉成time的型態 讓form驗證
-     def clean_start_time(self):
-        start_time = self.cleaned_data['start_time']
-        start_time_str = start_time.strftime('%H:%M')
-        print('type = ', type(start_time_str), '  str = ', start_time_str)
-        try:
-            return datetime.strptime(start_time_str, '%H:%M').time()
-        except ValueError:
-            raise forms.ValidationError('Enter a valid time.')
-
-    def clean_end_time(self):
-        end_time = self.cleaned_data['end_time']
-        end_time_str = end_time.strftime('%H:%M')
-        print('type = ', type(end_time_str), '  str = ', end_time_str)
-
-        try:
-            return datetime.strptime(end_time_str, '%H:%M').time()
-        except ValueError:
-            raise forms.ValidationError('Enter a valid time.')'''
         
 class SchedulingForm(forms.ModelForm):
     class Meta:

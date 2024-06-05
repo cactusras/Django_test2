@@ -17,8 +17,10 @@ function fetch_element(){
         clinField['license_number'] = document.getElementById('license_number').value,
         clinField['password'] = document.getElementById('password').value,
         clinField['introduction'] = document.getElementById('introduction').value
-        clinField['address'] = document.getElementById('address').value,
-        clinField['photo'] = document.getElementById('photo').files[0]
+        clinField['address'] = document.getElementById('address').value;
+        if(window.localStorage.getItem('isLogin') == 'failed'){
+            clinField['photo'] = document.getElementById('photo').files[0]
+        }
         console.log('phone_number' + clinField['phone_number']);
 }
 
@@ -31,6 +33,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const btnLogout = document.getElementById('logoutButton')
         const loginHide = document.querySelectorAll('.loginHide')
         const pwInput = document.getElementById('password')
+        const emailShow = document.getElementById('emailShow')
+        const photoInput = document.getElementById('photo')
         fetch_element();
 
         //canva11進入canva12   
@@ -40,8 +44,13 @@ document.addEventListener('DOMContentLoaded', function() {
             btnRegis.innerText = '完成'
             btnLogout.hidden = false;
             pwInput.required = false
+            //photoInput.style.display = 'none'
             loginHide.forEach(element => {
-                element.hidden = true
+                if (element.tagName.toLowerCase() === 'label') {
+                    element.style.display = 'none'
+                } else {
+                    element.type = 'hidden'
+                }
             });
             btnDocManage.addEventListener('click', function(){
                 window.location.href = "/doctor/manage"
@@ -53,6 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
             barTitle.innerText = '註冊'
             btnLogout.hidden = true;
             pwInput.required = true;
+            emailShow.style.display = 'none'
         }
 })
 
@@ -130,7 +140,18 @@ function fetch_info(formFilled){
         if (data.status === 'success') {
             //顯示資料時不填入photo_url跟password(不影響後端)
             const clinInfo = data.data;
-            //console.log("info_type = " + typeof(data.data) + "  info = " + data.data)
+            if (clinInfo['password'] != ''){
+                clinInfo['password'] = '';
+            }
+            /*clinInfo.forEach(element => {
+                console.log('info = ' + element)
+            });*/
+            Object.keys(clinInfo).forEach(key => {
+                console.log(`Key: ${key}, Value: ${clinInfo[key]}`);
+            });
+            
+            document.getElementById('emailShow').innerText = clinInfo['email']
+            document.getElementById('licenseShow').innerText = clinInfo['license_number']
             fillForm(clinInfo, formFilled);
         } else {
             console.error(data.error);
