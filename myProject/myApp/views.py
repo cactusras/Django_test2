@@ -545,6 +545,7 @@ def success(request):
             'name': clinic.name,
             'phone_number': clinic.phone_number,
             'address': clinic.address,
+            'introduction':clinic.introduction
             # 添加其他需要的字段
         },
         'doctors': list(doctors),  # 将 QuerySet 转为列表
@@ -642,42 +643,43 @@ def get_time_slots(schedule):
     time_delta = timedelta(minutes=60)  # Adjust as needed (e.g., 60 for hourly slots)
 
     time_slots = []
-    current_time = start_time
-    while current_time < end_time:
+    # Convert time to datetime for arithmetic operations
+    current_datetime = datetime.combine(datetime.today(), start_time)
+    end_datetime = datetime.combine(datetime.today(), end_time)
+
+    while current_datetime < end_datetime:
       
         weekday = schedule.WorkingHour.day_of_week-1
-        time_str = current_time.strftime('%H:%M')
+        time_str = current_datetime.strftime('%H:%M')
         time_slots.append(f"w{weekday},{time_str}")
-        current_time += time_delta
-
+        current_datetime += time_delta
     return time_slots
 
 #clinic 載入頁
 @login_required
 def clinic_load(request):
+    print('clinic_load')
     user = request.user
-    clinics = Clinic.objects.filter(user=user)
-    schedules = Scheduling.objects.filter(clinic__in=clinics)
-    reservations = Reservation.objects.filter(schedulesID__in=schedules)
+    clinic = Clinic.objects.get(id=user.id)
+    doctors = Doctor.objects.filter(clinicID=user.id)
+    schedules = Scheduling.objects.filter(DoctorID__in=doctors)
+    reservations = Reservation.objects.filter(SchedulingID__in=schedules)
 
     # Build the context as a dictionary
     context = {
-        'clinics': [
-            {
-                'id': clinic.id,
-                'name': clinic.name,
-                'address': clinic.address,
-                'phone_number': clinic.phone_number,
-                'email': clinic.email,
-            }
-            for clinic in clinics
-        ],
+        'clinic': {
+            'id': clinic.id,
+            'name': clinic.name,
+            'address': clinic.address,
+            'phone_number': clinic.phone_number,
+            'email': clinic.email,
+        },
         'schedules': [
             {
                 'id': schedule.id,
                 'doctor_name': schedule.DoctorID.name,
-                'start_date': schedule.StartDate.strftime('%Y-%m-%d'),
-                'end_date': schedule.EndDate.strftime('%Y-%m-%d'),
+                'start_date': datetime.combine(schedule.StartDate, datetime.min.time()).strftime('%Y-%m-%d'),
+                'end_date': datetime.combine(schedule.EndDate, datetime.min.time()).strftime('%Y-%m-%d'),
                 'time_slots': get_time_slots(schedule),
             }
             for schedule in schedules
@@ -686,7 +688,7 @@ def clinic_load(request):
             {
                 'id': reservation.id,
                 'client_name': reservation.ClientID.name,
-                'appointment_date': reservation.time_start.date().strftime('%Y-%m-%d'),
+                'appointment_date': reservation.time_start.strftime('%Y-%m-%d'),
                 'appointment_time': reservation.time_start.strftime('%H:%M'),
                 'expertise': reservation.expertiseID.name,
                 'status': reservation.get_status_display(),
@@ -694,6 +696,7 @@ def clinic_load(request):
             for reservation in reservations
         ],
     }
+    print('context = ', context)
 
     return JsonResponse(context)
 
@@ -704,40 +707,50 @@ def clinic_load(request):
 #以下為reservation狀態改變
 
 def reservationStCF(request, reservation_id):
-    reservation = Reservation.objects.get(pk=reservation_id)
-    # Update the status to "checkin Failed"
-    reservation.update_status(1) 
-    reservation.save()
-    return render(request,'myApp/clinicPage.html')
-    
+    try:
+        reservation = Reservation.objects.get(pk=reservation_id)
+        reservation.update_status(1)  # Update the status to "checkin Failed"
+        reservation.save()
+        return JsonResponse({'status': 'success', 'message': 'Status updated to checkin Failed'})
+    except Reservation.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Reservation not found'}, status=404)
+
 def reservationStSc(request, reservation_id):
-    reservation = Reservation.objects.get(pk=reservation_id)
-    # Update the status to "checkin successed"
-    reservation.update_status(2) 
-    reservation.save()
-    return render(request,'myApp/clinicPage.html')
-    
+    try:
+        reservation = Reservation.objects.get(pk=reservation_id)
+        reservation.update_status(2)  # Update the status to "checkin successed"
+        reservation.save()
+        return JsonResponse({'status': 'success', 'message': 'Status updated to checkin successed'})
+    except Reservation.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Reservation not found'}, status=404)
+
 def reservationStIt(request, reservation_id):
-    reservation = Reservation.objects.get(pk=reservation_id)
-    # Update the status to "in treatment"
-    reservation.update_status(3) 
-    reservation.save()
-    return render(request,'myApp/clinicPage.html')
-    
+    try:
+        reservation = Reservation.objects.get(pk=reservation_id)
+        reservation.update_status(3)  # Update the status to "in treatment"
+        reservation.save()
+        return JsonResponse({'status': 'success', 'message': 'Status updated to in treatment'})
+    except Reservation.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Reservation not found'}, status=404)
+
 def reservationStFn(request, reservation_id):
-    reservation = Reservation.objects.get(pk=reservation_id)
-    # Update the status to "Treatment finished"
-    reservation.update_status(4) 
-    reservation.save()
-    #下次預約
-    return render(request,'myApp/clinicPage.html')
+    try:
+        reservation = Reservation.objects.get(pk=reservation_id)
+        reservation.update_status(4)  # Update the status to "Treatment finished"
+        reservation.save()
+        # 下次預約
+        return JsonResponse({'status': 'success', 'message': 'Status updated to Treatment finished'})
+    except Reservation.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Reservation not found'}, status=404)
 
 def reservationStCbD(request, reservation_id):
-    reservation = Reservation.objects.get(pk=reservation_id)
-    # Update the status to "cancelled by doc"
-    reservation.update_status(5) 
-    reservation.save()
-    return render(request,'myApp/clinicPage.html')
+    try:
+        reservation = Reservation.objects.get(pk=reservation_id)
+        reservation.update_status(5)  # Update the status to "cancelled by doc"
+        reservation.save()
+        return JsonResponse({'status': 'success', 'message': 'Status updated to cancelled by doc'})
+    except Reservation.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Reservation not found'}, status=404)
 
 #預約此醫生按鈕按下去
 def doctor_reserve_page(request, doc_id):
@@ -774,19 +787,25 @@ def doctor_reserve_page(request, doc_id):
 
 
 #診所預約按鈕按下去
+'''def clinic_reserve_page(request, clinic_id):
+    clinic = get_object_or_404(Clinic, id=clinic_id)
+    clinic = {
+        'id': clinic.id,
+        'name': clinic.name,
+        'phone_number': clinic.phone_number,
+        'address': clinic.address,
+        'introduction':clinic.introduction,
+        # 添加其他需要的字段
+    }
+
+    return JsonResponse({'clinic': clinic})'''
+#先試用render看看
 def clinic_reserve_page(request, clinic_id):
     clinic = get_object_or_404(Clinic, id=clinic_id)
-    doctors = Doctor.objects.filter(clinicID=clinic)
-
-    doctor_list = []
-
-    for doctor in doctors:
-        doctor_list.append({
-            'id': doctor.id,
-            'name': doctor.name
-        })
-
-    return JsonResponse({'doctors': doctor_list, 'clinic': clinic.id})
+    context = {
+        'clinic': clinic
+    }
+    return render(request, 'myApp/clinic_reserve.html', context)
 
 
 #各個醫生的專長
@@ -1078,6 +1097,13 @@ def docDataEd(request):
     context={}
     return render(request, "myApp/doctor_dataEdit.html", context)
 
+def clinReserve(request):
+    context={}
+    return render(request, "myApp/clinic_reserve.html", context)
+
+def docDataEd(request):
+    context={}
+    return render(request, "myApp/doctor_dataEdit.html", context)
 
 def clickSchedule(request):
     context={}
@@ -1273,5 +1299,34 @@ def check_reservations(request):
 
     return JsonResponse({'message': 'Checked and updated reservations if necessary.'})
 
+def get_expertise_list_doc(request, doctor_id):
+    doctor = get_object_or_404(Doctor, id=doctor_id)
+    print('getDoc_exp')
+    expertise_list = [{'id': de.Expertise_ID.id, 'name': de.Expertise_ID.name, 'time': de.Expertise_ID.time} for de in doctor.doctorID_exp.all()]
+    return JsonResponse({'expertise_list': expertise_list})
 
+def get_expertise_list_clin(request, clinic_id):
+    clinic = get_object_or_404(Clinic, id=clinic_id)
+    doctors = Doctor.objects.filter(clinicID=clinic_id)
+    doctor_expertise = Doc_Expertise.objects.filter(DocID__in=doctors).select_related('Expertise_ID')
+    print('getClin_exp')
+    expertise_set = set()
+    for de in doctor_expertise:
+        expertise_set.add((de.Expertise_ID.id, de.Expertise_ID.name))
 
+    expertise_list = [{'id': exp_id, 'name': exp_name} for exp_id, exp_name in expertise_set]
+    return JsonResponse({'expertise_list': expertise_list})
+
+def get_doctor_from_exp(request, expertise_id):
+    matching_doctors = Doc_Expertise.objects.filter(Expertise_ID=expertise_id).select_related('DocID')
+
+    doctor_list = []
+
+    for de in matching_doctors:
+        print('add')
+        doctor_list.append({
+            'id': de.DocID.id,
+            'name': de.DocID.name,
+        })
+    print(" ", doctor_list)
+    return JsonResponse({'doctor_list': doctor_list})

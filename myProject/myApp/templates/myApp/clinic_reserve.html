@@ -91,195 +91,94 @@
             <div class="container" style="border: 1px solid #F0EAD6;">
                 <div class="row row-cols-1">
                     <div class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:80px; font-size: 20px; ">
-                        <select id="doctorSelect" class="form-select" aria-label="Default select example" style="width: 320px; height: 40px; font-size: 16px;">
-                            
-                        </select>
-                        {% for clinic in clinic_details %}
-                        <span>{{ clinic.name}} 診所</span>
+                        
+                        <span id="clinic-name">{{ clinic.name }}診所</span>
                     </div>
                     <!--內容-->
                     <div class="col" style="background-color:#fffff0; border: 1px solid #ada089; height:760px; font-size: 20px;">
                     <br>
-                        <label for="date1">診所介紹 : {{ clinic.introduction}}</label>
+                        <label for="date1">診所介紹 : {{ clinic.introduction }}</label>
+                        <span id="clinic-introduction"></span>
                     <br>
-                        <label for="date1">地址 : {{ clinic.address}}</label>
+                        <label for="date1">地址 : {{ clinic.address }}</label>
+                        <span id="clinic-addresss"></span>
                         
                     <br>
                         <!--選取治療項目-->
                         <label for="date1">項目</label>
                         <select id="experSelect" class="form-select" aria-label="Default select example" style="width: 320px; height: 40px; font-size: 16px;">
-                            <option selected>項目</option>
-                            <option value="1">一般矯正</option>
-                            <option value="2">隱形矯正</option>
-                            <option value="3">植牙治療</option>
-                            <option value="4">根管治療</option>
-                            <option value="5">活髓保存</option>
                         </select>
                     <br>
-                        <!--選取醫師>
+                        <!--選取醫師>-->
                         <label for="date1">醫師</label>
-                        <select class="form-select" aria-label="Default select example" style="width: 320px; height: 40px; font-size: 16px;">
-                            <option selected>醫師</option>
-                            <option value="1">醫師1</option>
-                            <option value="2">醫師2</option>
-                            <option value="3">醫師3</option>
-                            </select-->
+                        <select class="form-select" aria-label="Default select example" style="width: 320px; height: 40px; font-size: 16px;" id="doctorSelect" name="doctorSelect">
+                        </select>
+                        <button id="btnDoctor"  type="submit">確認選擇醫生</button>
+                        
                     <br>
-                        <!--選取日期-->
-                        <form action="">
-                            <label for="date1">日期</label>
-                            <div class="input-group date" id='date1'>  
-                                <input type="date" class="form-control" id="dateInput" min=new Date().toISOString().split('T')[0]/>  
-                                
-                            </div>  
-                        </form> 
-                              <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
-                              <script src="https://cdn.bootcss.com/moment.js/2.18.1/moment-with-locales.min.js"></script>
-                              <script src="https://cdn.bootcss.com/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
-                              <script src="{% static 'myApp/js/scripts.js' %}" ></script>
-
-                              <script>
-                              $('#date1').datetimepicker({
-                                date:null, //一開始輸入框的日期為空
-                                format: 'YYYY-MM-DD', //日期的顯示格式
-                                locale: moment.locale('zh-tw'), //國別
-                                daysOfWeekDisabled: [0, 6], //隱藏的天數0為周日6為星期六
-                                minDate: moment().add(1,'days'), //顯示最小天數
-                                maxDate: moment().add(30,'days'), //顯示最大天數，30為最大的顯示範圍為一個月為限
-                                disabledDates:
-                                [ //隱藏的日期
-                                  moment().add(1,'days'), //前一日
-                                  moment().add(2,'days'), //前二日
-                                        '2021-10-10', //特別日期
-                                        '2021-12-25'
-                                ]
-                              });
-                              </script>
-                        <br>
-                        <!-- 時段選取按鈕 -->
-                        <label for="date1">時段</label>
-                        <div class="button-container">
-                            <div class="button-row">
-                                <button id="timeslot" class="rounded-button timeBtn" onclick="showPopup('10:00', 'timeslot')" value="10:00">10:00</button>
-                                <button id="timeslot2" class="rounded-button timeBtn" onclick="showPopup('11:00', 'timeslot2')" value="11:00">11:00</button>
-                                <button id="timeslot3" class="rounded-button timeBtn" onclick="showPopup('12:00', 'timeslot3')" value="12:00">12:00</button>
-                                <button id="timeslot4" class="rounded-button timeBtn" onclick="showPopup('13:00', 'timeslot4')" value="13:00">13:00</button>
-                                <button id="timeslot5" class="rounded-button timeBtn" onclick="showPopup('14:00', 'timeslot5')" value="14:00">14:00</button>
-                                <button id="timeslot6" class="rounded-button timeBtn" onclick="showPopup('15:00', 'timeslot6')" value="15:00">15:00</button>
-                                </div>
-                                <div class="button-row">
-                                <button id="timeslot7" class="rounded-button timeBtn" onclick="showPopup('16:00', 'timeslot7')" value="16:00">16:00</button>
-                                <button id="timeslot8" class="rounded-button timeBtn" onclick="showPopup('17:00', 'timeslot8')" value="17:00">17:00</button>
-                                <button id="timeslot9" class="rounded-button timeBtn" onclick="showPopup('18:00', 'timeslot9')" value="18:00">18:00</button>
-                                <button id="timeslot10" class="rounded-button timeBtn" onclick="showPopup('19:00', 'timeslot10')" value="19:00">19:00</button>
-                                <button id="timeslot11" class="rounded-button timeBtn" onclick="showPopup('20:00', 'timeslot6')" value="20:00">20:00</button>
-                            </div>
-                        </div>
-
-                        <div class="popup-overlay" id="popupOverlay"></div>
-                        <div class="popup" id="popup">
-                            <div id="popupContent"></div>
-                            <div class="popup-buttons">
-                            <button onclick="confirmSelection(true)">是</button>
-                            <button onclick="confirmSelection(false)">否</button>
-                            </div>
-                        </div>
+                        
 
                          <!-- 確認預約 -->
                          <script>
                             document.addEventListener('DOMContentLoaded', () => {
+                                initialData()
+                                document.getElementById('experSelect').addEventListener("change", expertiseChange)
+        
+                            });
+
+                            //載入診所名 介紹 地址(改用render)
+                            // 此診所的所有expertise(用ajax)
+                            function initialData(event){
+                                /*event.preventDefault();
                                 fetch(`/clinic/reserve/<int:clinic_id>/`)
                                 .then(response => response.json())
                                 .then(data => {
-                                    // 清空现有的 options
-                                    const select = document.getElementById('doctorSelect');
-                                    select.innerHTML = '';
-
-                                    // 添加新的 options
-                                    data.doctors.forEach(doctor => {
-                                        const option = document.createElement('option');
-                                        option.value = doctor.id;
-                                        option.textContent = doctor.name;
-                                        select.appendChild(option);
-                                    });
+                                    診所基本資料
+                                    document.getElementById('clinic-introduction').textContent = data.name + 診所;
+                                    document.getElementById('clinic-introduction').textContent = data.introduction;
+                                    document.getElementById('clinic-address').textContent = data.address;
                                 })
                                 .catch(error => {
-                                    console.error('Error fetching doctor list:', error);
-                                    // 处理错误情况
-                                });
+                                    console.error('Error fetching initial info:', error);
+                                });*/
+                                const clinic_id = {{ clinic.id }}
 
-                                doctorSelect.addEventListener('change', () => {
-                                    // 清空现有的 options
-                                    expertiseSelect.innerHTML = '';
-                                    expertise_doc = expertiseChange(event);
-                                    // 添加新的 options 到 expertiseSelect
-                                    expertise_doc.forEach(expertise => {
-                                        const option = document.createElement('option');
-                                        option.value = expertise.expertise_name;
-                                        option.textContent = expertise.expertise_name;
-                                        expertiseSelect.appendChild(option);
-                                    });
-                                }
-
-                                timeBtns = document.querySelectorAll('timeBtn')
-                                /*const doctorName = document.getElementById('doctorLabel').value;
-
-                                // 創建一個隱藏的 input 元素來保存 doctor_id
-                                const hiddenInput = document.createElement('input');
-                                hiddenInput.type = 'hidden';
-                                hiddenInput.name = 'doctorName';
-                                hiddenInput.value = doctorName;
-
-                                // 將隱藏的 input 元素添加到表單中
-                                this.appendChild(hiddenInput);*/
-                                const selectOrInputHandler = (event) => {
-                                    const targetId = event.target.id;
-                                    const selectedValue = event.target.value;
-                                    console.log(`觸發事件的元素 ID：${targetId}，選擇的值：${selectedValue}`);
-                                    // 在這裡添加你的邏輯
-                                    fetch('/available/', {
-                                        method: 'GET'
-                                    })
-                                    .then(response => {
-                                        if (!response.ok) {
-                                            throw new Error('Network response was not ok');
-                                        }
-                                        return response.json(); // 解析 JSON 响应
-                                    })
-                                    .then(data =>{
-                                        timeBtns.forEach(timebtn =>{
-                                            //如果timeBtn是可預約狀態
-                                            if(data.includes[timebtn.value]){
-                                                //調顏色(reserve狀態)
-                                                timebtn.style = ''
-                                                timebtn.addEventListener(){
-
-                                                }
-                                            }
-                                            
-                                        })
-                                    })   
-                                    .catch(error => {
-                                        console.log('Error:', error);
-                                    });
-                                };
-                            
-                                document.getElementById('experSelect').addEventListener('change', selectOrInputHandler);
-                                document.getElementById('doctorSelect').addEventListener('change', selectOrInputHandler);
-                                document.getElementById('dateInput').addEventListener('change', selectOrInputHandler);
-                            });
-
-                            function expertiseChange(event){
-                                event.preventDefault();
-                                fetch(`/clinic/doctor/<int:doctor_id>/reserve/`)
+                                fetch(`/clinic/expertise-list/${clinic_id}/`)
                                 .then(response => response.json())
                                 .then(data => {
-                                    // 清空现有的 options
-                                    const select = document.getElementById('experSelect');
-                                    select.innerHTML = '';
+                                    const experSelect = document.getElementById('experSelect')
+                                    experSelect.innerHTML = '<option value="" selected disabled>選擇看診項目</option>'
+                                    const expertise_list = data.expertise_list
+                                    expertise_list.forEach(expertise => {
+                                        const option = document.createElement('option');
+                                        option.value = expertise.id;
+                                        option.textContent = `${expertise.name}`;
+                                        experSelect.appendChild(option);
+                                    })
+                                })
+                                .catch(error => {
+                                    console.error('Error fetching expertise:', error);
+                                });
+                            }
 
-                                    // 添加新的 options
-                                    return data.doc_expertise_list;
+                            //選擇不同expertise時 會取出不同醫生
+                            function expertiseChange(event){
+                                event.preventDefault();
+                                const expertise_id = event.target.value;
+                                console.log('id = ' + expertise_id)
+                                fetch(`/doctor-list/expertise/${expertise_id}/`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    const doctor_list = data.doctor_list
+                                    const doctorSelect = document.getElementById('doctorSelect')
+                                    doctorSelect.innerHTML = '<option value="" selected disabled>選擇醫生</option>'
+                                    doctor_list.forEach(doctor => {
+                                        console.log('docAdd')
+                                        const option = document.createElement('option');
+                                        option.value = doctor.id;
+                                        option.textContent = `${doctor.name}`;
+                                        doctorSelect.appendChild(option);
+                                    })
                                 })
                                 .catch(error => {
                                     console.error('Error fetching doctor list:', error);
@@ -287,99 +186,13 @@
                                 });
                             }
 
-                            let currentButtonId = null;
-                            const confirmedButtons = new Set();
+                            document.getElementById('btnDoctor').addEventListener('click', function(event){
+                                event.preventDefault();
+                                const doctorSelect = document.getElementById('doctorSelect');
+                                const selectedDoctorId = doctorSelect.value;
+                                window.location.href = `/doctor/reserve/${selectedDoctorId}/`   
+                                
+                            })
+                                
 
-                            function showPopup(timeSlot, buttonId) {
-                                currentButtonId = buttonId;
-                                const button = document.getElementById(buttonId);
-
-                                let message = '是否確認預約?' ;
-
-                                if (confirmedButtons.has(buttonId)) {
-                                    message = '是否確認候補?' ;
-                                }
-
-                                document.getElementById('popupContent').innerText = message ;
-                                document.getElementById('popup').style.display = 'block';
-                                document.getElementById('popupOverlay').style.display = 'block';
-                            }
-
-                            function changeText(buttonId) {
-                                const button = document.getElementById(buttonId);
-                                if (confirmedButtons.has(buttonId)) {
-                                    button.textContent = '確認候補';
-                                } else {
-                                    button.textContent = '確認預約';
-                                }
-                                    button.style.backgroundColor = '#2e1a02';
-                            }
-
-                            function confirmSelection(isConfirmed) {
-                                if (isConfirmed) {
-                                    const button = document.getElementById(currentButtonId);
-                                    if(button.textContent == '確認預約'){
-                                        alert('您已預約此時段');
-                                    } else{
-                                        alert('您已確認此時段候補');
-                                    }
-
-                                    changeText(currentButtonId);
-                                    button.disabled = true;
-                                } else {
-                                    alert('您已取消預約此時段');
-                                }
-                                document.getElementById('popup').style.display = 'none';
-                                document.getElementById('popupOverlay').style.display = 'none';
-                            }
-                        </script>
-                         <!-- 確認候補 -->
-                        <!--script>
-                            let currentButtonId = null;
-                            const confirmedButtons = new Set();
-
-                            function showPopup(timeSlot, buttonId) {
-                                if (confirmedButtons.has(buttonId)) {
-                                    return;
-                                }
-                                currentButtonId = buttonId;
-                                document.getElementById('popupContent').innerText = '候補時段: ' + timeSlot + '\n候補號碼為XXX\n是否確認候補?';
-                                document.getElementById('popup').style.display = 'block';
-                                document.getElementById('popupOverlay').style.display = 'block';
-                            }
-
-                            function changeText(buttonId) {
-                                const button = document.getElementById(buttonId);
-                                button.textContent = '確認候補';
-                                button.style.backgroundColor = '#2e1a02';
-                                confirmedButtons.add(buttonId);
-                            }
-
-                            function confirmSelection(isConfirmed) {
-                                if (isConfirmed) {
-                                    alert('您已確認此時段');
-                                    changeText(currentButtonId);
-                                } else {
-                                    alert('您已取消此時段');
-                                }
-                                document.getElementById('popup').style.display = 'none';
-                                document.getElementById('popupOverlay').style.display = 'none';
-                            }
-                        </script-->
-                        <script>
-                            function showup(message) {
-                                document.getElementById('popContent').innerText = message;
-                                document.getElementById('popContent').appendChild(document.createElement('br')); // 插入換行
-                                document.getElementById('pop').style.display = 'block';
-                                document.getElementById('popOverlay').style.display = 'block';
-                                var okButton = document.createElement('button');
-                                okButton.innerText = 'OK';
-                                okButton.onclick = closeup;
-                                document.getElementById('popContent').appendChild(okButton);
-                            }
-
-                            function closeup() {
-                                document.getElementById('pop').style.display = 'none';
-                                document.getElementById('popOverlay').style.display = 'none';
-                            }
                         </script>

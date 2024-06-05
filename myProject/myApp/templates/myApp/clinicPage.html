@@ -51,11 +51,6 @@
 
     <section class="py-5"  style="background-color:#FFFFF4">
         <div class="container">
-            <div class="row g-2">
-                <div class="col-md-6">
-                    
-                </div>
-                <div class="col-md-6">
                     <div class="p-3" style="height:600px;">
                         <div class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:80px; font-size: 20px;">
                             當日預約確認報到
@@ -129,8 +124,6 @@
                       </div>
                       
                     </div>
-                </div>
-            </div>
         </div>
     </section>
 
@@ -146,18 +139,26 @@
     <script src="{% static 'myApp/js/scripts.js' %}"></script>
     <script>
 
-        document.addEventListener("DOMContentLoaded", function(){
+        document.addEventListener("DOMContentLoaded", function(event){
+            event.preventDefault()
             clin_reserve_info();
         })
         
+        var reservation_id = "";
+
         function clin_reserve_info() {
             fetch('/clinic/load/')
                 .then(response => response.json())
                 .then(data => {
-                    const reservations = data.reservation_list;
-                    const clinic_info = data.clinics;
+                    const reservations = data.reservations;
+                    const clinic_info = data.clinic;
+                    /*reservation_id = clinic_info.id
+                    console.log("id out" + reservation_id)*/
+                    console.log('res = ' + clinic_info)
                     const tableBody = document.getElementById('clinic_reserve_body');
                     reservations.forEach(reservation => {
+                        reservation_id = reservation.id
+                        console.log("id in" + reservation_id)
                         const row = document.createElement('tr');
                         row.innerHTML = `
                             <td>${reservation.appointment_date}  ${reservation.appointment_time}</td>
@@ -165,22 +166,29 @@
                             <td>${reservation.expertise}</td>
                             <td>${reservation.status}</td>
                             <td>
-                                <button type="button" class="btn btn-outline-dark" id="appointmentButton1" data-bs-toggle="modal" data-bs-target="#appointmentModal1" style="font-size: 15px;" disabled>
+                                <button type="button" class="btn btn-outline-dark" 
+                                        data-bs-toggle="modal" data-bs-target="#appointmentModal${reservation_id}" 
+                                        data-index="${reservation_id}" style="font-size: 15px;">
                                     <i class="bi bi-calendar-check"></i> 預約
                                 </button>
-                                <div class="modal fade" id="appointmentModal1" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="appointmentModalLabel1" aria-hidden="true">
+                                <div class="modal fade" id="appointmentModal${reservation_id}" tabindex="-1" aria-labelledby="appointmentModalLabel${reservation_id}" aria-hidden="true">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
                                             <div class="modal-header">
-                                                <h5 class="modal-title" id="appointmentModalLabel1">下次預約確認</h5>
+                                                <h5 class="modal-title" id="appointmentModalLabel${reservation_id}">下次預約確認</h5>
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body">
                                                 是否要預約下次服務？
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-primary" id="confirmAppointmentButton" onclick="btnReserve(event)" data-bs-dismiss="modal" data-clinic-id="${clinic_info.id}">是</button>
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">否</button>
+                                                <button type="button" class="btn btn-primary appointment-button" id="confirmAppointmentButton${reservation_id}" 
+                                                    data-bs-dismiss="modal" data-clinic-id="${clinic_info.id}">
+                                                    是
+                                                </button>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                    否
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -189,16 +197,26 @@
                         `;
                         tableBody.appendChild(row);
                     });
-                  });
+                })
                 .catch(error => console.error('Error:', error));
           }
-
-          function btnReserve(event){
-            event.preventDefault();
-            const clinic_id = document.getElementById('confirmAppointmentButton').dataset.clinicId
-            window.location.href = '/clinic/reserve/${clinic_id}/'
-          }
         
+        /*document.getElementById('confirmAppointmentButton${reservation_id}').addEventListener('click',function(event){
+            event.preventDefault();
+            const clinicId = button.dataset.clinicId;
+            window.location.href = '/clinic/reserve/${clinicId}/'
+        })*/
+
+        document.addEventListener('click', function(event) {
+            if (event.target.matches('.appointment-button')) {
+                const clinicId = event.target.dataset.clinicId;
+                console.log('点击了有诊所 ID 的按钮:', clinicId);
+                window.location.href = `/clinic/reserve/${clinicId}/`;
+            
+            }
+        });
+
+
         /*document.getElementById('confirmReportButton1').addEventListener('click', function() {
             document.getElementById('reportButton1').innerHTML = '<i class="bi bi-check-circle-fill"></i> 已報到';
             document.getElementById('reportButton1').disabled = true;

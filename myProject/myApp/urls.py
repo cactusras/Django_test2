@@ -6,6 +6,7 @@ urlpatterns = [
     path('loginP/', views.loginP, name='loginP'),
     path('login/', views.user_login, name='login'),
     path('client/data/edit/', views.cliedataEd, name='client_data_edit'),
+    path('clinic/reserve/', views.clinReserve, name='clinReserve'),
     path('clinic/data/edit/', views.clinDataEd, name='clinic_data_edit'),
     path('doctor/data/edit/', views.docDataEd, name='doctor_data_edit'),
     path('click/schedule/', views.clickSchedule, name='click_to_edit_schedule'),
@@ -50,4 +51,7 @@ urlpatterns = [
     path('check_reservations/', views.check_reservations, name='check_reservations'),
     path('client/delete/reserve/', views.client_cancel_reservation, name='client_cancel_reservation'),
     path('doctor/delete/<str:doctor_email>/', views.delete_doctor, name='delete_doctor'),
+    path('doctor/expertise-list/<int:doctor_id>/', views.get_expertise_list_doc, name = 'get_expertise_list_doc'),
+    path('clinic/expertise-list/<int:clinic_id>/', views.get_expertise_list_clin, name = 'get_expertise_list_clin'),
+    path('doctor-list/expertise/<int:expertise_id>/', views.get_doctor_from_exp, name = 'get_doctor_from_exp'),
 ]
