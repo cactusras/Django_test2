@@ -22,12 +22,13 @@
         <nav class="navbar navbar-expand-lg" style="background-color:#F0EAD6; height: 100px;">
             <div class="container px-4 px-lg-5">
                 <img src="{% static 'myApp/assets/dental.png' %}" alt="DEN Logo">
-                <a class="navbar-brand" href="#!" style="font-size: 24px;">牙醫預約平台</a>
+                <a class="navbar-brand" href="#!" style="font-size: 24px;" onclick="mainPage(event)">牙醫預約平台</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <div class="ms-auto">
                         <button class="btn btn-outline-dark" onclick="navBtn_listener(event)" style="font-size: 20px;" id="nav_btn">
-                            <i class="bi bi-person-fill"></i>登入
+                            <i class="bi bi-person-fill"></i>
+                            登入
                         </button>
                     </div>
                 </div>
@@ -104,17 +105,17 @@
                                         <!-- 密碼 -->
                                         <div class="col-sm-6 col-md-5 col-lg-6">
                                             <br>
-                                            <label for="pw" class="required">密碼</label><span style="color: red;">*</span>
+                                            <label for="pw" class="required loginHide">密碼</label><span style="color: red;">*</span>
                                             <div class="form-floating">
-                                                <input type="password" class="form-control half-width" id="password" name="password" placeholder="請輸入密碼" required>
+                                                <input type="password" class="form-control half-width loginHide" id="password" name="password" placeholder="請輸入密碼" required>
                                             </div>
                                         </div>
                                         <!--上傳照片 -->
                                         <div class="col-sm-6 col-md-5 col-lg-6">
                                             <br>
-                                            <label for="photo">圖片</label><span style="color: red;">*</span>
+                                            <label for="photo" class="loginHide">圖片</label><span style="color: red;">*</span>
                                             <div class="form-floating">
-                                                <input type="file" class="form-control-file" id="photo" name="photo">
+                                                <input type="file" class="form-control-file loginHide" id="photo" name="photo">
                                             </div>
                                         </div>
                                         <!-- 強制換行 -->
@@ -124,8 +125,10 @@
                                         <!-- 管理醫師 完成按鈕 -->
                                         <div class="col-sm-6 col-md-5 col-lg-6 d-flex justify-content-end">
                                             <br>
-                                            <button class="setting-button" id="btnDocManage">管理/新增醫師</button>
+                                            
                                             <button class="rectangle-button" id="btnClinRegis" type="submit">完成</button>
+                                        </fieldset>
+                                    </form>
                                         </div>
                         </fieldset>
                     </form>
@@ -137,6 +140,7 @@
         <!-- 登出按鈕 -->
         <br style="background-color:#FFFFF4">
         <div class="d-flex justify-content-center" style="background-color:#FFFFF4">
+            <button class="btn btn-outline-dark" id="btnDocManage" style="font-size: 20px; width: 160px; height: 40px;">管理/新增醫師</button>
             <button class="btn btn-outline-dark" type="button" onclick="deleteCheckedRows()" id="logoutButton" style="font-size: 20px; width: 160px; height: 40px;">
                 登出
             </button>
@@ -146,6 +150,7 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
         <!-- Core theme JS-->
         <script src="{% static 'myApp/js/scripts.js' %}"></script>
-        <script src="{% static 'myApp/js/clinic.js' %}"></script>
+            <script src="{% static 'myApp/js/clinic.js' %}"></script>
+            <script src="{% static 'myApp/js/logout.js' %}"></script>
     </body>
 </html>

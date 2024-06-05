@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta name="description" content="" />
     <meta name="author" content="" />
-    <title>Client Data Edit</title>
+    <title>User Account</title>
     <!-- Favicon-->
     <link rel="icon" type="image/x-icon" href="{% static 'myApp/assets/favicon.ico' %}" />
     <!-- Bootstrap icons-->
@@ -29,9 +29,9 @@
     <nav class="navbar navbar-expand-lg" style="background-color:#F0EAD6; height: 100px;">
         <div class="container px-4 px-lg-5">
             <img src="{% static 'myApp/assets/dental.png' %}" alt="DEN Logo">
-            <a class="navbar-brand" href="#!" style="font-size: 24px;">牙醫預約平台</a>
+            <a class="navbar-brand" href="#!" style="font-size: 24px;" onclick="mainPage(event)">牙醫預約平台</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+<span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <div class="ms-auto">
@@ -136,9 +136,9 @@
                                     <!-- 密碼-->  
                                     <div class="col-sm-6 col-md-5 col-lg-6">
                                         <br>
-                                        <label for="password" class="required">密碼</label><span style="color: red;">*</span>
+                                        <label for="password"  class="required loginHide">密碼</label><span style="color: red;">*</span>
                                         <div class="form-floating">
-                                            <input type="password" class="form-control" id="password" name="password" required>
+                                            <input type="password" class="form-control loginHide" id="password" name="password" required>
                                         </div> 
                                     </div>
                                 </div>
@@ -158,17 +158,25 @@
             </div>
         </div>
     </section>
+    <script src="{% static 'js/logout.js' %}" defer></script>
     <!-- 登出按鈕 -->
     <br style="background-color:#FFFFF4">
     <div class="d-flex justify-content-center" style="background-color:#FFFFF4">
-        <button class="btn btn-outline-dark" type="button" onclick="deleteCheckedRows()" id="logoutButton" style="font-size: 20px; width: 160px; height: 40px;">
+        <button class="btn btn-outline-dark" type="button" onclick="redirectToPage()" id="logoutButton" style="font-size: 20px; width: 160px; height: 40px;">
             登出
         </button>
+        <script>
+            function redirectToPage() {
+                window.location.href = 'http://127.0.0.1:8000/home';
+            }
+            </script>
+
     </div>
     <!-- Bootstrap core JS-->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Core theme JS-->
     <script src="{% static 'myApp/js/scripts.js' %}"></script>
     <script src="{% static 'myApp/js/clinic.js' %}"></script>
+    <script src="{% static 'myApp/js/logout.js' %}"></script>
 </body>
 </html>
