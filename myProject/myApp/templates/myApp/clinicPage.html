@@ -28,6 +28,10 @@
             padding: 20px;
         }
     </style>
+
+    <script>
+        const csrfToken = "{{ csrf_token }}";  // 将 CSRF 令牌作为 JavaScript 变量直接写入
+    </script>
 </head>
 
 <body>
@@ -64,7 +68,6 @@
                                       <th scope="col">姓名</th>
                                       <th scope="col">項目</th>
                                       <th scope="col">狀態</th>
-                                      <th scope="col">下次預約</th>
                                   </tr>
                               </thead>
                               <tbody id="clinic_reserve_body">
@@ -160,73 +163,194 @@
                         reservation_id = reservation.id
                         console.log("id in" + reservation_id)
                         const row = document.createElement('tr');
+                        const statusCell = document.createElement('td');
+                        statusCell.innerHTML = change_status(reservation.status, reservation.id, clinic_info.id);
+                        
                         row.innerHTML = `
                             <td>${reservation.appointment_date}  ${reservation.appointment_time}</td>
                             <td>${reservation.client_name}</td>
                             <td>${reservation.expertise}</td>
-                            <td>${reservation.status}</td>
-                            <td>
-                                <button type="button" class="btn btn-outline-dark" 
-                                        data-bs-toggle="modal" data-bs-target="#appointmentModal${reservation_id}" 
-                                        data-index="${reservation_id}" style="font-size: 15px;">
-                                    <i class="bi bi-calendar-check"></i> 預約
-                                </button>
-                                <div class="modal fade" id="appointmentModal${reservation_id}" tabindex="-1" aria-labelledby="appointmentModalLabel${reservation_id}" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="appointmentModalLabel${reservation_id}">下次預約確認</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                是否要預約下次服務？
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-primary appointment-button" id="confirmAppointmentButton${reservation_id}" 
-                                                    data-bs-dismiss="modal" data-clinic-id="${clinic_info.id}">
-                                                    是
-                                                </button>
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                                    否
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
                         `;
+                        row.appendChild(statusCell);
                         tableBody.appendChild(row);
                     });
                 })
                 .catch(error => console.error('Error:', error));
           }
         
-        /*document.getElementById('confirmAppointmentButton${reservation_id}').addEventListener('click',function(event){
-            event.preventDefault();
-            const clinicId = button.dataset.clinicId;
-            window.location.href = '/clinic/reserve/${clinicId}/'
-        })*/
+        //根據不同狀態改變innerHtml
+        function change_status(status, reservation_id, clinic_id){
+            let result = "";
+            if(status == 'reserved'){
+                result = `<button type="button" class="btn btn-outline-dark" 
+                                    data-bs-toggle="modal" data-bs-target="#checkinModal${reservation_id}" 
+                                    data-index="${reservation_id}" style="font-size: 15px;">
+                                <i class="bi bi-calendar-check"></i> 病患報到
+                            </button>
+                            <div class="modal fade" id="checkinModal${reservation_id}" tabindex="-1" aria-labelledby="checkinModalLabel${reservation_id}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="checkinModalLabel${reservation_id}">病患報到狀態</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-primary" id="checkinButton${reservation_id}" 
+                                                data-bs-dismiss="modal"  onclick="update_status_two(${reservation_id})">
+                                                病患已報到
+                                            </button>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="update_status_one(${reservation_id})">
+                                                病患未報到
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`
+            }else if(status == 'checkin failed'){
+                result = `病患未報到`
+            }else if(status == 'checkin successed'){
+                result = `<button type="button" class="btn btn-outline-dark" data-index="${reservation_id}" style="font-size: 15px;" onclick="update_status_three(${reservation_id})">
+                            <i class="bi bi-calendar-check"></i> 開始看診
+                          </button>`
+            }else if(status == 'in treatment'){
+                result = `<button type="button" class="btn btn-outline-dark" data-index="${reservation_id}" style="font-size: 15px;" onclick="update_status_four(${reservation_id})">
+                            <i class="bi bi-calendar-check"></i> 看診完成
+                        </button>`
+            }else if(status == 'finish'){
+                result = `<button type="button" class="btn btn-outline-dark" 
+                                    data-bs-toggle="modal" data-bs-target="#appointmentModal${reservation_id}" 
+                                    data-index="${reservation_id}" style="font-size: 15px;">
+                                <i class="bi bi-calendar-check"></i> 預約下次看診
+                            </button>
+                            <div class="modal fade" id="appointmentModal${reservation_id}" tabindex="-1" aria-labelledby="appointmentModalLabel${reservation_id}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="appointmentModalLabel${reservation_id}">下次預約確認</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            是否要預約下次服務？
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-primary appointment-button" id="confirmAppointmentButton${reservation_id}" 
+                                                data-bs-dismiss="modal" data-clinic-id="${clinic_id}">
+                                                是
+                                            </button>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                否
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`
+            }else if(status == 'cancelled by doc'){
+                result = `醫生取消此預約`
+            }
+            return result
+        }
 
         document.addEventListener('click', function(event) {
             if (event.target.matches('.appointment-button')) {
                 const clinicId = event.target.dataset.clinicId;
-                console.log('点击了有诊所 ID 的按钮:', clinicId);
                 window.location.href = `/clinic/reserve/${clinicId}/`;
             
             }
         });
 
-
-        /*document.getElementById('confirmReportButton1').addEventListener('click', function() {
-            document.getElementById('reportButton1').innerHTML = '<i class="bi bi-check-circle-fill"></i> 已報到';
-            document.getElementById('reportButton1').disabled = true;
-            document.getElementById('appointmentButton1').disabled = false;
-        });
-    
-        document.getElementById('confirmAppointmentButton1').addEventListener('click', function() {
-            document.getElementById('appointmentButton1').innerHTML = '<i class="bi bi-check-circle-fill"></i> 已預約';
-            document.getElementById('appointmentButton1').disabled = true;
-        });*/
+        //連到各個views.py去更新status
+        function update_status_one(reservationId) {
+            
+            fetch(`/reservation/status/change/checkinfailed/${reservationId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken  // 添加 CSRF 令牌
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    window.location.href = '/clinic/home/'
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+        
+        function update_status_two(reservationId) {
+            
+            fetch(`/reservation/status/change/checkinsuccessed/${reservationId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken  // 添加 CSRF 令牌
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    window.location.href = '/clinic/home/'
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+        
+        function update_status_three(reservationId) {
+            
+            fetch(`/reservation/status/change/intreatment/${reservationId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken  // 添加 CSRF 令牌
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    window.location.href = '/clinic/home/'
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+        
+        function update_status_four(reservationId) {
+            
+            fetch(`/reservation/status/change/finished/${reservationId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken  // 添加 CSRF 令牌
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    window.location.href = '/clinic/home/'
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+        
 
         
     </script>

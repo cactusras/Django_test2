@@ -716,13 +716,17 @@ def reservationStCF(request, reservation_id):
         return JsonResponse({'status': 'error', 'message': 'Reservation not found'}, status=404)
 
 def reservationStSc(request, reservation_id):
-    try:
-        reservation = Reservation.objects.get(pk=reservation_id)
-        reservation.update_status(2)  # Update the status to "checkin successed"
-        reservation.save()
-        return JsonResponse({'status': 'success', 'message': 'Status updated to checkin successed'})
-    except Reservation.DoesNotExist:
-        return JsonResponse({'status': 'error', 'message': 'Reservation not found'}, status=404)
+    if request.method == 'POST':
+        try:
+            reservation = Reservation.objects.get(pk=reservation_id)
+            print(' ', reservation)
+            reservation.update_status(2)  # Update the status to "checkin successed"
+            reservation.save()
+            return JsonResponse({'status': 'success', 'message': 'Status updated to checkin successed'})
+        except Reservation.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Reservation not found'}, status=404)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 def reservationStIt(request, reservation_id):
     try:
