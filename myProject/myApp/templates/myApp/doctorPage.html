@@ -50,10 +50,6 @@
       
         <section class="py-5"  style="background-color:#FFFFF4">
           <div class="container">
-              <div class="row g-2">
-                  <div class="col-md-6">
-                  </div>
-                  <div class="col-md-6">
                       <div class="p-3" style="height:600px;">
                           <div class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:80px; font-size: 20px;">
                               各時段詳細資訊
@@ -69,8 +65,6 @@
                         </div>
                         
                       </div>
-                  </div>
-              </div>
           </div>
       </section>
 
@@ -105,7 +99,7 @@
                             `;
                             tableBody.appendChild(row);
                         });
-                      })
+                      });
                     .catch(error => console.error('Error:', error));
               }
             </script>
