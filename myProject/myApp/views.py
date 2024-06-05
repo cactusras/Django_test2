@@ -828,7 +828,7 @@ def add_times(time1, duration):
 #available/
 def available(request):
     # Get doctor_id, date, and expertise_name from the GET request
-    doctor_id = request.session.get('doctor_id')
+    doctor_id = request.get('doctor_id')
     date_str = request.GET.get('date')
     date_reserve = datetime.strptime(date_str, '%Y-%m-%d').date()
     week_day = date_reserve.weekday()+1
@@ -1093,19 +1093,27 @@ def doctorPage_loading(request):
         time_start__date__range=[start_of_week, end_of_week]
     )
 
-    reservation_list = [
-        {
-            'client_name': reservation.ClientID.name,
-            'appointment_date': reservation.time_start.date(),
-            'starting': reservation.time_start.strftime('%H:%M'),
+    reservation_list = []
+    for reservation in reservations:
+        client_name = reservation.ClientID.name
+        client_gender = reservation.ClientID.gender
+        if client_gender == 'male':
+            client_name += " 先生"
+        elif client_gender == 'female':
+            client_name += " 小姐"
+        
+        day_of_week = reservation.time_start.strftime('%A')
+        reservation_list.append({
+            'id': reservation.id,
+            'client_name': client_name,
+            'appointment_date': reservation.time_start.date().isoformat(),
+            'day_of_week': day_of_week,
+            'starting': reservation.time_start.time().strftime('%H:%M'),
             'expertise': reservation.expertiseID.name,
-            'ending': reservation.time_end.strftime('%H:%M'),
             'status': reservation.get_status_display(),
-            'WDforfront': reservation.WDforFront(),
-            'OccupiedHour': reservation.TimeSlotNumber(),
-        }
-        for reservation in reservations
-    ]
+        })
+    
+
 
     schedule_list = [
         {
@@ -1304,3 +1312,12 @@ def client_info(request):
 #clinicPage.html
 
 #doctorPage.html
+
+
+#doctor/page/cancel_reservation/<int:reservation_id>/
+@login_required
+def cancel_reservation(request, reservation_id):
+    reservation = get_object_or_404(Reservation, id=reservation_id)
+    reservation.Status = 5  # Set status to 'cancelled by doc'
+    reservation.save()
+    return JsonResponse({'status': 'success', 'message': 'Reservation status updated to cancelled.'})

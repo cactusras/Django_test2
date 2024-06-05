@@ -63,4 +63,6 @@ urlpatterns = [
     path('doctor_info/', views.doctor_info, name='doctor_info'),
     path('clinic_info/', views.clinic_info, name='clinic_info'),
     path('client_info/', views.client_info, name='client_info'),
+
+    path('doctor/page/cancel_reservation/<int:reservation_id>/', views.cancel_reservation, name='cancel_reservation'),
 ]

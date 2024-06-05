@@ -28,6 +28,9 @@
               padding: 20px;
             }
           </style>
+          <script>
+            const csrfToken = "{{ csrf_token}}";
+          </script>
     </head>
 
     <body>
@@ -115,64 +118,24 @@
                         </div>
                           <!-- 各時段詳細資訊 -->
                         <div class="col d-flex justify-content-center" style="background-color:#FFFFF0; border: 1px solid #ada089; height:500px; font-size: 20px; overflow: auto;">
-                          <table class="table table-hover">
+                          <table class="table table-hover" id = "doctor_reserve_body">
                             <thead>
-                                    <tr>
-                                      <th scope="row">星期一</th>
-                                      <td>10:00-14:00 XXX先生 項目</td>
-                                    </tr>
-
-                                    <tr>
-                                      <th scope="row">星期二</th>
-                                      <td>10:00-14:00 XXX先生 項目</td>
-                                    </tr>
-
-                                    <tr>
-                                      <th scope="row">星期二</th>
-                                      <td>10:00-14:00 XXX先生 項目</td>
-                                    </tr>
-
-                                    <tr>
-                                      <th scope="row">星期二</th>
-                                      <td>10:00-14:00 XXX先生 項目</td>
-                                    </tr>
-
-                                    <tr>
-                                      <th scope="row">星期二</th>
-                                      <td>10:00-14:00 XXX先生 項目</td>
-                                    </tr>
-
-                                    <tr>
-                                      <th scope="row">星期二</th>
-                                      <td>10:00-14:00 XXX先生 項目</td>
-                                    </tr>
-
-                                    <tr>
-                                      <th scope="row">星期二</th>
-                                      <td>10:00-14:00 XXX先生 項目</td>
-                                    </tr>
-
-                                    <tr>
-                                      <th scope="row">星期二</th>
-                                      <td>10:00-14:00 XXX先生 項目</td>
-                                    </tr>
-
-                                    <tr>
-                                      <th scope="row">星期二</th>
-                                      <td>10:00-14:00 XXX先生 項目</td>
-                                    </tr>
-
-                                    <tr>
-                                      <th scope="row">星期一</th>
-                                      <td>10:00-14:00 XXX先生 項目</td>
-                                    </tr>
-
-                                    <tr>
-                                      <th scope="row">星期一</th>
-                                      <td>10:00-14:00 XXX先生 項目</td>
-                                    </tr>
-                                  </tbody>
-                                </table>    
+                              <tr>
+                                <th scope="col"><i class="bi bi-clock-fill"></i></th>
+                                <th scope="col">星期</th>
+                                <th scope="col">時間</th>
+                                <th scope="col">患者</th>
+                                <th scope="col">項目</th>
+                                <th scope="col">狀態</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <!-- <tr>
+                                <th scope="row">日期</th>
+                                <td>時間 XXX先生 項目</td>
+                              </tr> -->
+                            </tbody>
+                          </table>    
                       </div>
                       
                     </div>
@@ -204,19 +167,50 @@
               reservations.forEach(reservation => {
                   const row = document.createElement('tr');
                   row.innerHTML = `
+                      <td>${reservation.day_of_week}</td>
                       <td>${reservation.appointment_date}</td>
-                      <td>${reservation.appointment_time}</td>
                       <td>${reservation.client_name}</td>
                       <td>${reservation.expertise}</td>
-                      <td>${reservation.status}</td>
+                      <td>
+                          <button class="cancel-btn" data-id="${reservation.id}">${reservation.status}</button>
+                      </td>
                   `;
                   tableBody.appendChild(row);
+              });
+              const buttons = document.querySelectorAll('.cancel-btn');
+                buttons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const reservationId = this.getAttribute('data-id');
+                        if (confirm('Are you sure you want to cancel this reservation?')) {
+                            cancelReservation(reservationId);
+                        }
+                    });
               });
             })
             .catch(error => {
                 // 处理错误情况，例如显示错误消息给用户
                 alert('Error loading clinic reservations: ' + error.message);
             });
+        }
+        function cancelReservation(reservationId) {
+          fetch(`/doctor/page/cancel_reservation/${reservationId}/`, {
+              method: 'POST',
+              headers: {
+                  'X-CSRFToken': csrfToken,  // Include CSRF token
+              }
+          })
+          .then(response => response.json())
+          .then(data => {
+              if (data.status === 'success') {
+                  alert('Reservation cancelled successfully.');
+                  window.location.href = '/doctor/page/loading/';  // Reload the page to update the reservation list
+              } else {
+                  alert('Error cancelling reservation: ' + data.message);
+              }
+          })
+          .catch(error => {
+              alert('Error cancelling reservation: ' + error.message);
+          });
         }
       </script>
     </body>

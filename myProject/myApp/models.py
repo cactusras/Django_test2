@@ -1,7 +1,7 @@
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 from django.db import models
 from datetime import timedelta
-from datetime import time
+# from datetime import time
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 #PK皆Auto Increment
@@ -199,16 +199,16 @@ class Reservation(models.Model):
 
     #預約的day_of_week
     def WDforFront(self):
-        return self.StartDate.weekday() + 1
+        return self.time_start.weekday() + 1
     
     #
     def TimeSlotNumber(self, start_time=None, end_time=None):
         if start_time is None or end_time is None:
             start_time = self.time_start
             end_time = self.time_end
-        if isinstance(start_time, datetime.time):
+        if isinstance(start_time, time):
             start_time = datetime.combine(datetime.today(), start_time)
-        if isinstance(end_time, datetime.time):
+        if isinstance(end_time, time):
             end_time = datetime.combine(datetime.today(), end_time)
             
         duration = end_time - start_time
