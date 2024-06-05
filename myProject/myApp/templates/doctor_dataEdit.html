@@ -1,0 +1,188 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>醫生註冊</title>
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="{% static 'myApp/assets/favicon.ico' %}" />
+        <!-- Bootstrap icons-->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="{% static 'myApp/css/styles_doctor_regis.css' %}" rel="stylesheet" />
+         
+    </head>
+    <body>
+        <!--網頁頭-->
+        <nav class="navbar navbar-expand-lg" style="background-color:#F0EAD6;  height: 100px;">
+            <div class="container px-4 px-lg-5">
+                <img src="{% static 'myApp/assets/dental.png' %}" alt="DEN Logo">
+                <a class="navbar-brand" href="#!"  style="font-size: 24px;" onclick="mainPage(event)"> 牙醫預約平台</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <div class="ms-auto">
+                    </div>
+                        <button class="btn btn-outline-dark" type="button" id="nav_btn" onclick="navBtn_listener(event)" style="font-size: 20px;">
+                            <i class="bi bi-person-fill"></i>
+                            登入
+                         <!--  <span class="badge bg-dark text-white ms-1 rounded-pill">0</span> -->
+                        </button>
+                </div>
+            </div>
+        </nav>
+        <!--醫師註冊-->
+        <section class="py-5"  style="background-color:#FFFFF4">
+            <div class="container" style="border: 1px solid #F0EAD6;">
+                <div class="row row-cols-1">
+                  
+                    <div id="barTitle" class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:80px; font-size: 20px; ">
+                        註冊
+                    </div>
+                    <!--註冊內容-->
+                        <div class="col" style="background-color:#fffff0; border: 1px solid #ada089; height:760px; font-size: 20px;">
+                            <br>
+                            <div class="row">
+                                <div class="col">
+                                    <label for="name" class="required">專長</label>
+                                    <form id="experForm">
+                                        {% csrf_token %}
+                                    <div class="form-floating">
+                                        <!--<input type="text" class="form-control" id="expertise" name="expertise" style="width: 50%; margin-right: 30px;">-->
+                                        <select id="expertiseSelect" name="expertiseSelect">
+                                            <option value="預防性治療-洗牙">預防性治療-洗牙</option>
+                                            <option value="預防性治療-塗氟">預防性治療-塗氟</option>
+                                            <option value="預防性治療-牙齒矯正評估">預防性治療-牙齒矯正評估</option>
+                                            <option value="修復性治療-補牙">修復性治療-補牙</option>
+                                            <option value="修復性治療-根管治療">修復性治療-根管治療</option>
+                                            <option value="修復性治療-牙冠修復">修復性治療-牙冠修復</option>
+                                            <option value="修復性治療-牙橋">修復性治療-牙橋</option>
+                                            <option value="美學治療-牙齒美白">美學治療-牙齒美白</option>
+                                            <option value="美學治療-貼片">美學治療-貼片</option>
+                                            <option value="美學治療-美容冠">美學治療-美容冠</option>
+                                            <option value="牙齒矯正-傳統矯正">牙齒矯正-傳統矯正</option>
+                                            <option value="牙齒矯正-隱形矯正">牙齒矯正-隱形矯正</option>
+                                            <option value="牙齒矯正-舌側矯正">牙齒矯正-舌側矯正</option>
+                                            <option value="口腔外科-拔牙">口腔外科-拔牙</option>
+                                            <option value="口腔外科-智齒拔除">口腔外科-智齒拔除</option>
+                                            <option value="口腔外科-牙齦手術">口腔外科-牙齦手術</option>
+                                            <option value="口腔外科-植牙">口腔外科-植牙</option>
+                                            <option value="牙周治療-牙周病治療">牙周治療-牙周病治療</option>
+                                            <option value="牙周治療-牙周手術">牙周治療-牙周手術</option>
+                                            <option value="兒童牙科-兒童補牙">兒童牙科-兒童補牙</option>
+                                            <option value="兒童牙科-兒童矯正">兒童牙科-兒童矯正</option>
+                                            <option value="兒童牙科-兒童預防性治療">兒童牙科-兒童預防性治療</option>
+                                            <option value="假牙及義齒-全口假牙">假牙及義齒-全口假牙</option>
+                                            <option value="假牙及義齒-局部假牙">假牙及義齒-局部假牙</option>
+                                            <option value="假牙及義齒-活動義齒">假牙及義齒-活動義齒</option>
+                                            <option value="假牙及義齒-固定義齒">假牙及義齒-固定義齒</option>
+                                        </select>
+                                        
+                                        <button id="btnExper"  type="submit">加入專長</button>
+                                    </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <form id="doctorForm" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                    <fieldset>
+                            <div class="row">
+                                <div class="col">
+                                    <label for="name" class="required">名字</label>
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control half-width" id="name" name="name" autocomplete="name" required>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <label for="phone_number" class="required">電話</label>
+                                    <div class="form-floating">
+                                        <input type="tel" class="form-control" id="phone_number" name="phone_number" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <br>
+                            <div class="row">
+                                <div class="col">
+                                    <label for="email" class="required">帳號(信箱)</label>
+                                    <div class="form-floating">
+                                        <input type="email" class="form-control half-width" id="email" name="email" autocomplete="email" required>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <label for="password" class="required loginHide">密碼</label>
+                                    <div class="form-floating">
+                                        <input type="password" class="form-control loginHide" id="password" name="password" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <br>
+                            <div class="row">
+                                <div class="col">
+                                    <label for="photo" class="loginHide" id="photoLbl">個人相片</label>
+                                    <div class="form-floating">
+                                        <input type="file" class="form-control-file loginHide" id="photo" name="photo">
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <label for="exoerience">任職經歷</label>
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="exoerience" name="exoerience">
+                                    </div>
+                                </div>
+                            </div>
+                            <br>
+                            <div class="row">
+                                <div class="col">
+                                    <label for="schedule" class="required">時刻表</label>
+                                    <div class="form-floating">
+                                        <button class="time-button" type="submit" id="btnSchedule">編輯班表</button>
+                                    </div>
+                                </fieldset>
+                            </form>
+                                </div>
+                            </div>
+                            <br>
+                            
+                            
+                            
+                        </div>
+                    <!--設定完成按鈕-->
+                    <form id="regisBtn_Form">
+                        {% csrf_token %}
+                        <button id="btnDocRegis" class="rectangle-button" type="submit" onclick="clickRegis(event)">完成</button>
+                    </form> 
+                    </div> 
+        </section>
+        
+  
+                </div>
+            </div>
+
+            <!-- 登出按鈕 -->
+
+            <br>
+
+            <div class="d-flex justify-content-center">
+
+                <button class="btn btn-outline-dark" type="button" id="logoutButton" style="font-size: 20px; width: 160px; height: 40px;">
+
+                    登出
+
+                </button>
+
+            </div>
+            </section>
+             <!--頁面底-->
+            <footer class="py-5 bg-dark">
+                <div class="container"><p class="m-0 text-center text-white">Copyright &copy; Your Website 2023</p></div>
+            </footer>
+            <!-- Bootstrap core JS-->
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+            <!-- Core theme JS-->
+            <script src="{% static 'myApp/js/scripts.js' %}"></script>
+            <script src="{% static 'myApp/js/doctor.js' %}"></script>
+            <script src="{% static 'myApp/js/logout.js' %}"></script>
+    </body>
+</html>

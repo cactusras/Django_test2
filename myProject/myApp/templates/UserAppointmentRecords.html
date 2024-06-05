@@ -1,4 +1,5 @@
 {% load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -20,19 +21,13 @@
         <nav class="navbar navbar-expand-lg" style="background-color:#F0EAD6;  height: 100px;">
             <div class="container px-4 px-lg-5">
                 <img src="{% static 'myApp/assets/dental.png' %}" alt="DEN Logo">
-                <a class="navbar-brand" href="#!"  style="font-size: 24px;"> 牙醫預約平台</a>
+                <a class="navbar-brand" href="#!"  style="font-size: 24px;" onclick="mainPage(event)"> 牙醫預約平台</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
                 <!-- 導覽列摺疊按鈕 -->
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
-                        <!-- 導覽連結 -->
-                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="#!" style="font-size: 20px;">找醫師</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#!" style="font-size: 20px;">紀錄</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#!" style="font-size: 20px;">Q&A</a></li>
-                    </ul>
                    <!-- 使用者登入按鈕 -->
-                    <form class="d-flex">
-                        <button class="btn btn-outline-dark" type="submit"  style="font-size: 20px;">
+                    <div class="ms-auto">
+                        <button class="btn btn-outline-dark" type="submit"  style="font-size: 20px;" id="nav_btn" onclick="navBtn_listener(event)">
                             <i class="bi bi-person-fill"></i>
                             登入
                          <!--  <span class="badge bg-dark text-white ms-1 rounded-pill">0</span> -->
@@ -56,93 +51,12 @@
                                   <th scope="col">項目</th>
                                   <th scope="col">時間</th>
                                   <th scope="col">診所</th>
-                                  <th scope="col">DOC</th>
+                                  <th scope="col">醫生</th>
                                   <th scope="col">狀態</th>
                                   <th scope="col">取消</th>
                               </tr>
                           </thead>
-                          <tbody>
-                               <!-- 紀錄內容 -->
-                             <tr>
-                                  <th scope="row">1</th>
-                                  <td>A</td>
-                                  <td>A</td>
-                                  <td>A</td>
-                                  <td>A</td>
-                                  <td>A</td>
-                              </tr>
-                              <tr>
-                                  <th scope="row">2</th>
-                                  <td>B</td>
-                                  <td>B</td>
-                                  <td>B</td>
-                                  <td>B</td>
-                                  <td>B</td>
-                              </tr>
-                              <tr>
-                                  <th scope="row">3</th>
-                                  <td>C</td>
-                                  <td>C</td>
-                                  <td>C</td>
-                                  <td>C</td>
-                                  <td>C</td>
-                              </tr>
-                              <tr>
-                                  <th scope="row">4</th>
-                                  <td>D</td>
-                                  <td>D</td>
-                                  <td>D</td>
-                                  <td>D</td>
-                                  <td>D</td>
-                              </tr>
-                              <tr>
-                                  <th scope="row">5</th>
-                                  <td>E</td>
-                                  <td>E</td>
-                                  <td>E</td>
-                                  <td>E</td>
-                                  <td>E</td>
-                              </tr>
-                              <tr>
-                                  <th scope="row">6</th>
-                                  <td>F</td>
-                                  <td>F</td>
-                                  <td>F</td>
-                                  <td>F</td>
-                                  <td>F</td>
-                              </tr>
-                              <tr>
-                                  <th scope="row">7</th>
-                                  <td>G</td>
-                                  <td>G</td>
-                                  <td>G</td>
-                                  <td>G</td>
-                                  <td>G</td>
-                              </tr>
-                              <tr>
-                                 <th scope="row">8</th>
-                                 <td>H</td>
-                                 <td>H</td>
-                                 <td>H</td>
-                                 <td>H</td>
-                                 <td>H</td>
-                             </tr>
-                             <tr>
-                                 <th scope="row">9</th>
-                                 <td>I</td>
-                                 <td>I</td>
-                                 <td>I</td>
-                                 <td>I</td>
-                                 <td>I</td>
-                             </tr>
-                             <tr>
-                                 <th scope="row">10</th>
-                                 <td>J</td>
-                                 <td>J</td>
-                                 <td>J</td>
-                                 <td>J</td>
-                                 <td>J</td>
-                             </tr>
+                          <tbody id="client_records_body">
                           </tbody>
                       </table>
                   </div>
@@ -155,7 +69,70 @@
             <!-- Bootstrap core JS-->
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
             <!-- Core theme JS-->
-            <script src="js/scripts.js"></script>
-        
+            <script src="{% static 'myApp/js/scripts.js' %}"></script>
+            <script>
+
+                document.addEventListener("DOMContentLoaded", function(){
+                    clin_reserve_info();
+                })
+
+                function clin_reserve_info() {
+                    fetch('/client/records/')
+                        .then(response => response.json())
+                        .then(data => {
+                            const reservations = data.reservation_list;
+                            const clinic_info = data.clinics;
+                            const tableBody = document.getElementById('client_records_body');
+                            reservations.forEach(reservation => {
+                                const row = document.createElement('tr');
+                                const isHidden = reservation.status !== 'reserved'
+                                row.innerHTML = `
+                                </td>
+                                    <td>${reservation.expertise}</td>
+                                    <td>${reservation.appointment_date}  ${reservation.appointment_time}</td>
+                                    <td>${reservation.clinic_name}</td>
+                                    <td>${reservation.doctor_name}</td>
+                                    <td>${reservation.status}</td>
+                                    <td>
+                                        <form id="btnCancelReserve">
+                                        {% csrf_token %}
+                                        <div>
+                                            <button type="submit" class="rectangle-button btnCancel" 
+                                            onclick="cancelReserve(event)" data-reservation-id="${reservation.id}"
+                                            ${isHidden ? 'hidden' : ''}>取消預約</button>
+                                        </div>
+                                    </form>
+                                    </td>
+                                `;
+                                tableBody.appendChild(row);
+                            });
+                          })
+                        .catch(error => console.error('Error:', error));
+                }
+
+                //只有reserve狀態會顯示這個button
+                function cancelReserve(event){
+                    event.preventDefault()
+                    const button = event.target;  // Get the button that triggered the event
+                    const reservationID = button.dataset.reservationId;
+                    console.log("id = " + reservationID)
+                    fetch(`/client/delete/reserve/${reservationID}/`, {
+                        method: 'GET'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if(data.dlteSuccess){
+                            alert(data.message)
+                            window.location.href = '/clieReserveRecord'
+                        }else{
+                            alert(data.message)
+                        }  
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+                }
+            </script>
+            
     </body>
 </html>

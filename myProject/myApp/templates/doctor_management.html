@@ -1,0 +1,279 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>診所登入（管理）</title>
+    <!-- Favicon-->
+    <link rel="icon" type="image/x-icon" href="{% static 'myApp/assets/favicon.ico' %}" />
+    <!-- Bootstrap icons-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="{% static 'myApp/css/styles.css' %}" rel="stylesheet" />
+</head>
+
+<body>
+    <!--網頁頭-->
+    <nav class="navbar navbar-expand-lg" style="background-color:#F0EAD6;  height: 100px;">
+        <div class="container px-4 px-lg-5">
+            <img src="{% static 'myApp/assets/dental.png' %}" alt="DEN Logo">
+            <a class="navbar-brand" href="#!"  style="font-size: 24px;" onclick="mainPage(event)"> 牙醫預約平台</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <div class="ms-auto">
+                    <button class="btn btn-outline-dark" type="submit" id="nav_btn" onclick="navBtn_listener(event)" style="font-size: 20px;">
+                        <i class="bi bi-person-fill"></i>
+                        使用者
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="py-5"  style="background-color:#FFFFF4">
+        <div class="container" style="border: 1px solid #F0EAD6;">
+            <div class="row row-cols-1">
+                <div class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:80px; font-size: 20px; ">
+                    管理新增醫師
+                </div>
+    
+                <div class="col" style="background-color:#fffff0; border: 1px solid #ada089; height:520px; font-size: 20px; overflow: auto;">
+                    <table class="table table-hover" id="doctorTable">
+                        <br>
+                        <thead>
+                            <tr>
+                                <th scope="col">醫師</th>
+                                <th scope="col">信箱</th>
+                                <th scope="col">電話</th>
+                                <th scope="col">經歷</th>
+                                <th scope="col">刪除</th>
+                            </tr>
+                        </thead>
+                        <tbody id="doctor_info_body">
+                        </tbody>
+                    </table>
+                </table>
+
+                <div style="text-align: right; margin-right: 10px;">
+
+                    <button class="btn btn-outline-dark" type="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop" style="font-size: 20px; width: 160px; height: 40px;" onclick="addDocPage(event)">
+
+                        <i class="bi bi-calendar2-plus-fill"></i>
+
+                        新增
+
+                    </button>
+
+                    <!--時段按鈕的彈跳視窗-->
+
+                <!--    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+
+                        <div class="modal-dialog modal-dialog-centered">
+
+                            <div class="modal-content">
+
+                                <div class="modal-header">
+
+                                    <h5 class="modal-title" id="staticBackdropLabel">編輯時段</h5>
+
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+                                </div>
+
+                                <div class="modal-body text-start">
+
+                                    <form id="doctorForm">
+
+                                        <div class="mb-3">
+
+                                            <label for="doctorName" class="form-label">醫師：</label>
+
+                                            <input type="text" class="form-control" id="doctorName" required style="width: 200px;">
+
+                                        </div>
+
+                                        <div class="mb-3">
+
+                                            <label for="specialty" class="form-label">專長：</label>
+
+                                            <input type="text" class="form-control" id="specialty" required style="width: 200px;">
+
+                                        </div>
+
+                                        <div class="mb-3">
+
+                                            <label for="phone" class="form-label">電話：</label>
+
+                                            <input type="tel" class="form-control" id="phone" required style="width: 200px;">
+
+                                        </div>
+
+                                        <div class="mb-3">
+
+                                            <label for="schedule" class="form-label">時刻表編輯：</label>
+
+                                            <input type="text" class="form-control" id="schedule" required style="width: 200px;">
+
+                                        </div>
+
+                                    </form>
+
+                                </div>
+
+                                <div class="modal-footer">
+
+                                    <button type="button" class="btn btn-primary" id="addTimeSlot" data-bs-dismiss="modal">新增</button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div> -->
+                    <!--如果要用回checkbox的話 還有deleteCheckedRows()可以當eventListener-->
+                    <button class="btn btn-outline-dark" type="button" onclick="clinPage(event)" id="btnClinPage" style="font-size: 20px; width: 160px; height: 40px;" data-bs-toggle="modal" data-bs-target="#exampleModal">
+
+                        <i class="bi bi-calendar-check-fill"></i>
+
+                        回到主頁
+
+                    </button>
+    
+                      
+                  </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--頁面底-->
+    
+    <!-- Bootstrap core JS-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Core theme JS-->
+    <script src="{% static 'myApp/js/scripts.js' %}"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function(){
+            document.getElementById('btnClinPage').innerText = "回到主頁"
+            doc_info();
+        })
+        
+
+        function clinPage(event){
+            event.preventDefault();
+            window.location.href = '/clinic/home/'
+           
+        }
+
+        function addDocPage(event){
+            event.preventDefault();
+            window.location.href = "/doctor/data/edit"
+        }
+    
+        //該診所現有醫生跟他們的資料顯示
+        function doc_info() {
+            fetch('/success/')
+                .then(response => response.json())
+                .then(data => {
+                    const doctors = data.doctors;
+                    const tableBody = document.getElementById('doctor_info_body');
+                    doctors.forEach(doctor => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${doctor.name}</td>
+                            <td>${doctor.email}</td>
+                            <td>${doctor.phone_number}</td>
+                            <td>${doctor.exoerience}</td>
+                            <td>
+                                <form class="delete-doctor-form">
+                                    {% csrf_token %}
+                                    <div>
+                                        <button type="submit" data-doctor-email="${doctor.email}" class="btn btn-outline-dark">刪除</button>
+                                    </div>
+                                </form>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                    const deleteForms = document.querySelectorAll('.delete-doctor-form');
+                    deleteForms.forEach(form => {
+                        form.addEventListener('submit', function(event) {
+                            event.preventDefault(); // 阻止表单默认提交行为                           
+                            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                            const doctorEmail = form.querySelector('button').dataset.doctorEmail;
+        
+                            fetch(`/doctor/delete/${doctorEmail}/`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRFToken': csrfToken
+                                },
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                alert(data.message);
+                                window.location.href = '/doctor/manage' 
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                            });
+                        });
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        /*function deleteCheckedRows() {
+    
+            const table = document.getElementById('doctorTable').getElementsByTagName('tbody')[0];
+    
+            const rows = table.getElementsByTagName('tr');
+    
+            for (let i = rows.length - 1; i >= 0; i--) {
+    
+                const checkbox = rows[i].getElementsByTagName('input')[0];
+    
+                if (checkbox.checked) {
+    
+                    table.deleteRow(i);
+    
+                }
+    
+            }
+    
+        }*/
+    
+    
+    
+        function toggleDeleteButton() {
+    
+            const table = document.getElementById('doctorTable').getElementsByTagName('tbody')[0];
+    
+            const rows = table.getElementsByTagName('tr');
+    
+            let anyChecked = false;
+    
+            for (const row of rows) {
+    
+                const checkbox = row.getElementsByTagName('input')[0];
+    
+                if (checkbox.checked) {
+    
+                    anyChecked = true;
+    
+                    break;
+    
+                }
+    
+            }
+    
+            document.getElementById('deleteButton').disabled = !anyChecked;
+    
+        }
+      
+  </script>
+</body>
+</html>
