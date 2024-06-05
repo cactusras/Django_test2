@@ -97,7 +97,7 @@ class Doctor(CustomUser):
 class Expertise(models.Model):
     
     name = models.CharField(max_length=100)
-    time = models.TimeField()
+    time = models.TimeField(default=time(hour=1))
 
     def __str__(self):
         return self.name

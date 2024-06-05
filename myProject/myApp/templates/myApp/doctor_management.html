@@ -173,6 +173,10 @@
 
         function addDocPage(event){
             event.preventDefault();
+            localStorage.removeItem('expertise');
+            localStorage.removeItem('doctorData');
+            localStorage.removeItem('working_hour_list');
+            localStorage.removeItem('schedulingForm');
             window.location.href = "/doctor/data/edit"
         }
     

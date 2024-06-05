@@ -109,7 +109,7 @@
                             <div id="doctor-info">
                                 <h2>{{ doctor }}</h2>
                                 <p>Email: {{ doctor.email }}</p>
-                                <p>Phone: {{ doctor.phone }}</p>
+                                <p>Phone: {{ doctor.phone_number }}</p>
                                 <p>Clinic: {{ doctor.clinicID.name }}</p>
                                 <p>學經歷: {{ doctor.experience }}</p>
                                  <!-- 渲染醫師的學經歷 -->
@@ -144,12 +144,12 @@
                                 <!-- 可用时间选项将由 JavaScript 动态添加 -->
                             </select>
                         </br>
-                            {% comment %} <label for="expertise_list">医生的项目列表：</label>
+                           <label for="expertise_list">医生的项目列表：</label>
                             <ul id="expertise_list"></ul> <!-- 用于显示项目列表 -->
                         
                             <label for="working_hours">医生的上班时间：</label>
                             <ul id="working_hours"></ul> <!-- 用于显示上班时间 -->
-                         {% endcomment %}
+                       
                             <button type="submit">预约</button>
                         </form>
 
@@ -287,7 +287,7 @@
     });
 
     function fetchAvailableTimes() {
-        const doctorId =  8;
+        const doctorId =    {{ doctor.id }};
         const date = document.getElementById('date').value;
         const expertiseName = document.getElementById('expertise_name').value;
 
@@ -306,6 +306,7 @@
                     timeSelect.disabled = false;
                 })
                 .catch(error => console.error('Error fetching available times:', error));
+                console.log(date)
         }
     }
 
