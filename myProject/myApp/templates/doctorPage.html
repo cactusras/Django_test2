@@ -98,7 +98,7 @@
                 doc_reserve_info();
             })
 
-              function doc_reserve_info() {
+            function doc_reserve_info() {
                 fetch('/doctor/page/loading/')
                     .then(response => response.json())
                     .then(data => {
@@ -115,7 +115,7 @@
                             `;
                             tableBody.appendChild(row);
                         });
-                      });
+                      })
                     .catch(error => console.error('Error:', error));
               }
             </script>

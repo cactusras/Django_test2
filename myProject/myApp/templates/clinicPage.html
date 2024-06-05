@@ -28,6 +28,10 @@
             padding: 20px;
         }
     </style>
+
+    <script>
+        const csrfToken = "{{ csrf_token }}";  // 将 CSRF 令牌作为 JavaScript 变量直接写入
+    </script>
 </head>
 
 <body>
@@ -35,34 +39,22 @@
     <nav class="navbar navbar-expand-lg" style="background-color:#F0EAD6;  height: 100px;">
         <div class="container px-4 px-lg-5">
             <img src="{% static 'myApp/assets/dental.png' %}" alt="DEN Logo">
-            <a class="navbar-brand" href="#!"  style="font-size: 24px;"> 牙醫預約平台</a>
+            <a class="navbar-brand" href="#!"  style="font-size: 24px;" onclick="mainPage(event)"> 牙醫預約平台</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4"></ul>
-                <form class="d-flex">
-                    <button class="btn btn-outline-dark" type="submit"  style="font-size: 20px;">
+                <div class="ms-auto">
+                    <button class="btn btn-outline-dark" type="submit" id="nav_btn" onclick="navBtn_listener(event)" style="font-size: 20px;">
                         <i class="bi bi-person-fill"></i>
                         使用者
                     </button>
-                </form>
+                </div>
             </div>
         </div>
     </nav>
 
     <section class="py-5"  style="background-color:#FFFFF4">
         <div class="container">
-            <div class="row g-2">
-                <div class="col-md-6">
-                    <div class="p-3" style="height:600px;">
-                        <div class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:80px; font-size: 20px;">
-                            診所時程
-                        </div>
-                        <div class="col d-flex align-items-center justify-content-center" style="background-color:#FFFFF0; border: 1px solid #ada089; height:500px; font-size: 20px;">
-                            <iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=Asia%2FTaipei&bgcolor=%23ffffff&mode=WEEK&src=MmE0OTVjZmVlYjBkYjBjMjdmNDNjODgzMjFmY2ZjYzg0ZTllNGNkZWFjNjNjNzljMGRjOTc0MGYyNmNkZDg4Y0Bncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=YzgxOGE4NzM2YTIxZGQ3OGZjOTI2NTJjZmMzN2IxYWE2NTJkMWVlYjY0NzFjYWJiOTBlMzk1Y2M3ZjkwN2ZmZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=emgtdHcudGFpd2FuI2hvbGlkYXlAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t&src=YWRkcmVzc2Jvb2sjY29udGFjdHNAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t&color=%237986CB&color=%234285F4&color=%230B8043&color=%2333B679" style="border:solid 1px #777; height: 500px; width: 600px;" frameborder="0" scrolling="no"></iframe>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
                     <div class="p-3" style="height:600px;">
                         <div class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:80px; font-size: 20px;">
                             當日預約確認報到
@@ -74,13 +66,12 @@
                                   <tr>
                                       <th scope="col">時間</th>
                                       <th scope="col">姓名</th>
-                                      <th scope="col">DOC</th>
+                                      <th scope="col">項目</th>
                                       <th scope="col">狀態</th>
-                                      <th scope="col">下次預約</th>
                                   </tr>
                               </thead>
-                              <tbody>
-                                <tr>
+                              <tbody id="clinic_reserve_body">
+                                <!--<tr>
                                     <td>A</td>
                                     <td>A</td>
                                     <td>A</td>
@@ -88,7 +79,7 @@
                                         <button type="button" class="btn btn-outline-dark" id="reportButton1" data-bs-toggle="modal" data-bs-target="#staticBackdrop1" style="font-size: 15px;">
                                             <i class="bi bi-x-circle"></i> 未報到
                                         </button>
-                                        <!-- Report Modal 1 -->
+                                        <!-- Report Modal 1
                                         <div class="modal fade" id="staticBackdrop1" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel1" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
@@ -111,7 +102,7 @@
                                         <button type="button" class="btn btn-outline-dark" id="appointmentButton1" data-bs-toggle="modal" data-bs-target="#appointmentModal1" style="font-size: 15px;" disabled>
                                             <i class="bi bi-calendar-check"></i> 預約
                                         </button>
-                                        <!-- New Appointment Modal 1 -->
+                                        <!-- New Appointment Modal 1 
                                         <div class="modal fade" id="appointmentModal1" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="appointmentModalLabel1" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
@@ -130,430 +121,12 @@
                                             </div>
                                         </div>
                                     </td>
-                                </tr>
-
-                                  <tr>
-                                      <td>A</td>
-                                      <td>A</td>
-                                      <td>A</td>
-                                      <td>
-                                        <button type="button" class="btn btn-outline-dark" id="reportButton2" data-bs-toggle="modal" data-bs-target="#staticBackdrop2" style="font-size: 15px;">
-                                            <i class="bi bi-x-circle"></i> 未報到
-                                        </button>
-                                        <!-- Report Modal 2 -->
-                                        <div class="modal fade" id="staticBackdrop2" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel2" aria-hidden="true">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="staticBackdropLabel2">報到確認</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        是否確認報到？
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-primary" id="confirmReportButton2" data-bs-dismiss="modal">是</button>
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">否</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-outline-dark" id="appointmentButton2" data-bs-toggle="modal" data-bs-target="#appointmentModal2" style="font-size: 15px;" disabled>
-                                            <i class="bi bi-calendar-check"></i> 預約
-                                        </button>
-                                        <!-- New Appointment Modal 2 -->
-                                        <div class="modal fade" id="appointmentModal2" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="appointmentModalLabel2" aria-hidden="true">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="appointmentModalLabel2">下次預約確認</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        是否要預約下次服務？
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-primary" id="confirmAppointmentButton2" data-bs-dismiss="modal">是</button>
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">否</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>  
-                                  </tr>
-                                  <tr>
-                                      <td>A</td>
-                                      <td>A</td>
-                                      <td>A</td>
-                                      <td>
-                                        <button type="button" class="btn btn-outline-dark" id="reportButton3" data-bs-toggle="modal" data-bs-target="#staticBackdrop3" style="font-size: 15px;">
-                                            <i class="bi bi-x-circle"></i> 未報到
-                                        </button>
-                                        <!-- Report Modal 3 -->
-                                        <div class="modal fade" id="staticBackdrop3" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel3" aria-hidden="true">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="staticBackdropLabel3">報到確認</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        是否確認報到？
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-primary" id="confirmReportButton3" data-bs-dismiss="modal">是</button>
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">否</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-outline-dark" id="appointmentButton3" data-bs-toggle="modal" data-bs-target="#appointmentModal3" style="font-size: 15px;" disabled>
-                                            <i class="bi bi-calendar-check"></i> 預約
-                                        </button>
-                                        <!-- New Appointment Modal 3 -->
-                                        <div class="modal fade" id="appointmentModal3" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="appointmentModalLabel3" aria-hidden="true">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="appointmentModalLabel3">下次預約確認</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        是否要預約下次服務？
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-primary" id="confirmAppointmentButton3" data-bs-dismiss="modal">是</button>
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">否</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                  
-                                  <tr>
-                                      <td>A</td>
-                                      <td>A</td>
-                                      <td>A</td>
-                                                                        <!-- Row 4 -->
-                                    <td>
-                                        <button type="button" class="btn btn-outline-dark" id="reportButton4" data-bs-toggle="modal" data-bs-target="#staticBackdrop4" style="font-size: 15px;">
-                                            <i class="bi bi-x-circle"></i> 未報到
-                                        </button>
-                                        <!-- Report Modal 4 -->
-                                        <div class="modal fade" id="staticBackdrop4" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel4" aria-hidden="true">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="staticBackdropLabel4">報到確認</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        是否確認報到？
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-primary" id="confirmReportButton4" data-bs-dismiss="modal">是</button>
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">否</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-outline-dark" id="appointmentButton4" data-bs-toggle="modal" data-bs-target="#appointmentModal4" style="font-size: 15px;" disabled>
-                                            <i class="bi bi-calendar-check"></i> 預約
-                                        </button>
-                                        <!-- New Appointment Modal 4 -->
-                                        <div class="modal fade" id="appointmentModal4" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="appointmentModalLabel4" aria-hidden="true">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="appointmentModalLabel4">下次預約確認</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        是否要預約下次服務？
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-primary" id="confirmAppointmentButton4" data-bs-dismiss="modal">是</button>
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">否</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                  <tr>
-                                      <td>A</td>
-                                      <td>A</td>
-                                      <td>A</td>
-                                      <td>
-                                        <button type="button" class="btn btn-outline-dark" id="reportButton5" data-bs-toggle="modal" data-bs-target="#staticBackdrop5" style="font-size: 15px;">
-                                            <i class="bi bi-x-circle"></i> 未報到
-                                        </button>
-                                        <!-- Report Modal 5 -->
-                                        <div class="modal fade" id="staticBackdrop5" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel5" aria-hidden="true">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="staticBackdropLabel5">報到確認</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        是否確認報到？
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-primary" id="confirmReportButton5" data-bs-dismiss="modal">是</button>
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">否</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-outline-dark" id="appointmentButton5" data-bs-toggle="modal" data-bs-target="#appointmentModal5" style="font-size: 15px;" disabled>
-                                            <i class="bi bi-calendar-check"></i> 預約
-                                        </button>
-                                        <!-- New Appointment Modal 5 -->
-                                        <div class="modal fade" id="appointmentModal5" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="appointmentModalLabel5" aria-hidden="true">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="appointmentModalLabel5">下次預約確認</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        是否要預約下次服務？
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-primary" id="confirmAppointmentButton5" data-bs-dismiss="modal">是</button>
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">否</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                  </tr>
-
-                                  <tr>
-                                      <td>A</td>
-                                      <td>A</td>
-                                      <td>A</td>
-                                      <td>
-                                        <button type="button" class="btn btn-outline-dark" id="reportButton6" data-bs-toggle="modal" data-bs-target="#staticBackdrop6" style="font-size: 15px;">
-                                            <i class="bi bi-x-circle"></i> 未報到
-                                        </button>
-                                        <!-- Report Modal 6 -->
-                                        <div class="modal fade" id="staticBackdrop6" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel6" aria-hidden="true">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="staticBackdropLabel6">報到確認</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        是否確認報到？
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-primary" id="confirmReportButton6" data-bs-dismiss="modal">是</button>
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">否</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-outline-dark" id="appointmentButton6" data-bs-toggle="modal" data-bs-target="#appointmentModal6" style="font-size: 15px;" disabled>
-                                            <i class="bi bi-calendar-check"></i> 預約
-                                        </button>
-                                        <!-- New Appointment Modal 6 -->
-                                        <div class="modal fade" id="appointmentModal6" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="appointmentModalLabel6" aria-hidden="true">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="appointmentModalLabel6">下次預約確認</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        是否要預約下次服務？
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-primary" id="confirmAppointmentButton6" data-bs-dismiss="modal">是</button>
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">否</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                  </tr>
-
-                                  <tr>
-                                      <td>A</td>
-                                      <td>A</td>
-                                      <td>A</td>
-                                        <!-- Row 7 -->
-                                        <td>
-                                            <button type="button" class="btn btn-outline-dark" id="reportButton7" data-bs-toggle="modal" data-bs-target="#staticBackdrop7" style="font-size: 15px;">
-                                                <i class="bi bi-x-circle"></i> 未報到
-                                            </button>
-                                            <!-- Report Modal 7 -->
-                                            <div class="modal fade" id="staticBackdrop7" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel7" aria-hidden="true">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="staticBackdropLabel7">報到確認</h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            是否確認報到？
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-primary" id="confirmReportButton7" data-bs-dismiss="modal">是</button>
-                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">否</button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <button type="button" class="btn btn-outline-dark" id="appointmentButton7" data-bs-toggle="modal" data-bs-target="#appointmentModal7" style="font-size: 15px;" disabled>
-                                                <i class="bi bi-calendar-check"></i> 預約
-                                            </button>
-                                            <!-- New Appointment Modal 7 -->
-                                            <div class="modal fade" id="appointmentModal7" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="appointmentModalLabel7" aria-hidden="true">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="appointmentModalLabel7">下次預約確認</h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            是否要預約下次服務？
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-primary" id="confirmAppointmentButton7" data-bs-dismiss="modal">是</button>
-                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">否</button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                  </tr>
-                                  <tr>
-                                      <td>A</td>
-                                      <td>A</td>
-                                      <td>A</td>                           <!-- Row 8 -->
-                                    <td>
-                                        <button type="button" class="btn btn-outline-dark" id="reportButton8" data-bs-toggle="modal" data-bs-target="#staticBackdrop8" style="font-size: 15px;">
-                                            <i class="bi bi-x-circle"></i> 未報到
-                                        </button>
-                                        <!-- Report Modal 8 -->
-                                        <div class="modal fade" id="staticBackdrop8" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel8" aria-hidden="true">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="staticBackdropLabel8">報到確認</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        是否確認報到？
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-primary" id="confirmReportButton8" data-bs-dismiss="modal">是</button>
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">否</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-outline-dark" id="appointmentButton8" data-bs-toggle="modal" data-bs-target="#appointmentModal8" style="font-size: 15px;" disabled>
-                                            <i class="bi bi-calendar-check"></i> 預約
-                                        </button>
-                                        <!-- New Appointment Modal 8 -->
-                                        <div class="modal fade" id="appointmentModal8" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="appointmentModalLabel8" aria-hidden="true">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="appointmentModalLabel8">下次預約確認</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        是否要預約下次服務？
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-primary" id="confirmAppointmentButton8" data-bs-dismiss="modal">是</button>
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">否</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                      <td>A</td>
-                                      <td>A</td>
-                                      <td>A</td>
-                                      <!-- Row 9 -->
-                                    <td>
-                                        <button type="button" class="btn btn-outline-dark" id="reportButton9" data-bs-toggle="modal" data-bs-target="#staticBackdrop9" style="font-size: 15px;">
-                                            <i class="bi bi-x-circle"></i> 未報到
-                                        </button>
-                                        <!-- Report Modal 9 -->
-                                        <div class="modal fade" id="staticBackdrop9" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel9" aria-hidden="true">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="staticBackdropLabel9">報到確認</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        是否確認報到？
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-primary" id="confirmReportButton9" data-bs-dismiss="modal">是</button>
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">否</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-outline-dark" id="appointmentButton9" data-bs-toggle="modal" data-bs-target="#appointmentModal9" style="font-size: 15px;" disabled>
-                                            <i class="bi bi-calendar-check"></i> 預約
-                                        </button>
-                                        <!-- New Appointment Modal 9 -->
-                                        <div class="modal fade" id="appointmentModal9" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="appointmentModalLabel9" aria-hidden="true">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="appointmentModalLabel9">下次預約確認</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        是否要預約下次服務？
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-primary" id="confirmAppointmentButton9" data-bs-dismiss="modal">是</button>
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">否</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                  </tr>
+                                </tr>-->
                               </tbody>
                           </table>
                       </div>
                       
                     </div>
-                </div>
-            </div>
         </div>
     </section>
 
@@ -566,115 +139,219 @@
     <!-- Bootstrap core JS-->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Core theme JS-->
-    <script src="js/scripts.js"></script>
+    <script src="{% static 'myApp/js/scripts.js' %}"></script>
     <script>
-        // For Button 1
-        document.getElementById('confirmReportButton1').addEventListener('click', function() {
-            document.getElementById('reportButton1').innerHTML = '<i class="bi bi-check-circle-fill"></i> 已報到';
-            document.getElementById('reportButton1').disabled = true;
-            document.getElementById('appointmentButton1').disabled = false;
-        });
-    
-        document.getElementById('confirmAppointmentButton1').addEventListener('click', function() {
-            document.getElementById('appointmentButton1').innerHTML = '<i class="bi bi-check-circle-fill"></i> 已預約';
-            document.getElementById('appointmentButton1').disabled = true;
-        });
 
-        // For Button 2
-        document.getElementById('confirmReportButton2').addEventListener('click', function() {
-            document.getElementById('reportButton2').innerHTML = '<i class="bi bi-check-circle-fill"></i> 已報到';
-            document.getElementById('reportButton2').disabled = true;
-            document.getElementById('appointmentButton2').disabled = false;
-        });
-    
-        document.getElementById('confirmAppointmentButton2').addEventListener('click', function() {
-            document.getElementById('appointmentButton2').innerHTML = '<i class="bi bi-check-circle-fill"></i> 已預約';
-            document.getElementById('appointmentButton2').disabled = true;
-        });
-
-        // For Button 3
-        document.getElementById('confirmReportButton3').addEventListener('click', function() {
-            document.getElementById('reportButton3').innerHTML = '<i class="bi bi-check-circle-fill"></i> 已報到';
-            document.getElementById('reportButton3').disabled = true;
-            document.getElementById('appointmentButton3').disabled = false;
-        });
-
-        document.getElementById('confirmAppointmentButton3').addEventListener('click', function() {
-            document.getElementById('appointmentButton3').innerHTML = '<i class="bi bi-check-circle-fill"></i> 已預約';
-            document.getElementById('appointmentButton3').disabled = true;
-        });
-
-        // For Button 4
-        document.getElementById('confirmReportButton4').addEventListener('click', function() {
-            document.getElementById('reportButton4').innerHTML = '<i class="bi bi-check-circle-fill"></i> 已報到';
-            document.getElementById('reportButton4').disabled = true;
-            document.getElementById('appointmentButton4').disabled = false;
-        });
-
-        document.getElementById('confirmAppointmentButton4').addEventListener('click', function() {
-            document.getElementById('appointmentButton4').innerHTML = '<i class="bi bi-check-circle-fill"></i> 已預約';
-            document.getElementById('appointmentButton4').disabled = true;
-        });
-
-        // For Button 5
-        document.getElementById('confirmReportButton5').addEventListener('click', function() {
-            document.getElementById('reportButton5').innerHTML = '<i class="bi bi-check-circle-fill"></i> 已報到';
-            document.getElementById('reportButton5').disabled = true;
-            document.getElementById('appointmentButton5').disabled = false;
-        });
-
-        document.getElementById('confirmAppointmentButton5').addEventListener('click', function() {
-            document.getElementById('appointmentButton5').innerHTML = '<i class="bi bi-check-circle-fill"></i> 已預約';
-            document.getElementById('appointmentButton5').disabled = true;
-        });
-
-        // For Button 6
-        document.getElementById('confirmReportButton6').addEventListener('click', function() {
-            document.getElementById('reportButton6').innerHTML = '<i class="bi bi-check-circle-fill"></i> 已報到';
-            document.getElementById('reportButton6').disabled = true;
-            document.getElementById('appointmentButton6').disabled = false;
-        });
-
-        document.getElementById('confirmAppointmentButton6').addEventListener('click', function() {
-            document.getElementById('appointmentButton6').innerHTML = '<i class="bi bi-check-circle-fill"></i> 已預約';
-            document.getElementById('appointmentButton6').disabled = true;
-        });
-
-        // For Button 7
-        document.getElementById('confirmReportButton7').addEventListener('click', function() {
-            document.getElementById('reportButton7').innerHTML = '<i class="bi bi-check-circle-fill"></i> 已報到';
-            document.getElementById('reportButton7').disabled = true;
-            document.getElementById('appointmentButton7').disabled = false;
-        });
-
-        document.getElementById('confirmAppointmentButton7').addEventListener('click', function() {
-            document.getElementById('appointmentButton7').innerHTML = '<i class="bi bi-check-circle-fill"></i> 已預約';
-            document.getElementById('appointmentButton7').disabled = true;
-        });
+        document.addEventListener("DOMContentLoaded", function(event){
+            event.preventDefault()
+            clin_reserve_info();
+        })
         
-        // For Button 8
-        document.getElementById('confirmReportButton8').addEventListener('click', function() {
-            document.getElementById('reportButton8').innerHTML = '<i class="bi bi-check-circle-fill"></i> 已報到';
-            document.getElementById('reportButton8').disabled = true;
-            document.getElementById('appointmentButton8').disabled = false;
+        var reservation_id = "";
+
+        function clin_reserve_info() {
+            fetch('/clinic/load/')
+                .then(response => response.json())
+                .then(data => {
+                    const reservations = data.reservations;
+                    const clinic_info = data.clinic;
+                    /*reservation_id = clinic_info.id
+                    console.log("id out" + reservation_id)*/
+                    console.log('res = ' + clinic_info)
+                    const tableBody = document.getElementById('clinic_reserve_body');
+                    reservations.forEach(reservation => {
+                        reservation_id = reservation.id
+                        console.log("id in" + reservation_id)
+                        const row = document.createElement('tr');
+                        const statusCell = document.createElement('td');
+                        statusCell.innerHTML = change_status(reservation.status, reservation.id, clinic_info.id);
+                        
+                        row.innerHTML = `
+                            <td>${reservation.appointment_date}  ${reservation.appointment_time}</td>
+                            <td>${reservation.client_name}</td>
+                            <td>${reservation.expertise}</td>
+                        `;
+                        row.appendChild(statusCell);
+                        tableBody.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+          }
+        
+        //根據不同狀態改變innerHtml
+        function change_status(status, reservation_id, clinic_id){
+            let result = "";
+            if(status == 'reserved'){
+                result = `<button type="button" class="btn btn-outline-dark" 
+                                    data-bs-toggle="modal" data-bs-target="#checkinModal${reservation_id}" 
+                                    data-index="${reservation_id}" style="font-size: 15px;">
+                                <i class="bi bi-calendar-check"></i> 病患報到
+                            </button>
+                            <div class="modal fade" id="checkinModal${reservation_id}" tabindex="-1" aria-labelledby="checkinModalLabel${reservation_id}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="checkinModalLabel${reservation_id}">病患報到狀態</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-primary" id="checkinButton${reservation_id}" 
+                                                data-bs-dismiss="modal"  onclick="update_status_two(${reservation_id})">
+                                                病患已報到
+                                            </button>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="update_status_one(${reservation_id})">
+                                                病患未報到
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`
+            }else if(status == 'checkin failed'){
+                result = `病患未報到`
+            }else if(status == 'checkin successed'){
+                result = `<button type="button" class="btn btn-outline-dark" data-index="${reservation_id}" style="font-size: 15px;" onclick="update_status_three(${reservation_id})">
+                            <i class="bi bi-calendar-check"></i> 開始看診
+                          </button>`
+            }else if(status == 'in treatment'){
+                result = `<button type="button" class="btn btn-outline-dark" data-index="${reservation_id}" style="font-size: 15px;" onclick="update_status_four(${reservation_id})">
+                            <i class="bi bi-calendar-check"></i> 看診完成
+                        </button>`
+            }else if(status == 'finish'){
+                result = `<button type="button" class="btn btn-outline-dark" 
+                                    data-bs-toggle="modal" data-bs-target="#appointmentModal${reservation_id}" 
+                                    data-index="${reservation_id}" style="font-size: 15px;">
+                                <i class="bi bi-calendar-check"></i> 預約下次看診
+                            </button>
+                            <div class="modal fade" id="appointmentModal${reservation_id}" tabindex="-1" aria-labelledby="appointmentModalLabel${reservation_id}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="appointmentModalLabel${reservation_id}">下次預約確認</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            是否要預約下次服務？
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-primary appointment-button" id="confirmAppointmentButton${reservation_id}" 
+                                                data-bs-dismiss="modal" data-clinic-id="${clinic_id}">
+                                                是
+                                            </button>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                否
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`
+            }else if(status == 'cancelled by doc'){
+                result = `醫生取消此預約`
+            }
+            return result
+        }
+
+        document.addEventListener('click', function(event) {
+            if (event.target.matches('.appointment-button')) {
+                const clinicId = event.target.dataset.clinicId;
+                window.location.href = `/clinic/reserve/${clinicId}/`;
+            
+            }
         });
 
-        document.getElementById('confirmAppointmentButton8').addEventListener('click', function() {
-            document.getElementById('appointmentButton8').innerHTML = '<i class="bi bi-check-circle-fill"></i> 已預約';
-            document.getElementById('appointmentButton8').disabled = true;
-        });
+        //連到各個views.py去更新status
+        function update_status_one(reservationId) {
+            
+            fetch(`/reservation/status/change/checkinfailed/${reservationId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken  // 添加 CSRF 令牌
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    window.location.href = '/clinic/home/'
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+        
+        function update_status_two(reservationId) {
+            
+            fetch(`/reservation/status/change/checkinsuccessed/${reservationId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken  // 添加 CSRF 令牌
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    window.location.href = '/clinic/home/'
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+        
+        function update_status_three(reservationId) {
+            
+            fetch(`/reservation/status/change/intreatment/${reservationId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken  // 添加 CSRF 令牌
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    window.location.href = '/clinic/home/'
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+        
+        function update_status_four(reservationId) {
+            
+            fetch(`/reservation/status/change/finished/${reservationId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken  // 添加 CSRF 令牌
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    window.location.href = '/clinic/home/'
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+        
 
-        // For Button 9
-        document.getElementById('confirmReportButton9').addEventListener('click', function() {
-            document.getElementById('reportButton9').innerHTML = '<i class="bi bi-check-circle-fill"></i> 已報到';
-            document.getElementById('reportButton9').disabled = true;
-            document.getElementById('appointmentButton9').disabled = false;
-        });
-
-        document.getElementById('confirmAppointmentButton9').addEventListener('click', function() {
-            document.getElementById('appointmentButton9').innerHTML = '<i class="bi bi-check-circle-fill"></i> 已預約';
-            document.getElementById('appointmentButton9').disabled = true;
-        });
         
     </script>
 </body>
