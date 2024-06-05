@@ -62,7 +62,11 @@
             .popup-buttons {
                 margin-top: 10px;
             }
+            #doctor_id {
+                display: none;
+            }
         </style>
+       
     </head>
     <body>
         <!--網頁頭-->
@@ -87,6 +91,7 @@
             </div>
         </nav>
         <!--選取的診所名稱-->
+        
         <section class="py-5"  style="background-color:#FFFFF4">
             <div class="container" style="border: 1px solid #F0EAD6;">
                 <div class="row row-cols-1">
@@ -96,7 +101,61 @@
                     <!--內容-->
                     <div class="col" style="background-color:#fffff0; border: 1px solid #ada089; height:760px; font-size: 20px;">
                     <br>
-                        <label for="date1">醫師學經歷 : </label>
+                        <div id="doctor-experience"></div>
+                        <div id="clinic-info"></div>
+                        <div id="doctor-address"></div>
+                        
+                        <h1>Doctor Reservation</h1>
+                            <div id="doctor-info">
+                                <h2>{{ doctor }}</h2>
+                                <p>Email: {{ doctor.email }}</p>
+                                <p>Phone: {{ doctor.phone }}</p>
+                                <p>Clinic: {{ doctor.clinicID.name }}</p>
+                                <p>學經歷: {{ doctor.experience }}</p>
+                                 <!-- 渲染醫師的學經歷 -->
+                            
+                            </select>
+                        </div>
+
+                        <form id="reservationForm" method="post" action='/add/reservation/' >
+                            {% csrf_token %}
+                            <label for="doctor_id"></label>
+                            {% comment %} {{ doctor.id }} {% endcomment %}
+
+                            <input type="input" id="doctor_id" name="doctor_id" value={{ doctor.id }}>
+
+                            {% comment %} <input type="number" id="doctor_id" name="doctor_id">  {% endcomment %}
+                            
+                            <br>
+                            <label for="date">reservation date：</label>
+                            <input type="date" id="date" name="date">
+                       
+                            </br>
+                            <label for="expertise_name">treatments：</label>
+                            <select id="expertise_name" name="expertise_name" class="form-select" aria-label="Select Expertise">
+                                <option selected disabled>選擇專業</option>
+                                {% for expertise in expertise_list %}
+                                <option value="{{ expertise }}">{{ expertise }}</option>
+                                {% endfor %}
+                            </select>
+                            <br>
+                            <label for="time_start">starting time：</label>
+                            <select id="time_start" name="time_start" disabled>
+                                <!-- 可用时间选项将由 JavaScript 动态添加 -->
+                            </select>
+                        </br>
+                            {% comment %} <label for="expertise_list">医生的项目列表：</label>
+                            <ul id="expertise_list"></ul> <!-- 用于显示项目列表 -->
+                        
+                            <label for="working_hours">医生的上班时间：</label>
+                            <ul id="working_hours"></ul> <!-- 用于显示上班时间 -->
+                         {% endcomment %}
+                            <button type="submit">预约</button>
+                        </form>
+
+
+
+                        {% comment %} <label for="date1">醫師學經歷 : </label>
                     <br>
                         <label for="date1">地址 : </label>
                         
@@ -111,7 +170,7 @@
                             <option value="4">根管治療</option>
                             <option value="5">活髓保存</option>
                         </select>
-                    <br>
+                    <br> {% endcomment %}
                         <!--選取醫師>
                         <label for="date1">醫師</label>
                         <select class="form-select" aria-label="Default select example" style="width: 320px; height: 40px; font-size: 16px;">
@@ -122,16 +181,16 @@
                             </select-->
                     <br>
                         <!--選取日期-->
-                        <form action="">
-                            <label for="date1">日期</label>
+                        {% comment %} <form action=""> {% endcomment %}
+                            {% comment %} <label for="date1">日期</label>
                             <div class="input-group date" id='date1'>  
                                 <input type="text" class="form-control" />  
                                 <span class="input-group-addon">  
                                     <i class="glyphicon glyphicon-calendar"></i>  
                                 </span>
-                            </div>  
-                        </form> 
-                              <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+                            </div>   {% endcomment %}
+                        {% comment %} </form>  {% endcomment %}
+                              {% comment %} <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
                               <script src="https://cdn.bootcss.com/moment.js/2.18.1/moment-with-locales.min.js"></script>
                               <script src="https://cdn.bootcss.com/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
                               <script>
@@ -152,7 +211,10 @@
                               });
                               </script>
                         <br>
-                        <!-- 時段選取按鈕 -->
+                        <!-- 時段選取按鈕 --> {% endcomment %}
+
+
+
                         <label for="date1">時段</label>
                         <div class="button-container">
                             <div class="button-row">
@@ -182,7 +244,104 @@
 
                          <!-- 確認預約 -->
                          <script src="{% static 'myApp/js/scripts.js' %}" ></script>
-                         <script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const doctorIdInput = {{ doctor.id }};
+        const expertiseDropdown = document.getElementById('expertiseDropdown');
+        const workingHoursContainer = document.getElementById('working_hours');
+
+        doctorIdInput.addEventListener('change', function() {
+            const doctorId = doctorIdInput.value;
+            if (doctorId) {
+                fetch(`/doctor/expertise-list/${doctorId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        expertiseDropdown.innerHTML = '<option selected disabled>選擇專業</option>'; // Clear and add default option
+                        const expertiseSet = new Set(); // Use a set to store unique expertise
+                        data.expertise_list.forEach(expertise => {
+                            expertiseSet.add(expertise.name); // Add each expertise to the set
+                        });
+                        expertiseSet.forEach(expertiseName => {
+                            const option = document.createElement('option');
+                            option.value = expertiseName;
+                            option.textContent = expertiseName;
+                            expertiseDropdown.appendChild(option); // Add unique expertise to the dropdown
+                        });
+                    })
+                    .catch(error => console.error('Error fetching doctor expertise list:', error));
+    
+                fetch(`/get_doc_working/${doctorId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        workingHoursContainer.innerHTML = '';
+                        data.working_hours.forEach(workingHour => {
+                            const li = document.createElement('li');
+                            li.textContent = `${workingHour.start_date} - ${workingHour.end_date}: ${workingHour.start_time} - ${workingHour.end_time}`;
+                            workingHoursContainer.appendChild(li);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching doctor working hours:', error));
+            }
+        });
+    });
+
+    function fetchAvailableTimes() {
+        const doctorId =  8;
+        const date = document.getElementById('date').value;
+        const expertiseName = document.getElementById('expertise_name').value;
+
+        if (doctorId && date && expertiseName) {
+            fetch(`/available?doctor_id=${doctorId}&date=${date}&expertise_name=${expertiseName}`)
+                .then(response => response.json())
+                .then(data => {
+                    const timeSelect = document.getElementById('time_start');
+                    timeSelect.innerHTML = '';
+                    data.reserve_choices.forEach(choice => {
+                        const option = document.createElement('option');
+                        option.text = choice;
+                        option.value = choice;
+                        timeSelect.add(option);
+                    });
+                    timeSelect.disabled = false;
+                })
+                .catch(error => console.error('Error fetching available times:', error));
+        }
+    }
+
+    document.getElementById('date').addEventListener('input', fetchAvailableTimes);
+    //document.getElementById('doctor_id').addEventListener('input', fetchAvailableTimes);
+    document.getElementById('expertise_name').addEventListener('input', fetchAvailableTimes);
+
+
+</script>
+
+     <script>
+                            $(document).ready(function() {
+                                var docId = {{ doc_id }}; // 使用 Django 模板语法获取医生ID
+                            
+                                $.ajax({
+                                    type: 'GET',
+                                    url: `/reserve/doctor/${docId}/`,  // 替换成你的 Django URL 模式
+                                    success: function(response) {
+                                        var doctorData = JSON.parse(response.doctor)[0].fields;  // 解析 JSON 响应
+                            
+                                        // 在页面上显示医生信息
+                                        $('#doctor-info').html(`
+                                            <h2>${doctorData.name}</h2>
+                                            <p>Specialty: ${doctorData.expertise}</p>
+                                            <p>Email: ${doctorData.email}</p>
+                                            <!-- Add more fields as needed -->
+                                        `);
+                                    },
+                                    error: function(xhr, status, error) {
+                                        var errorMessage = JSON.parse(xhr.responseText).error;
+                                        alert(errorMessage);  // 如果请求失败，显示错误消息
+                                    }
+                                });
+                            });
+                            
+
                             let currentButtonId = null;
                             const confirmedButtons = new Set();
 
@@ -229,39 +388,7 @@
                                 document.getElementById('popupOverlay').style.display = 'none';
                             }
                         </script>
-                         <!-- 確認候補 -->
-                        <!--script>
-                            let currentButtonId = null;
-                            const confirmedButtons = new Set();
-
-                            function showPopup(timeSlot, buttonId) {
-                                if (confirmedButtons.has(buttonId)) {
-                                    return;
-                                }
-                                currentButtonId = buttonId;
-                                document.getElementById('popupContent').innerText = '候補時段: ' + timeSlot + '\n候補號碼為XXX\n是否確認候補?';
-                                document.getElementById('popup').style.display = 'block';
-                                document.getElementById('popupOverlay').style.display = 'block';
-                            }
-
-                            function changeText(buttonId) {
-                                const button = document.getElementById(buttonId);
-                                button.textContent = '確認候補';
-                                button.style.backgroundColor = '#2e1a02';
-                                confirmedButtons.add(buttonId);
-                            }
-
-                            function confirmSelection(isConfirmed) {
-                                if (isConfirmed) {
-                                    alert('您已確認此時段');
-                                    changeText(currentButtonId);
-                                } else {
-                                    alert('您已取消此時段');
-                                }
-                                document.getElementById('popup').style.display = 'none';
-                                document.getElementById('popupOverlay').style.display = 'none';
-                            }
-                        </script-->
+                         
                         <script>
                             function showup(message) {
                                 document.getElementById('popContent').innerText = message;
@@ -278,4 +405,7 @@
                                 document.getElementById('pop').style.display = 'none';
                                 document.getElementById('popOverlay').style.display = 'none';
                             }
+
                         </script>
+
+                        

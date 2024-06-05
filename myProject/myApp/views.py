@@ -6,7 +6,7 @@ from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 #from rest_framework import serializers
 #from myProject.encoder import CustomEncoder
-from .forms import DoctorForm,ClinicForm,ClientForm, LoginForm,SchedulingForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm,TestingForm
+from .forms import DoctorForm,ClinicForm,ClientForm, LoginForm,SchedulingForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm,TestingForm,SearchForm
 from django.db.models import Q
 from django.db import connection
 from django.contrib.auth.decorators import login_required
@@ -176,89 +176,6 @@ def add_client(request):
             return JsonResponse({'message': 'Invalid form data', 'errors': form.errors, 'status': 'error'})
     else:
         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
-
-# add/reservation/
-@login_required
-def add_Reservation(request):  
-    if request.user.is_authenticated:
-        user_id = request.user.id
-
-        if request.method == 'POST':
-            # Retrieve session data
-            doctor_id = request.session.get('doctor_id')
-            date = request.session.get('date')  # Assuming date format is YYYY-MM-DD
-            
-            try:
-                scheduling = Scheduling.objects.get(DoctorID=doctor_id, StartDate__lte=date, EndDate__gte=date)
-                SchedulingID = scheduling.id
-            except Scheduling.DoesNotExist:
-                return HttpResponse('No scheduling found for this doctor on selected date')
-
-            ExpID = request.session.get('ExpertiseID', 'Not Found')
-            timeS = request.session.get('StartingTime', 'Not defined')
-
-            if SchedulingID == 'NotFound' or ExpID == 'Not Found' or timeS == 'Not defined' :
-                return HttpResponse('Missing scheduling information')
-
-            # Convert string times to datetime objects
-            timeS = datetime.strptime(timeS, '%Y-%m-%d %H:%M:%S')
-            
-            # Fetch the expertise duration
-            try:
-                expertise = Expertise.objects.get(id=ExpID)
-                expertise_duration = timedelta(hours=expertise.time.hour, minutes=expertise.time.minute)
-            except Expertise.DoesNotExist:
-                return HttpResponse('Expertise not found')
-            #可預約，邏輯參考avaliable
-            status_conditions = Q(status=0) | Q(status=2) | Q(status=3)
-            reservations = Reservation.objects.filter(
-                SchedulingID=SchedulingID,
-                time_start__lt=datetime.combine(datetime.strptime(date, '%Y-%m-%d').date(), timeS),
-                time_end__gt=datetime.combine(datetime.strptime(date, '%Y-%m-%d').date(), timeS),
-                Expertise = expertise
-            )
-            scheduling = Scheduling.objects.get(id=SchedulingID)
-            day_of_week = timeS.weekday() + 1
-            working_hours = WorkingHour.objects.filter(
-                day_of_week=timeS.weekday() + 1,  # +1 because WorkingHour.day_of_week is 1-7, not 0-6
-                start_time__lte=timeS.time(),
-                end_time__gte=(timeS + expertise_duration).time()
-            )
-
-            if not working_hours.exists():
-                return HttpResponse('Doctor is not working during this time')
-
-            status_conditions = Q(status=1) | Q(status=5)
-            schedule_condition = Q(schedule_id=SchedulingID)
-            if (status_conditions&schedule_condition):
-                form = ReservationForm(request.POST)
-                if form.is_valid():
-                    try:
-                        with connection.cursor() as cursor:
-                            cursor.execute("INSERT INTO Reservation (ClientID, SchedulingID, expertiseID, time_start, time_end, status) VALUES (%s, %s, %s, %s, %s, %s)",
-                                           [user_id, SchedulingID, ExpID, timeS, timeS + expertise_duration, 0])
-                        return HttpResponse('Reservation successfully created')
-                    except Exception as e:
-                        return HttpResponse(f'Error creating reservation: {e}')
-                else:
-                    return HttpResponse('Form not valid')
-            elif schedule_condition:
-                form = WaitingForm(request.POST)
-                if form.is_valid():
-                    try:
-                        with connection.cursor() as cursor:
-                            cursor.execute("INSERT INTO Waiting (ClientID, SchedulingID, expertiseID, time_start, time_end, is_waiting) VALUES (%s, %s, %s, %s, %s, %s)",
-                                           [user_id, SchedulingID, ExpID, timeS, timeS + expertise_duration, False])
-                        return HttpResponse('Added to waiting list')
-                    except Exception as e:
-                        return HttpResponse(f'Error adding to waiting list: {e}')
-                else:
-                    return HttpResponse('Form not valid')
-
-        request.session.flush()
-        return (request,'myApp/UserAppointmentRecords.html')
-    else:
-        return HttpResponse('Login failed')
 
 # add/clinic/  
 #clinic posting
@@ -552,79 +469,79 @@ def delete_doctor(request, doctor_email):
 
     return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
-# doctor/clinic/search/
-@csrf_exempt
-def doctor_clinic_search_view(request):
-    # Apply the filter
-    filter = docClinicFilter(request.GET, queryset=docClinicSearch.objects.all())
+# # doctor/clinic/search/
+# @csrf_exempt
+# def doctor_clinic_search_view(request):
+#     # Apply the filter
+#     filter = docClinicFilter(request.GET, queryset=docClinicSearch.objects.all())
 
-    # Retrieve detailed information for each filtered doctor
-    detailed_doctors = []
-    detailed_clinics = []
-    for result in filter.qs:
-        doctor_details = {
-            'doc_id': result.doc_id,
-            'doc_name': result.doc_name,  # Changed from result.name to result.doc_name
-            'clinic_name': result.clinic_name,
-            'clinic_adress': result.clinic_adress,
-            'doc_exp': result.exp_name
-        }
-        detailed_doctors.append(doctor_details)
+#     # Retrieve detailed information for each filtered doctor
+#     detailed_doctors = []
+#     detailed_clinics = []
+#     for result in filter.qs:
+#         doctor_details = {
+#             'doc_id': result.doc_id,
+#             'doc_name': result.doc_name,  # Changed from result.name to result.doc_name
+#             'clinic_name': result.clinic_name,
+#             'clinic_adress': result.clinic_adress,
+#             'doc_exp': result.exp_name
+#         }
+#         detailed_doctors.append(doctor_details)
 
-        clinic_details = {
-            'clinic_id': result.clinic_id,
-            'clinic_name': result.clinic_name,
-            'clinic_adress': result.clinic_adress,
-            'clinic_introduction': result.clinic_introduction,
-            'doc_exp': result.exp_name
-        }
-        detailed_clinics.append(clinic_details)  # Changed from detailed_doctors to detailed_clinics
+#         clinic_details = {
+#             'clinic_id': result.clinic_id,
+#             'clinic_name': result.clinic_name,
+#             'clinic_adress': result.clinic_adress,
+#             'clinic_introduction': result.clinic_introduction,
+#             'doc_exp': result.exp_name
+#         }
+#         detailed_clinics.append(clinic_details)  # Changed from detailed_doctors to detailed_clinics
 
-    # Combine doctor details
-    doc_final = []
-    for doc in detailed_doctors:
-        # Check if the doctor already exists in doc_final
-        existing_doctor = next((item for item in doc_final if item['doc_name'] == doc['doc_name']), None)
-        if existing_doctor:
-            # Append the expertise to the existing doctor's expertise list
-            existing_doctor['doc_exp'].append(doc['doc_exp'])
-        else:
-            # Create a new dictionary for the doctor
-            new_doctor = {
-                'doc_id': doc['doc_id'],
-                'doc_name': doc['doc_name'],
-                'clinic_name': doc['clinic_name'],
-                'clinic_adress': doc['clinic_adress'],
-                'doc_exp': [doc['doc_exp']]  # Initialize doc_exp as a list
-            }
-            doc_final.append(new_doctor)
+#     # Combine doctor details
+#     doc_final = []
+#     for doc in detailed_doctors:
+#         # Check if the doctor already exists in doc_final
+#         existing_doctor = next((item for item in doc_final if item['doc_name'] == doc['doc_name']), None)
+#         if existing_doctor:
+#             # Append the expertise to the existing doctor's expertise list
+#             existing_doctor['doc_exp'].append(doc['doc_exp'])
+#         else:
+#             # Create a new dictionary for the doctor
+#             new_doctor = {
+#                 'doc_id': doc['doc_id'],
+#                 'doc_name': doc['doc_name'],
+#                 'clinic_name': doc['clinic_name'],
+#                 'clinic_adress': doc['clinic_adress'],
+#                 'doc_exp': [doc['doc_exp']]  # Initialize doc_exp as a list
+#             }
+#             doc_final.append(new_doctor)
 
-    # Combine clinic details
-    clinic_final = []
-    for clinic in detailed_clinics:
-        # Check if the clinic already exists in clinic_final
-        existing_clinic = next((item for item in clinic_final if item['clinic_name'] == clinic['clinic_name']), None)
-        if existing_clinic:
-            # Append the expertise to the existing clinic's expertise list
-            existing_clinic['doc_exp'].append(clinic['doc_exp'])
-        else:
-            # Create a new dictionary for the clinic
-            new_clinic = {
-                'clinic_id': clinic['clinic_id'],
-                'clinic_name': clinic['clinic_name'],
-                'clinic_adress': clinic['clinic_adress'],
-                'clinic_introduction': clinic['clinic_introduction'],
-                'doc_exp': [clinic['doc_exp']]  # Initialize doc_exp as a list
-            }
-            clinic_final.append(new_clinic)
+#     # Combine clinic details
+#     clinic_final = []
+#     for clinic in detailed_clinics:
+#         # Check if the clinic already exists in clinic_final
+#         existing_clinic = next((item for item in clinic_final if item['clinic_name'] == clinic['clinic_name']), None)
+#         if existing_clinic:
+#             # Append the expertise to the existing clinic's expertise list
+#             existing_clinic['doc_exp'].append(clinic['doc_exp'])
+#         else:
+#             # Create a new dictionary for the clinic
+#             new_clinic = {
+#                 'clinic_id': clinic['clinic_id'],
+#                 'clinic_name': clinic['clinic_name'],
+#                 'clinic_adress': clinic['clinic_adress'],
+#                 'clinic_introduction': clinic['clinic_introduction'],
+#                 'doc_exp': [clinic['doc_exp']]  # Initialize doc_exp as a list
+#             }
+#             clinic_final.append(new_clinic)
 
-    # Prepare data to be returned as JsonResponse
-    data = {
-        'doctors': doc_final,
-        'clinics': clinic_final,
-    }
+#     # Prepare data to be returned as JsonResponse
+#     data = {
+#         'doctors': doc_final,
+#         'clinics': clinic_final,
+#     }
 
-    return JsonResponse(data)
+#     return JsonResponse(data)
 
 
 
@@ -694,37 +611,19 @@ def reservationStCbD(request, reservation_id):
 #預約此醫生按鈕按下去
 #doctor_reserve.html
 #doctor/reserve/<int:doc_id>/
+
 def doctor_reserve_page(request, doc_id):
+    doctor = Doctor.objects.get(id=doc_id)
+    doctor_expertise = Doc_Expertise.objects.filter(DocID=doctor).select_related('Expertise_ID').all()
 
-	request.session['doc_id'] = doc_id  # Save session
+    expertise_list = [ expertise.Expertise_ID.name for expertise in doctor_expertise]
 
-	# Fetch the doctor based on doc_id
-	doctor = get_object_or_404(Doctor, id=doc_id)
-	clinic = get_object_or_404(Clinic, id=doctor.clinicID)
+    context = {
+        'doctor': doctor,
+        'expertise_list': expertise_list
+    }
+    return render(request, 'myApp/doctor_reserve.html', context)
 
-	# Fetch the expertise related to the doctor
-	doctor_expertise = Doc_Expertise.objects.filter(DocID=doctor).select_related('Expertise_ID')
-
-	# Create a list of dictionaries with expertise name and time
-	expertise_list = []
-	for expertise in doctor_expertise:
-		expertise_dict = {
-			'name': expertise.Expertise_ID.name,
-			'time': expertise.Expertise_ID.time
-		}
-		expertise_list.append(expertise_dict)
-
-	# Store the expertise list in the session
-	request.session['expertise_list'] = expertise_list
-
-	context = {
-		'doctor': doctor,
-		'clinic': clinic,
-		'doctor_expertise': expertise_list,
-		#'schedules': doc_schedule_list
-		#'reserved': reservation_list
-	}
-	return render(request, 'myApp/doctor_reserve.html', context)
 
 
 #診所預約按鈕按下去
@@ -1257,25 +1156,52 @@ def client_info(request):
 def doctor_clinic_search_view(request):
     
     #似乎是要改成form形式，尚未成功合併到searchPage,不過在searchTest確定這個功能可運作，另外models裡有錯字需要修改：adress=?address
-    if request.method == 'GET':
-        # Get the search query from the request
-        search_query = request.GET.get('query', '')
+    # if request.method == 'GET':
+    #     # Get the search query from the request
+    #     search_query = request.GET.get('query', '')
         
-        #還有什麼條件都能在這裡加
+    #     #還有什麼條件都能在這裡加
 
-        # Apply the filter
-        filter = docClinicFilter(
+    #     # Apply the filter
+    #     filter = docClinicFilter(
+    #         queryset=docClinicSearch.objects.filter(
+    #             Q(doc_name__icontains=search_query) | Q(clinic_name__icontains=search_query) |
+    #             Q(clinic_address__icontains=search_query) | Q(clinic_introduction__icontains=search_query)|
+    #             Q(exp_name__icontains=search_query)
+    #         )
+    #     )
+    # #    return JsonResponse(data)
+    queryset = docClinicSearch.objects.none()
+    if request.method == 'POST':
+        form = SearchForm(request.POST)
+        if form.is_valid():
+            search_query = form.cleaned_data['query']
+            
+            print(f'searchQ:{search_query}')
+
+            city = request.POST.get('city', '')
+            district = request.POST.get('district', '')
+            category = request.POST.get('category', '')
+            treatment = request.POST.get('treatment', '')
+            start_date = request.POST.get('startDate', '')
+            end_date = request.POST.get('endDate', '')
+        
             queryset=docClinicSearch.objects.filter(
                 Q(doc_name__icontains=search_query) | Q(clinic_name__icontains=search_query) |
                 Q(clinic_address__icontains=search_query) | Q(clinic_introduction__icontains=search_query)|
                 Q(exp_name__icontains=search_query)
             )
-        )
+        else:
+            # Print form validation errors for debugging
+            print(f'form error:{form.errors}')
+            return JsonResponse({'error': 'Form validation failed.'}, status=400)
+   
+        #return JsonResponse(data)
 
         # Retrieve detailed information for each filtered doctor
         detailed_doctors = []
         detailed_clinics = []
-        for result in filter.qs:
+        for result in queryset:
             doctor_details = {
                 'doc_id': result.doc_id,
                 'doc_name': result.doc_name,
@@ -1300,8 +1226,9 @@ def doctor_clinic_search_view(request):
             # Check if the doctor already exists in doc_final
             existing_doctor = next((item for item in doc_final if item['doc_name'] == doc['doc_name']), None)
             if existing_doctor:
+                if doc['doc_exp'] not in existing_doctor['doc_exp']:
                 # Append the expertise to the existing doctor's expertise list
-                existing_doctor['doc_exp'].append(doc['doc_exp'])
+                    existing_doctor['doc_exp'].append(doc['doc_exp'])
             else:
                 # Create a new dictionary for the doctor
                 new_doctor = {
@@ -1319,8 +1246,9 @@ def doctor_clinic_search_view(request):
             # Check if the clinic already exists in clinic_final
             existing_clinic = next((item for item in clinic_final if item['clinic_name'] == clinic['clinic_name']), None)
             if existing_clinic:
+                if clinic['doc_exp'] not in existing_clinic['doc_exp']:
                 # Append the expertise to the existing clinic's expertise list
-                existing_clinic['doc_exp'].append(clinic['doc_exp'])
+                    existing_clinic['doc_exp'].append(clinic['doc_exp'])
             else:
                 # Create a new dictionary for the clinic
                 new_clinic = {
@@ -1337,6 +1265,7 @@ def doctor_clinic_search_view(request):
             'doctors': doc_final,
             'clinics': clinic_final,
         }
+        print(data)
 
         return JsonResponse(data)
 

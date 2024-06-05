@@ -183,3 +183,16 @@ class TestingForm(forms.Form):
 class LoginForm(forms.Form):
     email = forms.EmailField()
     password = forms.CharField(widget=forms.PasswordInput)
+ 
+ 
+class SearchForm(forms.Form):
+    query = forms.CharField(label='查詢欄位', max_length=255)
+
+    city = forms.ChoiceField(label='縣市', choices=[], required=False)
+    district = forms.ChoiceField(label='地區', choices=[], required=False)
+
+    category = forms.ChoiceField(label='治療項目', choices=[], required=False)
+    treatment = forms.ChoiceField(label='具體治療', choices=[], required=False)
+
+    start_date = forms.DateField(label='看診日期 開始', required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(label='結束', required=False, widget=forms.DateInput(attrs={'type': 'date'}))
