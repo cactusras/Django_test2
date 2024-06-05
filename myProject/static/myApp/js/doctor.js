@@ -104,35 +104,35 @@
     // }
 
     //登入狀態從後端抓資料放到dataEdit
-    // function fetch_info(formFilled){
-    //     fetch('/doctor_info/', {
-    //         method: 'GET'
-    //     })
-    //     .then(async response => {
-    //         if (!response.ok) {
-    //             throw new Error('Network response was not ok');
-    //         }
-    //         const data = await response.json();
+    function fetch_info(formFilled){
+        fetch('/doctor_info/', {
+            method: 'GET'
+        })
+        .then(async response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
     
-    //         if (data.status === 'success') {
-    //             const docInfo = data.data;
-    //             if (docInfo['photo'] != ''){
-    //                 docInfo['photo'] = '';
-    //             }
-    //             if (docInfo['password'] != ''){
-    //                 docInfo['password'] = '';
-    //             }
-    //             //console.log(clinInfo.photo_url)
-    //             //console.log("info_type = " + typeof(data.data) + "  info = " + data.data)
-    //             fillForm(docInfo, formFilled);
-    //         } else {
-    //             console.error(data.error);
-    //         }
-    //     })   
-    //     .catch(error => {
-    //         console.log('Error:', error);
-    //     });
-    // }
+            if (data.status === 'success') {
+                const docInfo = data.data;
+                if (docInfo['photo'] != ''){
+                    docInfo['photo'] = '';
+                }
+                if (docInfo['password'] != ''){
+                    docInfo['password'] = '';
+                }
+                //console.log(clinInfo.photo_url)
+                //console.log("info_type = " + typeof(data.data) + "  info = " + data.data)
+                fillForm(docInfo, formFilled);
+            } else {
+                console.error(data.error);
+            }
+        })   
+        .catch(error => {
+            console.log('Error:', error);
+        });
+    }
     
     // //編輯完班表之後回到醫生註冊頁會出現的資料
     // function info_before_regis(filledForm){

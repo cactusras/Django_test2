@@ -28,6 +28,8 @@ SECRET_KEY = 'django-insecure-8)v2)8295e15w7i@q@wkxku-2w6q6@5m(rejen818**z!&kc^m
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+LOGIN_URL='/loginP/'
+
 ALLOWED_HOSTS = []
 
 

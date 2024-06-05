@@ -24,7 +24,16 @@ class DoctorForm(forms.ModelForm):
         super(DoctorForm, self).__init__(*args,**kwargs)
     #  self.fields['is_active'].initial = True
      #   self.fields['is_admin'].initial = False
-        
+
+#有update的form沒有密碼跟圖片(資料更新時不更改密碼 圖片)
+class DoctorUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Doctor
+        fields = ['email', 'name','phone_number','experience' ]
+    def __init__(self, *args, **kwargs):
+        self.update = kwargs.pop('update', False)
+        super(DoctorUpdateForm, self).__init__(*args, **kwargs)
+
 class ClinicForm(forms.ModelForm):
     class Meta:
         model = Clinic
@@ -34,7 +43,16 @@ class ClinicForm(forms.ModelForm):
         super(ClinicForm, self).__init__(*args,**kwargs)
       #  self.fields['is_active'].initial = True
       #  self.fields['is_admin'].initial = False
-        
+
+class ClinicUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Clinic
+        #fields = ['name', 'license_number','phone_number','address','introduction','photo','email','password' ]
+        fields = ['email', 'name','phone_number','license_number','address','introduction']
+    def __init__(self, *args, **kwargs):
+        self.update = kwargs.pop('update', False)
+        super(ClinicUpdateForm, self).__init__(*args, **kwargs)
+
 class ClientForm(forms.ModelForm):
     class Meta:
         model = Client
@@ -44,6 +62,14 @@ class ClientForm(forms.ModelForm):
         super(ClientForm, self).__init__(*args,**kwargs)
         # self.fields['is_active'].initial = True
         # self.fields['is_admin'].initial = False
+
+class ClientUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Client
+        fields = [ 'email','name','phone_number','address','birth_date','gender','occupation','notify']
+    
+    def __init__(self, *args, **kwargs):
+        super(ClientUpdateForm, self).__init__(*args,**kwargs)
 
 class WorkingHourForm(forms.ModelForm):
     class Meta:

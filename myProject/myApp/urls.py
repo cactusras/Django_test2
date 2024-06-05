@@ -65,4 +65,16 @@ urlpatterns = [
     path('client_info/', views.client_info, name='client_info'),
 
     path('doctor/page/cancel_reservation/<int:reservation_id>/', views.cancel_reservation, name='cancel_reservation'),
+    #added by L
+    path('doctor/expertise-list/<int:doctor_id>/', views.get_expertise_list, name = 'getexpertise'),
+    path('get_doc_working/<int:doctor_id>/', views.get_doc_working, name = 'getworking'),
+    #我的版本的available顯示
+    path('available/', views.get_available_times, name='get_available_times'),
+    path('testing',views.testing,name='testing'),
+    path('Searchtesting',views.searchTest,name='Stesting'),
+    path('home/doctor/reserve/<int:doctor_id>/add/reservation/',views.add_Reservation, name ='added'),
+    path('doctor/delete/<str:doctor_email>/', views.delete_doctor, name='delete_doctor'),
+    path('doctor/expertise-list/<int:doctor_id>/', views.get_expertise_list_doc, name = 'get_expertise_list_doc'),
+    path('clinic/expertise-list/<int:clinic_id>/', views.get_expertise_list_clin, name = 'get_expertise_list_clin'),
+    path('doctor-list/expertise/<int:expertise_id>/', views.get_doctor_from_exp, name = 'get_doctor_from_exp'),
 ]

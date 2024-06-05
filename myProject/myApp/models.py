@@ -184,8 +184,8 @@ class Reservation(models.Model):
     
     #原本應該是直觀用來看客戶醫生診所預約關係
     #改成scheduling之後應該就變成直觀能看到醫生不一定有診所
-    def __str__(self):
-        return f"{self.client.name} reservation for doctor{self.SchedulingID.DoctorID}, clinic {self.SchedulingID.DoctorID.clnicID}"
+    # def __str__(self):
+    #     return f"{self.clientID} reservation for doctor{self.SchedulingID.DoctorID}, clinic {self.SchedulingID.DoctorID.clnicID}"
     
     def update_status(self, new_status):
         if new_status in self.STATUS_CHOICES:

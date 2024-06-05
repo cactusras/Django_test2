@@ -188,8 +188,10 @@ document.getElementById('clientForm').addEventListener('submit', async function(
             if (data.status === 'success') {
                 alert(data.message);
                 if(window.localStorage.getItem('isLogin') == 'failed'){
+                    
                     window.location.href = '/loginP/';
                 }else{
+                    window.localStorage.setItem('username', clieField.name)
                     window.location.href = '/home/';
                 }
             } else {
