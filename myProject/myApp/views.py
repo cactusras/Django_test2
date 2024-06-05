@@ -1063,12 +1063,19 @@ def clinic_load(request):
 
     return JsonResponse(context)
 
+def get_reserved_times(doctor_id, date):
+    reservations = Reservation.objects.filter(
+        SchedulingID__DoctorID_id=doctor_id,
+        time_start__date=date
+    ).values_list('time_start', 'time_end')
+    return list(reservations)
+
 # doctor/page/loading/
 @login_required
 def doctorPage_loading(request):
     user = request.user
     doctor = get_object_or_404(Doctor, id=user.id)
-    working_hours = WorkingHour.objects.filter(DoctorID=doctor.id)
+    # working_hours = WorkingHour.objects.filter(DoctorID=doctor)
     
     today = now().date()
     start_of_week = today - timedelta(days=today.weekday())
@@ -1082,7 +1089,7 @@ def doctorPage_loading(request):
     
     reservations = Reservation.objects.filter(
         SchedulingID__in=schedules,
-        status__in=[0, 2, 3],
+        Status__in=[0, 2, 3],
         time_start__date__range=[start_of_week, end_of_week]
     )
 
@@ -1108,6 +1115,10 @@ def doctorPage_loading(request):
             'valid_from': schedule.StartDate,
             'valid_to': schedule.EndDate,
             'WDforfront': schedule.WDforFront(),
+            'OccupiedHour': Reservation().TimeSlotNumber(
+                start_time=schedule.WorkingHour.start_time,
+                end_time=schedule.WorkingHour.end_time
+            ),
         }
         for schedule in schedules
     ]

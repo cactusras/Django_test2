@@ -196,11 +196,16 @@ class Reservation(models.Model):
     def get_status_display(self):
         return dict(self.STATUS_CHOICES).get(self.Status, 'Unknown status')
 
+    #預約的day_of_week
     def WDforFront(self):
         return self.StartDate.weekday() + 1
     
-    def TimeSlotNumber(self):
-        duration = self.time_end - self.time_start
+    #
+    def TimeSlotNumber(self, start_time=None, end_time=None):
+        if start_time is None or end_time is None:
+            start_time = self.time_start
+            end_time = self.time_end
+        duration = end_time - start_time
         total_hours = int(duration.total_seconds() // 3600)  # Total hours between start and end
         slot_numbers = [i + 1 for i in range(total_hours)]  # Generate slot numbers for each hour
         return slot_numbers
