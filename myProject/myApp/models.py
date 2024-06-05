@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from django.db import models
 from datetime import timedelta
 from datetime import time
@@ -152,11 +153,11 @@ class Scheduling(models.Model):
     def WDforFront(self):
         return self.StartDate.weekday() + 1
     
-    def TimeSlotNumber(self):
-        duration = self.time_end - self.time_start
-        total_hours = int(duration.total_seconds() // 3600)  # Total hours between start and end
-        slot_numbers = [i + 1 for i in range(total_hours)]  # Generate slot numbers for each hour
-        return slot_numbers
+    # def TimeSlotNumber(self):
+    #     duration = self.time_end - self.time_start
+    #     total_hours = int(duration.total_seconds() // 3600)  # Total hours between start and end
+    #     slot_numbers = [i + 1 for i in range(total_hours)]  # Generate slot numbers for each hour
+    #     return slot_numbers
     
      
 class Reservation(models.Model):
@@ -205,6 +206,11 @@ class Reservation(models.Model):
         if start_time is None or end_time is None:
             start_time = self.time_start
             end_time = self.time_end
+        if isinstance(start_time, datetime.time):
+            start_time = datetime.combine(datetime.today(), start_time)
+        if isinstance(end_time, datetime.time):
+            end_time = datetime.combine(datetime.today(), end_time)
+            
         duration = end_time - start_time
         total_hours = int(duration.total_seconds() // 3600)  # Total hours between start and end
         slot_numbers = [i + 1 for i in range(total_hours)]  # Generate slot numbers for each hour
