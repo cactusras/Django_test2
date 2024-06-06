@@ -120,9 +120,7 @@
                         <form id="reservationForm" method="post" action='/add/reservation/' >
                             {% csrf_token %}
                             <label for="doctor_id"></label>
-                           
-
-                            <input type="input" id="doctor_id" name="doctor_id" value={{ doctor.id }}>
+                            <input type="input" id="doctor_id" name="doctor_id" value="{{ doctor.id }}">
 
     
                             
@@ -249,7 +247,7 @@
    
     document.addEventListener('DOMContentLoaded', function () {
        
-        const doctorIdInput = {{ doctor.id }};
+        const doctorIdInput = document.getElementById('doctor_id').value;
         const expertiseDropdown = document.getElementById('expertiseDropdown');
         const workingHoursContainer = document.getElementById('working_hours');
 
@@ -289,7 +287,7 @@
     });
 
     function fetchAvailableTimes() {
-        const doctorId =    {{ doctor.id }};
+        const doctorId =    document.getElementById('doctor_id').value;
         const date = document.getElementById('date').value;
         const expertiseName = document.getElementById('expertise_name').value;
 

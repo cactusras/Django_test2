@@ -37,7 +37,7 @@ urlpatterns = [
     path('clinic/reserve/<int:clinic_id>/', views.clinic_reserve_page, name='clinic_reserve_page'),
     path('clinic/doctor/<int:doctor_id>/reserve/', views.clinic_reserve_doctor_confirmed, name='clinic_reserve_doctor_confirmed'),
     #add_time
-    path('available/', views.available, name='available_times'),
+    # path('available/', views.available, name='available_times'),
     path('waitinglist/to/reservation/', views.waitingToResForC, name='waiting_to_reservation'),
     path('client/delete/reserve/', views.client_cancel_reservation, name='client_cancel_reservation'),
     path('check_reservations/', views.check_reservations, name='check_reservations'),

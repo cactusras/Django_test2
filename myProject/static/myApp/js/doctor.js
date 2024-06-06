@@ -12,65 +12,14 @@ var docField = {
 var expExist = [];
 
 function fetch_element(){
-        docField['email'] = document.getElementById('email').value
-        docField['name'] = document.getElementById('name').value,
-        docField['phone_number'] = document.getElementById('phone_number').value,
-        docField['password'] = document.getElementById('password').value,
-        docField['experience'] = document.getElementById('experience').value,
-        docField['photo'] = document.getElementById('photo').files[0]
-        // console.log('exoerience' + docField['exoerience']);
+    docField['email'] = document.getElementById('email').value
+    docField['name'] = document.getElementById('name').value,
+    docField['phone_number'] = document.getElementById('phone_number').value,
+    docField['password'] = document.getElementById('password').value,
+    docField['experience'] = document.getElementById('experience').value,
+    docField['photo'] = document.getElementById('photo').files[0]
+    // console.log('exoerience' + docField['exoerience']);
 }
-
-document.addEventListener('DOMContentLoaded', function() {
-        //頁面加載後才能把這些element load進來
-        const btnRegis = document.getElementById('btnDocRegis');
-        const barTitle = document.getElementById('barTitle');
-        const docForm = document.getElementById('doctorForm');
-        const photoInput = document.getElementById('photo');
-        const photoLabel = document.getElementById('photoLbl');
-        const loginHide = document.querySelectorAll('.loginHide')
-        const btnLogout = document.getElementById('logoutButton')
-        fetch_element();
-        fillFormFromLocalStorage(docForm);
-        // 清空localstorage有關醫生註冊的東西
-        // const doctorData = JSON.parse(localStorage.getItem('doctorData'));
-        // const expertises = JSON.parse(localStorage.getItem('expertise_list'));
-        // const working_hour_list = JSON.parse(localStorage.getItem('working_hour_list'));
-        // const schedulingForm = JSON.parse(localStorage.getItem('schedulingForm'));
-        // const clinicName = JSON.parse(localStorage.getItem('username'));
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            const value = localStorage.getItem(key);
-            console.log(`${key}: ${value}`); // This loop iterates through all local storage, not just working hours
-        }
-        //canva11進入canva12   
-        if (window.localStorage.getItem('user_type') == 'doctor'){
-            barTitle.innerText = '醫生資料'
-            btnRegis.innerText = '回到主頁'
-            btnLogout.hidden = false;
-            btnRegis.addEventListener('click', function(){
-                window.location.href = "/clinic/home"
-            })
-            loginHide.forEach(element => {
-                element.hidden = true;
-            });
-            fetch_info(docForm);
-        }else if (window.localStorage.getItem('user_type') == 'clinic'){
-            barTitle.innerText = '註冊'
-            btnLogout.hidden = true;
-            btnRegis.innerText = '完成'
-            for (let i = 0; i < expExist.length; i++){
-                const optionToEdit = document.querySelector(`#expertiseSelect option[value="${expertise}"]`);
-                optionToEdit.disabled = true;
-                optionToEdit.innerText = expertise + "(已選)";
-            }
-            if(window.localStorage.getItem('readyRegis') == 'yes'){
-                // info_before_regis(docForm);
-                photoInput.hidden = true;
-                photoLabel.hidden = true;
-            }
-        }
-})
 
 function fillForm(data, form) {
     if (!form) {
@@ -180,6 +129,59 @@ function fetch_info(formFilled){
 //     //     console.error('Error fetching session data:', error);
 //     // });
 // }
+
+
+document.addEventListener('DOMContentLoaded', function() {
+        //頁面加載後才能把這些element load進來
+        const btnRegis = document.getElementById('btnDocRegis');
+        const barTitle = document.getElementById('barTitle');
+        const docForm = document.getElementById('doctorForm');
+        const photoInput = document.getElementById('photo');
+        const photoLabel = document.getElementById('photoLbl');
+        const loginHide = document.querySelectorAll('.loginHide')
+        const btnLogout = document.getElementById('logoutButton')
+        fetch_element();
+        fillFormFromLocalStorage(docForm);
+        // 清空localstorage有關醫生註冊的東西
+        // const doctorData = JSON.parse(localStorage.getItem('doctorData'));
+        // const expertises = JSON.parse(localStorage.getItem('expertise_list'));
+        // const working_hour_list = JSON.parse(localStorage.getItem('working_hour_list'));
+        // const schedulingForm = JSON.parse(localStorage.getItem('schedulingForm'));
+        // const clinicName = JSON.parse(localStorage.getItem('username'));
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            const value = localStorage.getItem(key);
+            console.log(`${key}: ${value}`); // This loop iterates through all local storage, not just working hours
+        }
+        //canva11進入canva12   
+        if (window.localStorage.getItem('user_type') == 'doctor'){
+            barTitle.innerText = '醫生資料'
+            btnRegis.innerText = '回到主頁'
+            btnLogout.hidden = false;
+            btnRegis.addEventListener('click', function(){
+                window.location.href = "/doctor/home"
+            })
+            loginHide.forEach(element => {
+                element.hidden = true;
+            });
+            fetch_info(docForm);
+        }else if (window.localStorage.getItem('user_type') == 'clinic'){
+            barTitle.innerText = '註冊'
+            btnLogout.hidden = true;
+            btnRegis.innerText = '完成'
+            for (let i = 0; i < expExist.length; i++){
+                const optionToEdit = document.querySelector(`#expertiseSelect option[value="${expertise}"]`);
+                optionToEdit.disabled = true;
+                optionToEdit.innerText = expertise + "(已選)";
+            }
+            if(window.localStorage.getItem('readyRegis') == 'yes'){
+                // info_before_regis(docForm);
+                photoInput.hidden = true;
+                photoLabel.hidden = true;
+            }
+        }
+})
+
 
 document.getElementById('experForm').addEventListener('submit', async function(event){
     event.preventDefault();

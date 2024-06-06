@@ -7,7 +7,7 @@ from django.http import HttpResponse, JsonResponse
 #from rest_framework import serializers
 from myProject.encoder import CustomEncoder
 # from .serializers import WorkingHourSerializer
-from .forms import ClinicUpdateForm, DoctorForm,ClinicForm,ClientForm, LoginForm,SchedulingForm, SearchForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm
+from .forms import ClientUpdateForm, ClinicUpdateForm, DoctorForm,ClinicForm,ClientForm, LoginForm,SchedulingForm, SearchForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm
 from django.db.models import Q
 from django.db import connection
 from django.contrib.auth.decorators import login_required
@@ -191,86 +191,60 @@ def add_client(request):
 
 # add/reservation/
 @login_required
-def add_Reservation(request):  
-    if request.user.is_authenticated:
-        user_id = request.user.id
+def add_Reservation(request):
+    if request.method == 'POST':
+        doctor_id = request.POST.get('doctor_id')
+        doctor = get_object_or_404(Doctor, id=doctor_id)
+        date_str = request.POST.get('date')
+        start_time_str = request.POST.get('time_start')
+        expertise_name = request.POST.get('expertise_name')
+        
+        print(doctor_id)
+        print(date_str)
+        print(start_time_str)
+        print(expertise_name)
 
-        if request.method == 'POST':
-            # Retrieve session data
-            doctor_id = request.session.get('doctor_id')
-            date = request.session.get('date')  # Assuming date format is YYYY-MM-DD
+        if not doctor_id or not date_str or not start_time_str or not expertise_name:
+            return JsonResponse({'error': 'Invalid input data'}, status=400)
+
+        try:
+            client = request.user.client
+            date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+            week_day = date_obj.weekday()+1
+            time_obj = datetime.strptime(start_time_str, '%H:%M:%S').time()
+
             
-            try:
-                scheduling = Scheduling.objects.get(DoctorID=doctor_id, StartDate__lte=date, EndDate__gte=date)
-                SchedulingID = scheduling.id
-            except Scheduling.DoesNotExist:
-                return HttpResponse('No scheduling found for this doctor on selected date')
+            scheduling = Scheduling.objects.filter(
+                DoctorID=doctor,
+                StartDate__lte=date_obj,
+                EndDate__gte=date_obj,
+                WorkingHour__day_of_week=week_day,
+                WorkingHour__start_time__lte=time_obj,
+                WorkingHour__end_time__gte=time_obj
+            ).first()
 
-            ExpID = request.session.get('ExpertiseID', 'Not Found')
-            timeS = request.session.get('StartingTime', 'Not defined')
-
-            if SchedulingID == 'NotFound' or ExpID == 'Not Found' or timeS == 'Not defined' :
-                return HttpResponse('Missing scheduling information')
-
-            # Convert string times to datetime objects
-            timeS = datetime.strptime(timeS, '%Y-%m-%d %H:%M:%S')
             
-            # Fetch the expertise duration
-            try:
-                expertise = Expertise.objects.get(id=ExpID)
-                expertise_duration = timedelta(hours=expertise.time.hour, minutes=expertise.time.minute)
-            except Expertise.DoesNotExist:
-                return HttpResponse('Expertise not found')
-            #可預約，邏輯參考avaliable
-            status_conditions = Q(status=0) | Q(status=2) | Q(status=3)
-            reservations = Reservation.objects.filter(
-                SchedulingID=SchedulingID,
-                time_start__lt=datetime.combine(datetime.strptime(date, '%Y-%m-%d').date(), timeS),
-                time_end__gt=datetime.combine(datetime.strptime(date, '%Y-%m-%d').date(), timeS),
-                Expertise = expertise
+            expertise_id = Expertise.objects.get(name=expertise_name)
+            expertise_time = expertise_id.time
+            time_start = datetime.combine(date_obj, time_obj)
+            time_end = time_start + timedelta(hours=expertise_time.hour, minutes=expertise_time.minute)
+            
+            reservation = Reservation.objects.create(
+                ClientID=client,
+                SchedulingID=scheduling,
+                expertiseID=expertise_id,
+                time_start=time_start,
+                time_end=time_end,
+                Status=0
             )
-            scheduling = Scheduling.objects.get(id=SchedulingID)
-            day_of_week = timeS.weekday() + 1
-            working_hours = WorkingHour.objects.filter(
-                day_of_week=timeS.weekday() + 1,  # +1 because WorkingHour.day_of_week is 1-7, not 0-6
-                start_time__lte=timeS.time(),
-                end_time__gte=(timeS + expertise_duration).time()
-            )
+            
+            reservation.save()
+            return redirect(clieReserveRecord)
+            # return JsonResponse({'success': 'Reservation added successfully'}, status=201)
+        except (Doctor.DoesNotExist, Scheduling.DoesNotExist, ValueError) as e:
+            return JsonResponse({'error': f'Failed to add reservation: {e}'}, status=400)
 
-            if not working_hours.exists():
-                return HttpResponse('Doctor is not working during this time')
-
-            status_conditions = Q(status=1) | Q(status=5)
-            schedule_condition = Q(schedule_id=SchedulingID)
-            if (status_conditions&schedule_condition):
-                form = ReservationForm(request.POST)
-                if form.is_valid():
-                    try:
-                        with connection.cursor() as cursor:
-                            cursor.execute("INSERT INTO Reservation (ClientID, SchedulingID, expertiseID, time_start, time_end, status) VALUES (%s, %s, %s, %s, %s, %s)",
-                                           [user_id, SchedulingID, ExpID, timeS, timeS + expertise_duration, 0])
-                        return HttpResponse('Reservation successfully created')
-                    except Exception as e:
-                        return HttpResponse(f'Error creating reservation: {e}')
-                else:
-                    return HttpResponse('Form not valid')
-            elif schedule_condition:
-                form = WaitingForm(request.POST)
-                if form.is_valid():
-                    try:
-                        with connection.cursor() as cursor:
-                            cursor.execute("INSERT INTO Waiting (ClientID, SchedulingID, expertiseID, time_start, time_end, is_waiting) VALUES (%s, %s, %s, %s, %s, %s)",
-                                           [user_id, SchedulingID, ExpID, timeS, timeS + expertise_duration, False])
-                        return HttpResponse('Added to waiting list')
-                    except Exception as e:
-                        return HttpResponse(f'Error adding to waiting list: {e}')
-                else:
-                    return HttpResponse('Form not valid')
-
-        request.session.flush()
-        return (request,'myApp/UserAppointmentRecords.html')
-    else:
-        return HttpResponse('Login failed')
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 # add/clinic/  
 #clinic posting
@@ -868,7 +842,7 @@ def add_times(time1, duration):
 #available/
 def available(request):
     # Get doctor_id, date, and expertise_name from the GET request
-    doctor_id = request.get('doctor_id')
+    doctor_id = request.GET.get('doctor_id')
     date_str = request.GET.get('date')
     date_reserve = datetime.strptime(date_str, '%Y-%m-%d').date()
     week_day = date_reserve.weekday()+1
@@ -1240,7 +1214,7 @@ def docDataEd(request):
 def docDataEd_new(request, doctor_id):
     doctor = Doctor.objects.get(id=doctor_id)
     doc_exp_list = Doc_Expertise.objects.filter(DocID=doctor)
-
+    print("in_doctorDataEd_new")
     context={
         'doctor': doctor,
         'expertises': doc_exp_list
