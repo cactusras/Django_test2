@@ -26,7 +26,7 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                    <!-- 使用者登入按鈕 -->
                     <div class="ms-auto">
-                        <button class="btn btn-outline-dark" type="submit"  style="font-size: 20px;" id="nav_btn">
+                        <button class="btn btn-outline-dark" type="submit"  style="font-size: 20px;" id="nav_btn" onclick="navBtn_listener(event)">
                             <i class="bi bi-person-fill"></i>
                             登入
                          <!--  <span class="badge bg-dark text-white ms-1 rounded-pill">0</span> -->
@@ -56,23 +56,6 @@
                               </tr>
                           </thead>
                           <tbody id="client_records_body">
-                            {% for reservation in reservation_list %}
-                                <tr>
-                                    <td>{{ reservation.expertise }}</td>
-                                    <td>{{ reservation.appointment_date }} {{ reservation.appointment_time }}</td>
-                                    <td>{{ reservation.clinic_name }}</td>
-                                    <td>{{ reservation.doctor_name }}</td>
-                                    <td>{{ reservation.status }}</td>
-                                    <td>
-                                        <form method="post" action="{% url 'client_cancel_reservation'%}">
-                                            {% csrf_token %}
-                                            <div>
-                                                <button type="submit" class="rectangle-button">取消預約</button>
-                                            </div>
-                                        </form>
-                                    </td>
-                                </tr>
-                            {% endfor %}
                           </tbody>
                       </table>
                   </div>
@@ -101,6 +84,7 @@
                             const tableBody = document.getElementById('client_records_body');
                             reservations.forEach(reservation => {
                                 const row = document.createElement('tr');
+                                const isHidden = reservation.status !== 'reserved'
                                 row.innerHTML = `
                                 </td>
                                     <td>${reservation.expertise}</td>
@@ -112,20 +96,42 @@
                                         <form id="btnCancelReserve">
                                         {% csrf_token %}
                                         <div>
-                                            <button type="submit" class="rectangle-button" onclick="cancelReserve(event)">取消預約</button>
+                                            <button type="submit" class="rectangle-button btnCancel" 
+                                            onclick="cancelReserve(event)" data-reservation-id="${reservation.id}"
+                                            ${isHidden ? 'hidden' : ''}>取消預約</button>
                                         </div>
                                     </form>
                                     </td>
                                 `;
                                 tableBody.appendChild(row);
                             });
-                          });
+                          })
                         .catch(error => console.error('Error:', error));
                 }
 
+                //只有reserve狀態會顯示這個button
                 function cancelReserve(event){
                     event.preventDefault()
+                    const button = event.target;  // Get the button that triggered the event
+                    const reservationID = button.dataset.reservationId;
+                    console.log("id = " + reservationID)
+                    fetch(`/client/delete/reserve/${reservationID}/`, {
+                        method: 'GET'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if(data.dlteSuccess){
+                            alert(data.message)
+                            window.location.href = '/clieReserveRecord'
+                        }else{
+                            alert(data.message)
+                        }  
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
                 }
             </script>
+            
     </body>
 </html>

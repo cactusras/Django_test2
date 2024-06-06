@@ -76,7 +76,7 @@ urlpatterns = [
     path('doctor/expertise-list/<int:doctor_id>/', views.get_expertise_list_doc, name = 'get_expertise_list_doc'),
     path('clinic/expertise-list/<int:clinic_id>/', views.get_expertise_list_clin, name = 'get_expertise_list_clin'),
     path('doctor-list/expertise/<int:expertise_id>/', views.get_doctor_from_exp, name = 'get_doctor_from_exp'),
-    
+    #path('add_reservation/<int:client_id>/<int:doctor_id>/', views.add_Reservation_for_clin, name='add_Reservation_for_clin'),
     
     
    

@@ -885,22 +885,12 @@ def waitingToResForC(request):
 #如果是Status = 2或3的話 就不執行而是跳jsonresponse
 #變數名有待確認
 #client/delete/reserve/
-def client_cancel_reservation(request):
+def client_cancel_reservation(request, reservation_id):
+    reservation = get_object_or_404(Reservation, id=reservation_id)
+    reservation.delete()
+    return JsonResponse({'dlteSuccess': True, 'message': 'Reservation cancelled successfully'})
 
-    if request.method == 'GET':
-        reserveID = request.GET.get('reservationID')
-        reservation = get_object_or_404(Reservation, reservationID=reserveID)
 
-        if (reservation.Status == 2 or reservation.Status == 3):
-            return JsonResponse({'dlteSuccess': False,}) #不能取消
-        else:
-        # 删除预约
-            reservation.delete()
-            return JsonResponse({'dlteSuccess': True,}) #可以取消
-        
-        
-    
-    return render(request, 'UserAppointmentRecords.html')
 
 #check_reservations/
 def check_reservations(request):
@@ -1025,31 +1015,33 @@ def doctorPage_loading(request):
     }
     
     return JsonResponse(context)
-
-#client/records/
 @login_required        
 def clientRecord_loading(request):
     user = request.user
-    client = Client.objects.filter(id = user.id)
-    reservations = Reservation.objects.filter(ClientID=client.id).order_by('-time_start')
+    client = Client.objects.get(id=user.id)
+    reservations = Reservation.objects.filter(ClientID=client).order_by('-time_start')
     
-    reservation_list = [
-        {
+    reservation_list = []
+    for reservation in reservations:
+        scheduling = reservation.SchedulingID
+        doctor = scheduling.DoctorID
+        clinic = doctor.clinicID
+        reservation_list.append({
             'id': reservation.id,
-            'client_name': reservation.ClientID.name,
-            'appointment_date': reservation.time_start.date(),
+            'appointment_date': reservation.time_start.strftime('%Y-%m-%d'),
             'appointment_time': reservation.time_start.strftime('%H:%M'),
             'expertise': reservation.expertiseID.name,
+            'doctor_name': doctor.name,
+            'clinic_name': clinic.name,
             'status': reservation.get_status_display(),
-        }
-        for reservation in reservations
-    ]
+        })
 
     context = {
         'reservation_list': reservation_list,
     }
-
+    print('context = ', context)
     return JsonResponse(context)
+
 
 #searchPage.html
 #home/
@@ -1144,7 +1136,7 @@ def doctor_info(request):
             'phone_number': user.phone_number,
             'password': user.password,
             #'photo_url': user.doctor.photo.url,
-            'exoerience': user.doctor.exoerience,
+            'experience': user.doctor.experience,
         }
         if user.doctor.photo and user.doctor.photo.name:
            info['photo'] =  user.doctor.photo.url
@@ -1526,7 +1518,8 @@ def add_Reservation(request):
             
             reservation.save()
             
-            return JsonResponse({'success': 'Reservation added successfully'}, status=201)
+            return redirect(clieReserveRecord)
+            #return JsonResponse({'success': 'Reservation added successfully'}, status=201)
         except (Doctor.DoesNotExist, Scheduling.DoesNotExist, ValueError) as e:
             return JsonResponse({'error': f'Failed to add reservation: {e}'}, status=400)
 
@@ -1570,4 +1563,3 @@ def get_doctor_from_exp(request, expertise_id):
         })
     print(" ", doctor_list)
     return JsonResponse({'doctor_list': doctor_list})
-

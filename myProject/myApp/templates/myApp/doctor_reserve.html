@@ -144,74 +144,14 @@
                                 <!-- 可用时间选项将由 JavaScript 动态添加 -->
                             </select>
                         </br>
-                           {% comment %} <label for="expertise_list">医生的项目列表：</label>
-                            <ul id="expertise_list"></ul> <!-- 用于显示项目列表 -->
-                        
-                            <label for="working_hours">医生的上班时间：</label>
-                            <ul id="working_hours"></ul> <!-- 用于显示上班时间 --> {% endcomment %}
+                         
                        
                             <button type="submit">預約</button>
                         </form>
 
 
-
-                        {% comment %} <label for="date1">醫師學經歷 : </label>
                     <br>
-                        <label for="date1">地址 : </label>
-                        
-                    <br>
-                        <!--選取治療項目-->
-                        <label for="date1">項目</label>
-                        <select class="form-select" aria-label="Default select example" style="width: 320px; height: 40px; font-size: 16px;">
-                            <option selected>項目</option>
-                            <option value="1">一般矯正</option>
-                            <option value="2">隱形矯正</option>
-                            <option value="3">植牙治療</option>
-                            <option value="4">根管治療</option>
-                            <option value="5">活髓保存</option>
-                        </select>
-                    <br> {% endcomment %}
-                        <!--選取醫師>
-                        <label for="date1">醫師</label>
-                        <select class="form-select" aria-label="Default select example" style="width: 320px; height: 40px; font-size: 16px;">
-                            <option selected>醫師</option>
-                            <option value="1">醫師1</option>
-                            <option value="2">醫師2</option>
-                            <option value="3">醫師3</option>
-                            </select-->
-                    <br>
-                        <!--選取日期-->
-                        {% comment %} <form action=""> {% endcomment %}
-                            {% comment %} <label for="date1">日期</label>
-                            <div class="input-group date" id='date1'>  
-                                <input type="text" class="form-control" />  
-                                <span class="input-group-addon">  
-                                    <i class="glyphicon glyphicon-calendar"></i>  
-                                </span>
-                            </div>   {% endcomment %}
-                        {% comment %} </form>  {% endcomment %}
-                              {% comment %} <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
-                              <script src="https://cdn.bootcss.com/moment.js/2.18.1/moment-with-locales.min.js"></script>
-                              <script src="https://cdn.bootcss.com/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
-                              <script>
-                              $('#date1').datetimepicker({
-                                date:null, //一開始輸入框的日期為空
-                                format: 'YYYY-MM-DD', //日期的顯示格式
-                                locale: moment.locale('zh-tw'), //國別
-                                daysOfWeekDisabled: [0, 6], //隱藏的天數0為周日6為星期六
-                                minDate: moment().add(1,'days'), //顯示最小天數
-                                maxDate: moment().add(30,'days'), //顯示最大天數，30為最大的顯示範圍為一個月為限
-                                disabledDates:
-                                [ //隱藏的日期
-                                  moment().add(1,'days'), //前一日
-                                  moment().add(2,'days'), //前二日
-                                        '2021-10-10', //特別日期
-                                        '2021-12-25'
-                                ]
-                              });
-                              </script>
-                        <br>
-                        <!-- 時段選取按鈕 --> {% endcomment %}
+                       
 
 
 

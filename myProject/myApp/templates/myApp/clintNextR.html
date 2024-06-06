@@ -1,0 +1,202 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>User Reserve</title>
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="{% static 'myApp/assets/favicon.ico' %}" />
+        <!-- Bootstrap icons-->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="{% static 'myApp/css/styles.css' %}" rel="stylesheet" />
+         <!-- Bootstrap date-->
+        <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="https://cdn.bootcss.com/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+        <style>
+            .button-container {
+                display: flex;
+                flex-direction: column;
+            }
+    
+            .button-row {
+                display: flex;
+            }
+    
+            .rounded-button {
+                margin: 5px;
+                border-radius: 10px;
+                padding: 10px;
+                background-color: rgb(185, 158, 117);
+                border: none;
+                cursor: pointer;
+            }
+    
+            .popup {
+                display: none;
+                position: fixed;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                background-color: white;
+                padding: 20px;
+                border: 1px solid black;
+                border-radius: 10px;
+                z-index: 999;
+            }
+    
+            .popup-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 998;
+            }
+    
+            .popup-buttons {
+                margin-top: 10px;
+            }
+            #doctor_id {
+                display: none;
+            }
+        </style>
+       
+    </head>
+    <body>
+        <!--網頁頭-->
+        <nav class="navbar navbar-expand-lg" style="background-color:#F0EAD6;  height: 100px;">
+            <div class="container px-4 px-lg-5">
+                <img src="{% static 'myApp/assets/dental.png' %}" alt="DEN Logo">
+                <a class="navbar-brand" href="#!"  style="font-size: 24px;"> 牙醫預約平台</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="#!" style="font-size: 20px;">找醫師</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#!" style="font-size: 20px;">紀錄</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#!" style="font-size: 20px;">Q&A</a></li>
+                    </ul>
+                    <form class="d-flex">
+                        <button class="btn btn-outline-dark" type="submit"  style="font-size: 20px;" id = 'nav_btn' onclick='navBtn_listener(event)'>
+                            <i class="bi bi-person-fill"></i>
+                            登入
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </nav>
+        <!--選取的診所名稱-->
+        
+        <section class="py-5"  style="background-color:#FFFFF4">
+            <div class="container" style="border: 1px solid #F0EAD6;">
+                <div class="row row-cols-1">
+                    <div class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:80px; font-size: 20px; ">
+                        XX醫師 XX診所
+                    </div>
+                    <!--內容-->
+                    <div class="col" style="background-color:#fffff0; border: 1px solid #ada089; height:760px; font-size: 20px;">
+                    <br>
+                        <div id="doctor-experience"></div>
+                        <div id="clinic-info"></div>
+                        <div id="doctor-address"></div>
+                        
+                        <h1>Doctor Reservation</h1>
+                            <div id="doctor-info">
+                                <h2>{{ doctor }}</h2>
+                                <p>Email: {{ doctor.email }}</p>
+                                <p>Phone: {{ doctor.phone_number }}</p>
+                                <p>Clinic: {{ doctor.clinicID.name }}</p>
+                                <p>學經歷: {{ doctor.experience }}</p>
+                                 <!-- 渲染醫師的學經歷 -->
+                            
+                            </select>
+                        </div>
+
+                        <form id="reservationForm" method="post" action='/add/reservation/' >
+                            {% csrf_token %}
+                            <label for="doctor_id"></label>
+                            {% comment %} {{ doctor.id }} {% endcomment %}
+
+                            <input type="input" id="doctor_id" name="doctor_id" value={{ doctor.id }}>
+
+                            {% comment %} <input type="number" id="doctor_id" name="doctor_id">  {% endcomment %}
+                            
+                            <br>
+                            <label for="date">reservation date：</label>
+                            <input type="date" id="date" name="date">
+                       
+                            </br>
+                            <label for="expertise_name">treatments：</label>
+                            <select id="expertise_name" name="expertise_name" class="form-select" aria-label="Select Expertise">
+                                <option selected disabled>選擇專業</option>
+                                {% for expertise in expertise_list %}
+                                <option value="{{ expertise }}">{{ expertise }}</option>
+                                {% endfor %}
+                            </select>
+                            <br>
+                            <label for="time_start">starting time：</label>
+                            <select id="time_start" name="time_start" disabled>
+                                <!-- 可用时间选项将由 JavaScript 动态添加 -->
+                            </select>
+                        </br>
+                           {% comment %} <label for="expertise_list">医生的项目列表：</label>
+                            <ul id="expertise_list"></ul> <!-- 用于显示项目列表 -->
+                        
+                            <label for="working_hours">医生的上班时间：</label>
+                            <ul id="working_hours"></ul> <!-- 用于显示上班时间 --> {% endcomment %}
+                       
+                            <button type="submit">預約</button>
+                        </form>
+    
+    <button type="button" class="btn btn-outline-dark" id="addReservationButton" data-client-id="client_id" data-doctor-id="doctor_id">
+        <i class="bi bi-calendar-plus"></i> 新增預約
+    </button>
+    
+    
+    
+    <script>
+        document.getElementById('addReservationButton').addEventListener('click', function() {
+        const clientId = this.getAttribute('data-client-id');
+        const doctorId = this.getAttribute('data-doctor-id');
+
+        const date = prompt("Enter the date (YYYY-MM-DD):");
+        const startTime = prompt("Enter the start time (HH:MM:SS):");
+        const expertiseName = prompt("Enter the expertise name:");
+
+        if (date && startTime && expertiseName) {
+            const requestData = {
+                'date': date,
+                'time_start': startTime,
+                'expertise_name': expertiseName,
+                'csrfmiddlewaretoken': csrfToken  // CSRF token
+            };
+
+            fetch(`/add_reservation/${clientId}/${doctorId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken  // Adding CSRF token
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                } else {
+                    alert('Reservation added successfully');
+                    window.location.reload();  // Reload the page to reflect changes
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        } else {
+            alert("All fields are required.");
+        }
+    });</script>

@@ -168,7 +168,8 @@
                         
                         row.innerHTML = `
                             <td>${reservation.appointment_date}  ${reservation.appointment_time}</td>
-                            <td>${reservation.client_name}</td>
+                           
+                            <td>${reservation.client_Id}  ${reservation.client_name}</td>
                             <td>${reservation.expertise}</td>
                         `;
                         row.appendChild(statusCell);
@@ -179,7 +180,7 @@
           }
         
         //根據不同狀態改變innerHtml
-        function change_status(status, reservation_id, clinic_id){
+        function change_status(status, reservation_id, clinic_id,client_id){
             let result = "";
             if(status == 'reserved'){
                 result = `<button type="button" class="btn btn-outline-dark" 
@@ -253,7 +254,14 @@
         document.addEventListener('click', function(event) {
             if (event.target.matches('.appointment-button')) {
                 const clinicId = event.target.dataset.clinicId;
-                window.location.href = `/clinic/reserve/${clinicId}/`;
+                const client_Id = event.target.dataset.client_Id;
+                console.log('client_Id:'+client_Id)
+                window.location.href = `/home/clinic/reserve/${clinicId}/`;
+               // window.location.href = `/home/doctor/reserve/${client_Id}/`;
+
+               
+
+
             
             }
         });
