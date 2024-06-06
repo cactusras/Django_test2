@@ -153,11 +153,11 @@ class Scheduling(models.Model):
     def WDforFront(self):
         return self.StartDate.weekday() + 1
     
-    # def TimeSlotNumber(self):
-    #     duration = self.time_end - self.time_start
-    #     total_hours = int(duration.total_seconds() // 3600)  # Total hours between start and end
-    #     slot_numbers = [i + 1 for i in range(total_hours)]  # Generate slot numbers for each hour
-    #     return slot_numbers
+    def TimeSlotNumber(self):
+        duration = self.time_end - self.time_start
+        total_hours = int(duration.total_seconds() // 3600)  # Total hours between start and end
+        slot_numbers = [i + 1 for i in range(total_hours)]  # Generate slot numbers for each hour
+        return slot_numbers
     
      
 class Reservation(models.Model):
@@ -180,15 +180,17 @@ class Reservation(models.Model):
     Status = models.IntegerField(choices=STATUS_CHOICES, default=0)
     
     class Meta:
-        unique_together = ('ClientID', 'SchedulingID', 'Status')
+        unique_together = ('ClientID', 'time_start', 'SchedulingID', 'Status')
     
     #原本應該是直觀用來看客戶醫生診所預約關係
     #改成scheduling之後應該就變成直觀能看到醫生不一定有診所
-    # def __str__(self):
-    #     return f"{self.clientID} reservation for doctor{self.SchedulingID.DoctorID}, clinic {self.SchedulingID.DoctorID.clnicID}"
-    
+    def __str__(self):
+        return f"{self.ClientID.name} reservation for doctor{self.SchedulingID.DoctorID}, clinic {self.SchedulingID.DoctorID.clinicID}"
+     
     def update_status(self, new_status):
-        if new_status in self.STATUS_CHOICES:
+        print('new = ', new_status, ' type = ', type(new_status))
+        valid_statuses = [status[0] for status in self.STATUS_CHOICES]
+        if new_status in valid_statuses:
             self.Status = new_status
             self.save()
         else:
@@ -227,7 +229,7 @@ class Waiting(models.Model):
     
 
     def __str__(self):
-        return f"{self.client.name} waiting for doctor{self.SchedulingID.DoctorID}, clinic {self.SchedulingID.DoctorID.clnicID}"
+        return f"{self.client.name} waiting for doctor{self.SchedulingID.DoctorID}, clinic {self.SchedulingID.DoctorID.clinicID}"
 
     
 class docClinicSearch(models.Model):
@@ -250,8 +252,8 @@ class docClinicSearch(models.Model):
     exp_id = models.IntegerField()#e.id
     exp_name = models.CharField(max_length=100)#e.name
     scheduling_id = models.IntegerField()#ms.id
-    start_date = models.DateField()#ms.start_date
-    end_date = models.DateField()#ms.end_date
+    StartDate = models.DateField()#ms.start_date
+    EndDate = models.DateField()#ms.end_date
     workinghour_id = models.IntegerField()#w.WorkingHour_id
     day_of_week = models.IntegerField(choices=DAY_CHOICES)#w.day_of_week
     start_time = models.TimeField()#w.start_time

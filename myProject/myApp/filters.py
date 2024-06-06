@@ -15,7 +15,7 @@ class docClinicFilter(django_filters.FilterSet):
     appointed_date = django_filters.DateFilter(method='filter_by_appointed_date')#it is a value get from http request, don't need to be added into class meta fields
     doc_name = django_filters.CharFilter(lookup_expr='icontains')
     clinic_name = django_filters.CharFilter(lookup_expr='icontains')
-    clinic_adress = django_filters.CharFilter(lookup_expr='icontains')
+    clinic_address = django_filters.CharFilter(lookup_expr='icontains')
     clinic_introduction = django_filters.CharFilter(lookup_expr='icontains')
     exp_name = django_filters.CharFilter(lookup_expr='icontains')
     #other fields in the docClinic models won't be directly filtered, so we don't have to add them here
@@ -24,7 +24,7 @@ class docClinicFilter(django_filters.FilterSet):
 
     class Meta:
         model = docClinicSearch
-        fields = ['doc_name', 'clinic_name', 'clinic_adress', 'clinic_introduction']
+        fields = ['doc_name', 'clinic_name', 'clinic_address', 'clinic_introduction']
 
     def filter_by_appointed_date(self, queryset, name, value):
         if value:

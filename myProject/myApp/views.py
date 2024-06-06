@@ -7,7 +7,7 @@ from django.http import HttpResponse, JsonResponse
 #from rest_framework import serializers
 from myProject.encoder import CustomEncoder
 # from .serializers import WorkingHourSerializer
-from .forms import ClinicUpdateForm, DoctorForm,ClinicForm,ClientForm, LoginForm,SchedulingForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm
+from .forms import ClinicUpdateForm, DoctorForm,ClinicForm,ClientForm, LoginForm,SchedulingForm, SearchForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm
 from django.db.models import Q
 from django.db import connection
 from django.contrib.auth.decorators import login_required
@@ -135,21 +135,31 @@ def add_client(request):
             data = json.loads(request.body)  # 解析 JSON 數據
         except json.JSONDecodeError:
             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
+        
         password = data.get('password')
+        email = data.get('email')
         # 創建一個包含數據的 QueryDict
         data = {
-            'email': data.get('email'),
+            'email': email,
             'name': data.get('name'),
             'phone_number': data.get('phone_number'),
-            'password': password,  # 对密码进行哈希处理
+            'password': password,
             'address': data.get('address'),
             'birth_date': data.get('birth_date'),
             'gender': data.get('gender'),
             'occupation': data.get('occupation'),
             'notify': data.get('notify')
         }
-
-        form = ClientForm(data)
+        print('password here = ', password)
+        try:
+            client = Client.objects.get(email=email)
+        except Client.DoesNotExist:
+            client = None
+        print('data = ', data)
+        if client:
+            form = ClientUpdateForm(data, instance=client)
+        else:
+            form = ClientForm(data)
         if form.is_valid():
             cleaned_data = form.cleaned_data
 
@@ -163,17 +173,18 @@ def add_client(request):
                 defaults=cleaned_data
             )
 
-            if password:
-                client.password = make_password(password)
+            if password != '':
+                client.password = make_password(data['password'])
                 client.save()
 
             if created_client:
                 message = 'Client created successfully.'
             else:
-                message = 'Client updated successfully.'
+                message = "Client updated successfully."
 
             return JsonResponse({'message': message, 'status': 'success'})
         else:
+            print('error = ', form.errors)
             return JsonResponse({'message': 'Invalid form data', 'errors': form.errors, 'status': 'error'})
     else:
         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
@@ -276,8 +287,9 @@ def add_clinic(request):
                     update_clinic = False  # 新建診所
             else:
                 update_clinic = False
+            print('type = ', type(clinic))
             if update_clinic:
-                form = ClinicUpdateForm(request.POST)
+                form = ClinicUpdateForm(request.POST, instance=clinic)
             else:
                 form = ClinicForm(request.POST, request.FILES)
             if form.is_valid():
@@ -321,7 +333,6 @@ def add_clinic(request):
 
                 return JsonResponse({'message': message, 'status': 'success'})
             else:
-                print(form.errors)
                 return JsonResponse({'message': 'Invalid form data', 'errors': form.errors, 'status': 'error'})
         except json.JSONDecodeError:
             return JsonResponse({'message': '無效的 JSON', 'status': 'error'})
@@ -534,9 +545,9 @@ def add_doctor(request):
         email = doctor_form_data.pop('email')
         doctor, created = Doctor.objects.update_or_create(email=email, defaults=doctor_form_data)
         
-        Doc_Expertise.objects.filter(DocID=doctor).delete()
         
         if isinstance(expertise_list, list):
+            Doc_Expertise.objects.filter(DocID=doctor).delete()
             for expertise_data in expertise_list:
                 if isinstance(expertise_data, dict):
                     expertise_name = expertise_data.get('name')
@@ -611,76 +622,104 @@ def delete_doctor(request, doctor_email):
 # doctor/clinic/search/
 @csrf_exempt
 def doctor_clinic_search_view(request):
-    # Apply the filter
-    filter = docClinicFilter(request.GET, queryset=docClinicSearch.objects.all())
+   
+    queryset = docClinicSearch.objects.none()
+    if request.method == 'POST':
+        form = SearchForm(request.POST)
+        if form.is_valid():
+            search_query = form.cleaned_data['query']
+            
+            print(f'searchQ:{search_query}')
 
-    # Retrieve detailed information for each filtered doctor
-    detailed_doctors = []
-    detailed_clinics = []
-    for result in filter.qs:
-        doctor_details = {
-            'doc_id': result.doc_id,
-            'doc_name': result.doc_name,  # Changed from result.name to result.doc_name
-            'clinic_name': result.clinic_name,
-            'clinic_adress': result.clinic_adress,
-            'doc_exp': result.exp_name
-        }
-        detailed_doctors.append(doctor_details)
-
-        clinic_details = {
-            'clinic_id': result.clinic_id,
-            'clinic_name': result.clinic_name,
-            'clinic_adress': result.clinic_adress,
-            'clinic_introduction': result.clinic_introduction,
-            'doc_exp': result.exp_name
-        }
-        detailed_clinics.append(clinic_details)  # Changed from detailed_doctors to detailed_clinics
-
-    # Combine doctor details
-    doc_final = []
-    for doc in detailed_doctors:
-        # Check if the doctor already exists in doc_final
-        existing_doctor = next((item for item in doc_final if item['doc_name'] == doc['doc_name']), None)
-        if existing_doctor:
-            # Append the expertise to the existing doctor's expertise list
-            existing_doctor['doc_exp'].append(doc['doc_exp'])
+            city = request.POST.get('city', '')
+            district = request.POST.get('district', '')
+            category = request.POST.get('category', '')
+            treatment = request.POST.get('treatment', '')
+            start_date = request.POST.get('startDate', '')
+            end_date = request.POST.get('endDate', '')
+        
+            queryset=docClinicSearch.objects.filter(
+                Q(doc_name__icontains=search_query) | Q(clinic_name__icontains=search_query) |
+                Q(clinic_address__icontains=search_query) | Q(clinic_introduction__icontains=search_query)|
+                Q(exp_name__icontains=search_query)
+            )
         else:
-            # Create a new dictionary for the doctor
-            new_doctor = {
-                'doc_id': doc['doc_id'],
-                'doc_name': doc['doc_name'],
-                'clinic_name': doc['clinic_name'],
-                'clinic_adress': doc['clinic_adress'],
-                'doc_exp': [doc['doc_exp']]  # Initialize doc_exp as a list
+            # Print form validation errors for debugging
+            print(f'form error:{form.errors}')
+            return JsonResponse({'error': 'Form validation failed.'}, status=400)
+   
+        #return JsonResponse(data)
+
+        # Retrieve detailed information for each filtered doctor
+        detailed_doctors = []
+        detailed_clinics = []
+        for result in queryset:
+            doctor_details = {
+                'doc_id': result.doc_id,
+                'doc_name': result.doc_name,
+                'clinic_name': result.clinic_name,
+                'clinic_address': result.clinic_address,
+                'doc_exp': result.exp_name
             }
-            doc_final.append(new_doctor)
+            detailed_doctors.append(doctor_details)
 
-    # Combine clinic details
-    clinic_final = []
-    for clinic in detailed_clinics:
-        # Check if the clinic already exists in clinic_final
-        existing_clinic = next((item for item in clinic_final if item['clinic_name'] == clinic['clinic_name']), None)
-        if existing_clinic:
-            # Append the expertise to the existing clinic's expertise list
-            existing_clinic['doc_exp'].append(clinic['doc_exp'])
-        else:
-            # Create a new dictionary for the clinic
-            new_clinic = {
-                'clinic_id': clinic['clinic_id'],
-                'clinic_name': clinic['clinic_name'],
-                'clinic_adress': clinic['clinic_adress'],
-                'clinic_introduction': clinic['clinic_introduction'],
-                'doc_exp': [clinic['doc_exp']]  # Initialize doc_exp as a list
+            clinic_details = {
+                'clinic_id': result.clinic_id,
+                'clinic_name': result.clinic_name,
+                'clinic_address': result.clinic_address,
+                'clinic_introduction': result.clinic_introduction,
+                'doc_exp': result.exp_name
             }
-            clinic_final.append(new_clinic)
+            detailed_clinics.append(clinic_details)
 
-    # Prepare data to be returned as JsonResponse
-    data = {
-        'doctors': doc_final,
-        'clinics': clinic_final,
-    }
+        # Combine doctor details
+        doc_final = []
+        for doc in detailed_doctors:
+            # Check if the doctor already exists in doc_final
+            existing_doctor = next((item for item in doc_final if item['doc_name'] == doc['doc_name']), None)
+            if existing_doctor:
+                if doc['doc_exp'] not in existing_doctor['doc_exp']:
+                # Append the expertise to the existing doctor's expertise list
+                    existing_doctor['doc_exp'].append(doc['doc_exp'])
+            else:
+                # Create a new dictionary for the doctor
+                new_doctor = {
+                    'doc_id': doc['doc_id'],
+                    'doc_name': doc['doc_name'],
+                    'clinic_name': doc['clinic_name'],
+                    'clinic_address': doc['clinic_address'],
+                    'doc_exp': [doc['doc_exp']]
+                }
+                doc_final.append(new_doctor)
 
-    return JsonResponse(data)
+        # Combine clinic details
+        clinic_final = []
+        for clinic in detailed_clinics:
+            # Check if the clinic already exists in clinic_final
+            existing_clinic = next((item for item in clinic_final if item['clinic_name'] == clinic['clinic_name']), None)
+            if existing_clinic:
+                if clinic['doc_exp'] not in existing_clinic['doc_exp']:
+                # Append the expertise to the existing clinic's expertise list
+                    existing_clinic['doc_exp'].append(clinic['doc_exp'])
+            else:
+                # Create a new dictionary for the clinic
+                new_clinic = {
+                    'clinic_id': clinic['clinic_id'],
+                    'clinic_name': clinic['clinic_name'],
+                    'clinic_address': clinic['clinic_address'],
+                    'clinic_introduction': clinic['clinic_introduction'],
+                    'doc_exp': [clinic['doc_exp']]
+                }
+                clinic_final.append(new_clinic)
+
+        # Prepare data to be returned as JsonResponse
+        data = {
+            'doctors': doc_final,
+            'clinics': clinic_final,
+        }
+        print(data)
+
+        return JsonResponse(data)
 
 
 
@@ -753,36 +792,16 @@ def reservationStCbD(request, reservation_id):
 #doctor_reserve.html
 #doctor/reserve/<int:doc_id>/
 def doctor_reserve_page(request, doc_id):
+    doctor = Doctor.objects.get(id=doc_id)
+    doctor_expertise = Doc_Expertise.objects.filter(DocID=doctor).select_related('Expertise_ID').all()
 
-	request.session['doc_id'] = doc_id  # Save session
+    expertise_list = [ expertise.Expertise_ID.name for expertise in doctor_expertise]
 
-	# Fetch the doctor based on doc_id
-	doctor = get_object_or_404(Doctor, id=doc_id)
-	clinic = get_object_or_404(Clinic, id=doctor.clinicID)
-
-	# Fetch the expertise related to the doctor
-	doctor_expertise = Doc_Expertise.objects.filter(DocID=doctor).select_related('Expertise_ID')
-
-	# Create a list of dictionaries with expertise name and time
-	expertise_list = []
-	for expertise in doctor_expertise:
-		expertise_dict = {
-			'name': expertise.Expertise_ID.name,
-			'time': expertise.Expertise_ID.time
-		}
-		expertise_list.append(expertise_dict)
-
-	# Store the expertise list in the session
-	request.session['expertise_list'] = expertise_list
-
-	context = {
-		'doctor': doctor,
-		'clinic': clinic,
-		'doctor_expertise': expertise_list,
-		#'schedules': doc_schedule_list
-		#'reserved': reservation_list
-	}
-	return render(request, 'myApp/doctor_reserve.html', context)
+    context = {
+        'doctor': doctor,
+        'expertise_list': expertise_list
+    }
+    return render(request, 'myApp/doctor_reserve.html', context)
 
 
 #診所預約按鈕按下去
@@ -1215,6 +1234,19 @@ def docDataEd(request):
     context={}
     return render(request, "myApp/doctor_dataEdit.html", context)
 
+#doctor_dataEdit.html
+#doctor/data/edit/<int: doctor_id/>
+@login_required
+def docDataEd_new(request, doctor_id):
+    doctor = Doctor.objects.get(id=doctor_id)
+    doc_exp_list = Doc_Expertise.objects.filter(DocID=doctor)
+
+    context={
+        'doctor': doctor,
+        'expertises': doc_exp_list
+    }
+    return render(request, "myApp/doctor_dataEdit.html", context)
+
 #ClicktoEditSchedule.html
 #click/schedule/
 def clickSchedule(request):
@@ -1298,17 +1330,16 @@ def clinic_info(request):
             'password': user.password,
             'address': user.clinic.address,
             'license_number': user.clinic.license_number,
-            #'photo_url': user.clinic.photo.url,
             'introduction': user.clinic.introduction,
         }
-        print("info = ", info)
-        if user.clinic.photo and user.clinic.photo.name:
-           info['photo_url'] =  user.clinic.photo.url
-        print("info = ", info)
+        if 'photo' in info:
+            del info['photo']
         print('photo = ', user.clinic.photo, '  name = ', user.clinic.photo.name)
+        print("info = ", info)
         return JsonResponse({'status': 'success', 'data': info}, status=200)
     else:
         return JsonResponse({'status': 'error', 'error': 'User is not a clinic'}, status=400)
+
 
 #client_info/
 def client_info(request):

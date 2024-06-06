@@ -62,7 +62,8 @@
                             <div class="col">
                                 <label for="email" class="required">帳號(電子郵件)</label>
                                 <div class="form-floating">
-                                    <input type="email" class="form-control" id="email" name="email" required>
+                                    <input type="email" class="form-control loginHide" id="email" name="email" required>
+                                    <span id="emailShow"></span>
                                 </div>
                             </div>
                             <div class="col">
@@ -78,13 +79,14 @@
                                 <label for="password" class="required loginHide">密碼</label>
                                 <div class="form-floating">
                                     <input type="password" class="form-control loginHide" id="password" name="password">
+
                                 </div>
                             </div>
                             <div class="col">
                                 <label for="gender" class="required">性別</label>
                                 <div class="form-floating">
                                     <select class="form-select" id="gender" name="gender" required>
-                                        <option value="">選擇性別</option>
+                                        <option value="" selected disabled>選擇性別</option>
                                         <option value="male">男</option>
                                         <option value="female">女</option>
                                     </select>

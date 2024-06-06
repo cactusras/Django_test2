@@ -25,9 +25,7 @@ function fetch_element(){
         clieField['email'] = document.getElementById('email').value
         clieField['name'] = document.getElementById('name').value,
         clieField['phone_number'] = document.getElementById('phone_number').value;
-        if(window.localStorage.getItem('isLogin') == 'failed'){
-            clieField['password'] = document.getElementById('password').value
-        }          
+        clieField['password'] = document.getElementById('password').value
         clieField['address'] = document.getElementById('address').value,
         clieField['birth_date'] = document.getElementById('birth_date').value
         clieField['gender'] = document.getElementById('gender').value
@@ -45,35 +43,31 @@ document.addEventListener('DOMContentLoaded', function() {
         const btnLogout = document.getElementById('logoutButton');
         const loginHide = document.querySelectorAll('.loginHide');
         const pwInput = document.getElementById('password')
+        const emailShow = document.getElementById('emailShow')
         fetch_element();
         //canva11進入canva12   
         if (window.localStorage.getItem('isLogin') == 'success'){
-            //console.log('cliejs46')
             barTitle.innerText = '患者資料'
             btnRegis.innerText = '回到主頁'
             btnLogout.hidden = false;
             pwInput.required = false
             loginHide.forEach(element => {
-                element.hidden = true;
+                if (element.tagName.toLowerCase() === 'label') {
+                    element.style.display = 'none'
+                } else {
+                    element.type = 'hidden'
+                }
             });
             fetch_info(clieForm);
+            pwClass = document.querySelectorAll('.password')
         }else if(window.localStorage.getItem('isLogin') == 'failed'){
-            //console.log('cliejs46_no')
             barTitle.innerText = '註冊'
             btnRegis.innerText = '完成'
             btnLogout.hidden = true;
             pwInput.required = true
+            emailShow.style.display = 'none'
         }
 })
-
-function click_regis(event){
-    event.preventDefault();
-    if (window.localStorage.getItem('isLogin') == 'success'){
-        window.location.href = '/home'
-    }else{
-        window.location.href = "/loginP"
-    }
-}
 
 async function isUniqueEmail(email){
     try {
@@ -81,7 +75,6 @@ async function isUniqueEmail(email){
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                //'X-CSRFToken': getCookie('csrftoken')
             },
             body: JSON.stringify({email: email})
         });
@@ -89,7 +82,6 @@ async function isUniqueEmail(email){
         return uniqueEmail.isUnique;
     } catch (error) {
         console.log('Error fetching registered emails:', error);
-        //alert('Error checking email availability');
         return false;
     }
 }
@@ -108,6 +100,10 @@ function fetch_info(formFilled){
             const clieInfo = data.data;
             if (clieInfo['password'] != ''){
                 clieInfo['password'] = '';
+            }
+            document.getElementById('emailShow').innerText = clieInfo['email']
+            if(!clieInfo['notify']){
+                notify.checked = false
             }
             fillForm(clieInfo, formFilled);
         } else {
@@ -164,9 +160,9 @@ document.getElementById('clientForm').addEventListener('submit', async function(
                         }else{
                             isValid = true;
                         }
-                    }else if(window.localStorage.getItem('isLogin') == 'success'){
+                    }else{
                         isValid = true;
-                    }
+                    }                                             
                 }
             }
     }  
@@ -186,11 +182,11 @@ document.getElementById('clientForm').addEventListener('submit', async function(
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                alert(data.message);
                 if(window.localStorage.getItem('isLogin') == 'failed'){
-                    
+                    alert(data.message);
                     window.location.href = '/loginP/';
                 }else{
+                    alert(data.message);
                     window.localStorage.setItem('username', clieField.name)
                     window.location.href = '/home/';
                 }

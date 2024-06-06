@@ -45,13 +45,17 @@ class ClinicForm(forms.ModelForm):
       #  self.fields['is_admin'].initial = False
 
 class ClinicUpdateForm(forms.ModelForm):
+    email = forms.EmailField(required=True)
+    license_number = forms.CharField(required=True)
+
     class Meta:
         model = Clinic
         #fields = ['name', 'license_number','phone_number','address','introduction','photo','email','password' ]
         fields = ['email', 'name','phone_number','license_number','address','introduction']
     def __init__(self, *args, **kwargs):
-        self.update = kwargs.pop('update', False)
         super(ClinicUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['email'].validators = []
+        self.fields['license_number'].validators = []
 
 class ClientForm(forms.ModelForm):
     class Meta:
@@ -64,12 +68,15 @@ class ClientForm(forms.ModelForm):
         # self.fields['is_admin'].initial = False
 
 class ClientUpdateForm(forms.ModelForm):
+    email = forms.EmailField(required=True)
+    
     class Meta:
         model = Client
-        fields = [ 'email','name','phone_number','address','birth_date','gender','occupation','notify']
-    
+        fields = ['email', 'name', 'phone_number', 'address', 'birth_date', 'gender', 'occupation', 'notify']
+
     def __init__(self, *args, **kwargs):
-        super(ClientUpdateForm, self).__init__(*args,**kwargs)
+        super(ClientUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['email'].validators = []
 
 class WorkingHourForm(forms.ModelForm):
     class Meta:
@@ -102,10 +109,10 @@ class SchedulingForm(forms.ModelForm):
         model = Scheduling
         fields = ['StartDate','EndDate']
         
-#class Doctor_ExpertiseForm(forms.ModelForm):
-#    class Meta:
-#        model = Doc_Expertise
-#        fields = ['DocID','Expertise_ID']
+class Doctor_ExpertiseForm(forms.ModelForm):
+   class Meta:
+       model = Doc_Expertise
+       fields = ['DocID','Expertise_ID']
 
 class ExpertiseForm(forms.ModelForm):
     class Meta:
@@ -115,8 +122,8 @@ class ExpertiseForm(forms.ModelForm):
 class ReservationForm(forms.ModelForm):
     class Meta:
         model = Reservation
-        fields = ['ClientID','SchedulingID','expertiseID','time_start','time_end','Status']
-        
+        #fields = ['ClientID','SchedulingID','expertiseID','time_start','time_end','Status']
+        fields = ['ClientID','SchedulingID','expertiseID','time_start']
        
 class WaitingForm(forms.ModelForm):
     class Meta:
@@ -178,7 +185,26 @@ class AuthenticationForm(forms.Form):
 		if self.user_cache:
 			return self.user_cache.id
 		return None
-     
+
+class TestingForm(forms.Form):
+    doctor_id = forms.IntegerField(label='Doctor ID')
+    date = forms.DateField(label='Date', widget=forms.DateInput(attrs={'type': 'date'}))
+    expertise_name = forms.CharField(label='Expertise Name', max_length=100)
+    expertise_list = forms.CharField(label='Expertise List', widget=forms.Textarea)
+
 class LoginForm(forms.Form):
     email = forms.EmailField()
     password = forms.CharField(widget=forms.PasswordInput)
+
+
+class SearchForm(forms.Form):
+    query = forms.CharField(label='查詢欄位', max_length=255)
+
+    city = forms.ChoiceField(label='縣市', choices=[], required=False)
+    district = forms.ChoiceField(label='地區', choices=[], required=False)
+
+    category = forms.ChoiceField(label='治療項目', choices=[], required=False)
+    treatment = forms.ChoiceField(label='具體治療', choices=[], required=False)
+
+    start_date = forms.DateField(label='看診日期 開始', required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(label='結束', required=False, widget=forms.DateInput(attrs={'type': 'date'}))
