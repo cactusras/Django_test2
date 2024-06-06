@@ -171,7 +171,7 @@ class Reservation(models.Model):
     Status = models.IntegerField(choices=STATUS_CHOICES, default=0)
     
     class Meta:
-        unique_together = ('ClientID', 'SchedulingID', 'Status')
+        unique_together = ('ClientID', 'time_start','SchedulingID', 'Status')
     
     #原本應該是直觀用來看客戶醫生診所預約關係
     #改成scheduling之後應該就變成直觀能看到醫生不一定有診所
@@ -194,7 +194,7 @@ class Reservation(models.Model):
     def WDforFront(self):
         return self.time_start.weekday() + 1
     
-    #
+    '''楊老師ver.'''
     def TimeSlotNumber(self, start_time=None, end_time=None):
         if start_time is None or end_time is None:
             start_time = self.time_start
@@ -208,6 +208,13 @@ class Reservation(models.Model):
         total_hours = int(duration.total_seconds() // 3600)  # Total hours between start and end
         slot_numbers = [i + 1 for i in range(total_hours)]  # Generate slot numbers for each hour
         return slot_numbers
+    
+    '''林昀儀ver.
+    def TimeSlotNumber(self):
+        duration = self.time_end - self.time_start
+        total_hours = int(duration.total_seconds() // 3600)  # Total hours between start and end
+        slot_numbers = [i + 1 for i in range(total_hours)]  # Generate slot numbers for each hour
+        return slot_numbers'''
     
 class Waiting(models.Model):
     ClientID = models.ForeignKey('Client', related_name='waitings', on_delete=models.CASCADE)
@@ -239,13 +246,13 @@ class docClinicSearch(models.Model):
     doc_name = models.CharField(max_length=100) #d.name    
     clinic_id = models.IntegerField() #d.clinicid
     clinic_name = models.CharField(max_length=100)  #c.name
-    clinic_address = models.TextField()#c.address
+    clinic_address = models.TextField()#c.adress
     clinic_introduction = models.TextField(blank=True, null=True)#c.introduction
     exp_id = models.IntegerField()#e.id
     exp_name = models.CharField(max_length=100)#e.name
     scheduling_id = models.IntegerField()#ms.id
-    start_date = models.DateField()#ms.start_date
-    end_date = models.DateField()#ms.end_date
+    StartDate = models.DateField()#ms.start_date
+    EndDate = models.DateField()#ms.end_date
     workinghour_id = models.IntegerField()#w.WorkingHour_id
     day_of_week = models.IntegerField(choices=DAY_CHOICES)#w.day_of_week
     start_time = models.TimeField()#w.start_time
@@ -254,5 +261,3 @@ class docClinicSearch(models.Model):
     class Meta:
         managed = False  # No migrations will be made for this model
         db_table = 'docClinicSearch'  # Name of the view in the database
-
-#docClinicSearch: AutoField to IntegerField, and PK? 

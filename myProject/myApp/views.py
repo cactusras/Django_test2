@@ -6,7 +6,7 @@ from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 #from rest_framework import serializers
 from myProject.encoder import CustomEncoder
-from .forms import ClientUpdateForm, ClinicUpdateForm, DoctorForm,ClinicForm,ClientForm, LoginForm,SchedulingForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm
+from .forms import ClientUpdateForm, ClinicUpdateForm, DoctorForm,ClinicForm,ClientForm, LoginForm,SchedulingForm, SearchForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm
 from django.db.models import Q
 from django.db import connection
 from django.contrib.auth.decorators import login_required
@@ -121,86 +121,60 @@ def add_client(request):
 
 
 @login_required
-def add_Reservation(request):  
-    if request.user.is_authenticated:
-        user_id = request.user.id
+def add_Reservation(request):
+    if request.method == 'POST':
+        doctor_id = request.POST.get('doctor_id')
+        doctor = get_object_or_404(Doctor, id=doctor_id)
+        date_str = request.POST.get('date')
+        start_time_str = request.POST.get('time_start')
+        expertise_name = request.POST.get('expertise_name')
+        
+        print(doctor_id)
+        print(date_str)
+        print(start_time_str)
+        print(expertise_name)
 
-        if request.method == 'POST':
-            # Retrieve session data
-            doctor_id = request.session.get('doctor_id')
-            date = request.session.get('date')  # Assuming date format is YYYY-MM-DD
+        if not doctor_id or not date_str or not start_time_str or not expertise_name:
+            return JsonResponse({'error': 'Invalid input data'}, status=400)
+
+        try:
+            client = request.user.client
+            date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+            week_day = date_obj.weekday()+1
+            time_obj = datetime.strptime(start_time_str, '%H:%M:%S').time()
+
             
-            try:
-                scheduling = Scheduling.objects.get(DoctorID=doctor_id, StartDate__lte=date, EndDate__gte=date)
-                SchedulingID = scheduling.id
-            except Scheduling.DoesNotExist:
-                return HttpResponse('No scheduling found for this doctor on selected date')
+            scheduling = Scheduling.objects.filter(
+                DoctorID=doctor,
+                StartDate__lte=date_obj,
+                EndDate__gte=date_obj,
+                WorkingHour__day_of_week=week_day,
+                WorkingHour__start_time__lte=time_obj,
+                WorkingHour__end_time__gte=time_obj
+            ).first()
 
-            ExpID = request.session.get('ExpertiseID', 'Not Found')
-            timeS = request.session.get('StartingTime', 'Not defined')
-
-            if SchedulingID == 'NotFound' or ExpID == 'Not Found' or timeS == 'Not defined' :
-                return HttpResponse('Missing scheduling information')
-
-            # Convert string times to datetime objects
-            timeS = datetime.strptime(timeS, '%Y-%m-%d %H:%M:%S')
             
-            # Fetch the expertise duration
-            try:
-                expertise = Expertise.objects.get(id=ExpID)
-                expertise_duration = timedelta(hours=expertise.time.hour, minutes=expertise.time.minute)
-            except Expertise.DoesNotExist:
-                return HttpResponse('Expertise not found')
-            #可預約，邏輯參考avaliable
-            status_conditions = Q(status=0) | Q(status=2) | Q(status=3)
-            reservations = Reservation.objects.filter(
-                SchedulingID=SchedulingID,
-                time_start__lt=datetime.combine(datetime.strptime(date, '%Y-%m-%d').date(), timeS),
-                time_end__gt=datetime.combine(datetime.strptime(date, '%Y-%m-%d').date(), timeS),
-                Expertise = expertise
+            expertise_id = Expertise.objects.get(name=expertise_name)
+            expertise_time = expertise_id.time
+            time_start = datetime.combine(date_obj, time_obj)
+            time_end = time_start + timedelta(hours=expertise_time.hour, minutes=expertise_time.minute)
+            
+            reservation = Reservation.objects.create(
+                ClientID=client,
+                SchedulingID=scheduling,
+                expertiseID=expertise_id,
+                time_start=time_start,
+                time_end=time_end,
+                Status=0
             )
-            scheduling = Scheduling.objects.get(id=SchedulingID)
-            day_of_week = timeS.weekday() + 1
-            working_hours = WorkingHour.objects.filter(
-                day_of_week=timeS.weekday() + 1,  # +1 because WorkingHour.day_of_week is 1-7, not 0-6
-                start_time__lte=timeS.time(),
-                end_time__gte=(timeS + expertise_duration).time()
-            )
+            
+            reservation.save()
+            
+            return JsonResponse({'success': 'Reservation added successfully'}, status=201)
+        except (Doctor.DoesNotExist, Scheduling.DoesNotExist, ValueError) as e:
+            return JsonResponse({'error': f'Failed to add reservation: {e}'}, status=400)
 
-            if not working_hours.exists():
-                return HttpResponse('Doctor is not working during this time')
-
-            status_conditions = Q(status=1) | Q(status=5)
-            schedule_condition = Q(schedule_id=SchedulingID)
-            if (status_conditions&schedule_condition):
-                form = ReservationForm(request.POST)
-                if form.is_valid():
-                    try:
-                        with connection.cursor() as cursor:
-                            cursor.execute("INSERT INTO Reservation (ClientID, SchedulingID, expertiseID, time_start, time_end, status) VALUES (%s, %s, %s, %s, %s, %s)",
-                                           [user_id, SchedulingID, ExpID, timeS, timeS + expertise_duration, 0])
-                        return HttpResponse('Reservation successfully created')
-                    except Exception as e:
-                        return HttpResponse(f'Error creating reservation: {e}')
-                else:
-                    return HttpResponse('Form not valid')
-            elif schedule_condition:
-                form = WaitingForm(request.POST)
-                if form.is_valid():
-                    try:
-                        with connection.cursor() as cursor:
-                            cursor.execute("INSERT INTO Waiting (ClientID, SchedulingID, expertiseID, time_start, time_end, is_waiting) VALUES (%s, %s, %s, %s, %s, %s)",
-                                           [user_id, SchedulingID, ExpID, timeS, timeS + expertise_duration, False])
-                        return HttpResponse('Added to waiting list')
-                    except Exception as e:
-                        return HttpResponse(f'Error adding to waiting list: {e}')
-                else:
-                    return HttpResponse('Form not valid')
-
-        request.session.flush()
-        return (request,'myApp/UserAppointmentRecords.html')
-    else:
-        return HttpResponse('Login failed')
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
     
 #clinic posting
 def add_clinic(request):
@@ -269,20 +243,26 @@ def add_clinic(request):
         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
 #先將加入圖片放在這裡 但可能還有東西要改
+# add/doctor/
 @login_required
 def add_doctor(request):
     print('add doctor')
     if request.method == 'POST':
         print('add doctor_post yes')
-        doctor_form_data = request.session.get('doctor_form_data')
-        expertise_list = request.session.get('doc_expertise_list', [])
-        schedule_form_data = request.session.get('schedule_form_data')
-        working_hour_list = request.session.get('working_hour_list', [])
+        request_data_json = request.body.decode()  # Decode raw bytes to string
+        print('Request Data JSON:', request_data_json)
+        request_data = json.loads(request_data_json).get('requestData')  # Parse JSON string
+
+        doctor_form_data = request_data.get('doctorData')
+        expertise_list = request_data.get('expertises')
+        schedule_form_data = request_data.get('schedulingForm')
+        working_hour_list = request_data.get('working_hour_list')
+        clinicName = request_data.get('clinicName')
 
         print('doc_info = ', doctor_form_data , '  exp_info = ', expertise_list, '  working_hours = ', working_hour_list, '  schedule = ', schedule_form_data)
 
-        '''if not (doctor_form_data and expertise_list and schedule_form_data and working_hour_list):
-            return JsonResponse({'message': 'Session data incomplete', 'status': 'error'})'''
+        # if not (doctor_form_data and expertise_list and schedule_form_data and working_hour_list):
+        #     return JsonResponse({'message': 'Session data incomplete', 'status': 'error'})
         
         if not (doctor_form_data and expertise_list and schedule_form_data):
             return JsonResponse({'message': 'Session data incomplete', 'status': 'error'})
@@ -301,34 +281,50 @@ def add_doctor(request):
                 print(f"Error saving photo: {e}")
                 return JsonResponse({'message': 'Error saving photo', 'status': 'error'})
 
-        clinic = Clinic.objects.get(id=request.user.id)
+        clinic = Clinic.objects.get(name=clinicName)#理論上要用id才能取到唯一
         doctor_form_data['clinicID'] = clinic
         email = doctor_form_data.pop('email')
         doctor, created = Doctor.objects.update_or_create(email=email, defaults=doctor_form_data)
         
         Doc_Expertise.objects.filter(DocID=doctor).delete()
         
-        for expertise_data in expertise_list:
-            expertise_name = expertise_data.get('name')
-            expertise, created = Expertise.objects.get_or_create(name=expertise_name)
-            Doc_Expertise.objects.create(DocID=doctor, Expertise_ID=expertise)
+        if isinstance(expertise_list, list):
+            for expertise_data in expertise_list:
+                if isinstance(expertise_data, dict):
+                    expertise_name = expertise_data.get('name')
+                    if expertise_name:  # Ensure the name exists
+                        expertise, created = Expertise.objects.get_or_create(name=expertise_name)
+                        Doc_Expertise.objects.update_or_create(DocID=doctor, Expertise_ID=expertise)
+                else:
+                    print(f"1 Expected dict but got {type(expertise_data)}: {expertise_data}")
+        else:
+            print(f"2 Expected list but got {type(expertise_list)}: {expertise_list}")
         
-        for working_hour_data in working_hour_list:
-            working_hour, created = WorkingHour.objects.update_or_create(
-                day_of_week=working_hour_data['day_of_week'],
-                start_time=working_hour_data['start_time'],
-                end_time=working_hour_data['end_time'],
-                defaults=working_hour_data
-            )
-            Scheduling.objects.update_or_create(
-                DoctorID=doctor.id,
-                #WorkingHour=1,
-                #WorkingHour=working_hour,
-                defaults=schedule_form_data
-            )
-
+        if isinstance(working_hour_list, list):
+            for working_hour_data in working_hour_list:
+                if isinstance(working_hour_data, dict):
+                    working_hour, created = WorkingHour.objects.update_or_create(
+                        day_of_week=working_hour_data.get('day_of_week'),
+                        start_time=working_hour_data.get('start_time'),
+                        end_time=working_hour_data.get('end_time'),
+                        defaults=working_hour_data
+                    )
+                    start_date = schedule_form_data.get('StartDate')
+                    # end_date = schedule_form_data.get('EndDate')
+                    
+                    Scheduling.objects.update_or_create(
+                        DoctorID=doctor,
+                        WorkingHour=working_hour,  # Assuming WorkingHour is a foreign key in Scheduling model
+                        StartDate=start_date,
+                        # EndDate=end_date,
+                        defaults=schedule_form_data
+                    )
+                else:
+                    print(f"3 Expected dict but got {type(working_hour_data)}: {working_hour_data}")
+        else:
+            print(f"4 Expected list but got {type(working_hour_list)}: {working_hour_list}")
         # Clear session data after successful processing
-        request.session.flush()
+        # request.session.flush()
         return JsonResponse({'message': 'Doctor added successfully', 'status': 'success'})
 
     return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
@@ -349,23 +345,31 @@ def Doc_uploading(request):
             doctor_form = DoctorForm(request.POST, request.FILES)
         except json.JSONDecodeError:
             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
+
         if doctor_form.is_valid():
             clean = doctor_form.cleaned_data
             clean['password'] = make_password(clean['password'])
             photo = request.FILES.get('photo')
+
             if photo is not None:
                 photo_url = handle_uploaded_file(photo)
                 clean['photo'] = photo_url
-            request.session['doctor_form_data'] = clean
-            print('succeed adding', clean)
-            doc_expertise_list = request.session.get('doc_expertise_list', None)
-            return JsonResponse({'message': 'Doctor Session added', 'status': 'success'})
+
+            # Store data in local storage
+            localStorage_data = json.dumps(clean)  # Convert data to JSON string
+            # Use JavaScript to access localStorage (see client-side code)
+
+            return JsonResponse({
+                'message': 'Doctor Data added',
+                'status': 'success',
+                'localStorageData': localStorage_data  # Send data to client-side
+            })
         else:
             print('error : ', doctor_form.errors)
             return JsonResponse({'message': 'Invalid form data', 'errors': doctor_form.errors, 'status': 'error'})
     else:
         doctor_form = DoctorForm()
-    return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
+        return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
 
 @login_required
@@ -391,98 +395,40 @@ def DocExp_uploading(request):
     else:
         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
-@login_required
-def workingHour_upload(request):
-    if request.method == 'POST':
-        try:
-            data_string = request.body.decode('utf-8')
-            data = json.loads(data_string)  # 解析 JSON 数据
-            print('post succeed')
-        except json.JSONDecodeError:
-            print('post failed')
-            return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
-        start_time_str = data['start_time'] #type(start_time_str) == str
-        '''end_time_str = data.get('end_time')
-        
-
-        data = {
-            'day_of_week' : data.get('day_of_week'),
-            'start_time' : start_time_str,
-            'end_time' : end_time_str
-            #'start_time' : start_time_str.strftime('%H:%M'),
-            #'end_time' : end_time_str.strftime('%H:%M')
-        }'''
-        print('sttime = ', start_time_str) 
-        #working_hour_form = WorkingHourForm(data)
-        print('before valid')
-        #取代form來驗證input的資料型態(連到serializers.py)
-        serializer = WorkingHourSerializer(data=data)
-        if serializer.is_valid():
-            print('after valid1')
-            working_hour_list = request.session.get('working_hour_list', [])
-            print('first get list = ', working_hour_list)
-            # 添加新工作時間到列表中
-            working_hour_list.append(serializer.validated_data)
-            print('succeed adding', working_hour_list)
-            # 將工作時間列表保存回 session
-            request.session['working_hour_list'] = working_hour_list
-            print('finish')
-
-            #working_hour_list = request.session.get('working_hour_list', [])
-            
-            #working_hour_list.append(working_hour_form.cleaned_data)
-            #working_hour_list.append(data)
-            
-            # 序列化 time 对象为字符串
-            '''workingHour_data = []
-            for item in working_hour_list:
-                if(type(item['start_time']) == datetime):
-                    print('type is datatimeS')
-                    item['start_time'] = item['start_time'].strftime('%H:%M')
-                if(type(item['end_time']) == datetime):
-                    print('type is datatimeE')
-                    item['end_time'] = item['end_time'].strftime('%H:%M')
-                workingHour_data.append(item)'''
-            
-            #request.session['working_hour_list'] = working_hour_list
-            #print('after valid3')
-            #想除掉not serializable的bug 所以寫了這個(跟encoder.py) 但會導到cls的bug
-            #serialized_data  = simplejson.dumps(working_hour_list, cls=CustomEncoder)
-            #return JsonResponse({'message': 'Working hour data added successfully', 'status': 'success'})
-            return HttpResponse(status=204) #我想說改用http看看 但還是有bug 也可能是我json沒有接收好httpresponse? 我不確定
-        else:
-            print('notvalid = ', serializer.errors)
-            #return JsonResponse({'message': 'Invalid form data', 'status': 'error'})
-            return HttpResponse('Invalid form data', status=400)
-    else:
-        working_hour_form = WorkingHourForm()
-    
-    #return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
-    return HttpResponse('Invalid request method', status=405)
-
-'''render版的workingHour_upload 對應到clicktoEditSchedule_new
+#直接在js存到session，不用這個method了
+#workingHour/upload/
 @login_required
 def workingHour_upload(request):
     print('hi')
     if request.method == 'POST':
         print('post here')
-        working_hour_form = WorkingHourForm(request.POST)
-        print('form = ', working_hour_form)
+        print(request.POST)  # Print raw POST data
+        try:
+            working_hour_form = WorkingHourForm(request.POST)
+            print("Form data:", working_hour_form.data)  # Print form data before validation
+            # working_hour_form.errors
+        except json.JSONDecodeError:
+            return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
+        
         if working_hour_form.is_valid():
             print('valid here')
             working_hour_list = request.session.get('working_hour_list', [])
+            
             working_hour_list.append(working_hour_form.cleaned_data)
             request.session['working_hour_list'] = working_hour_list
             print('working = ', working_hour_list)
-            return render(request,'myApp/ClicktoEditSchedule.html')
+            # Return a success JSON response
+            return JsonResponse({'message': 'Working hour added to session successfully!', 'status': 'success'})
         else:
-            print(working_hour_form.errors)
+            print("Form errors:", working_hour_form.errors)  # Print form errors
+            # Return an error JSON response with form errors
+            return JsonResponse({'message': 'Form validation failed', 'errors': working_hour_form.errors, 'status': 'error'})
     else:
         working_hour_form = WorkingHourForm()
-    
-    return JsonResponse({'message': 'Invalid request method', 'status': 'error'})'''
+    return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
-
+# scheduling/upload/
+@login_required
 def scheduling_upload(request):
     if request.method == 'POST':
         try:
@@ -491,8 +437,10 @@ def scheduling_upload(request):
             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
 
         data = {
+                #'StartDate': datetime.strftime(data.get('StartDate'), '%Y-%m-%d'),
                 'StartDate' : data.get('StartDate'),
                 'EndDate' : data.get('EndDate')
+                #'EndDate': datetime.strftime(data.get('EndDate'), '%Y-%m-%d')
             }
 
         schedule_form = SchedulingForm(data)
@@ -503,8 +451,13 @@ def scheduling_upload(request):
             scheduling_data['StartDate'] = data.get('StartDate')
             scheduling_data['EndDate'] = data.get('EndDate')
         
-            request.session['schedule_form_data'] = scheduling_data
-            return JsonResponse({'message': 'Scheduling data added successfully', 'status': 'success'})
+            # request.session['schedule_form_data'] = scheduling_data
+            return JsonResponse({
+                'message': 'Doctor Data added',
+                'status': 'success',
+                'localStorageData': scheduling_data  # Send data to client-side
+            })
+            # return JsonResponse({'message': 'Scheduling data added successfully', 'status': 'success'})
         else:
             print('notvalid = ', schedule_form.errors)
             return JsonResponse({'message': 'Invalid form data', 'errors': schedule_form.errors, 'status': 'error'})
@@ -513,6 +466,7 @@ def scheduling_upload(request):
     
     return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
+#doc/session/
 def doc_session(request):
     print('doc_session')
 
@@ -565,76 +519,105 @@ def delete_doctor(request, doctor_email):
 
 @csrf_exempt
 def doctor_clinic_search_view(request):
-    # Apply the filter
-    filter = docClinicFilter(request.GET, queryset=docClinicSearch.objects.all())
+    
+   
+    queryset = docClinicSearch.objects.none()
+    if request.method == 'POST':
+        form = SearchForm(request.POST)
+        if form.is_valid():
+            search_query = form.cleaned_data['query']
+            
+            print(f'searchQ:{search_query}')
 
-    # Retrieve detailed information for each filtered doctor
-    detailed_doctors = []
-    detailed_clinics = []
-    for result in filter.qs:
-        doctor_details = {
-            'doc_id': result.doc_id,
-            'doc_name': result.doc_name,  # Changed from result.name to result.doc_name
-            'clinic_name': result.clinic_name,
-            'clinic_adress': result.clinic_adress,
-            'doc_exp': result.exp_name
-        }
-        detailed_doctors.append(doctor_details)
-
-        clinic_details = {
-            'clinic_id': result.clinic_id,
-            'clinic_name': result.clinic_name,
-            'clinic_adress': result.clinic_adress,
-            'clinic_introduction': result.clinic_introduction,
-            'doc_exp': result.exp_name
-        }
-        detailed_clinics.append(clinic_details)  # Changed from detailed_doctors to detailed_clinics
-
-    # Combine doctor details
-    doc_final = []
-    for doc in detailed_doctors:
-        # Check if the doctor already exists in doc_final
-        existing_doctor = next((item for item in doc_final if item['doc_name'] == doc['doc_name']), None)
-        if existing_doctor:
-            # Append the expertise to the existing doctor's expertise list
-            existing_doctor['doc_exp'].append(doc['doc_exp'])
+            city = request.POST.get('city', '')
+            district = request.POST.get('district', '')
+            category = request.POST.get('category', '')
+            treatment = request.POST.get('treatment', '')
+            start_date = request.POST.get('startDate', '')
+            end_date = request.POST.get('endDate', '')
+        
+            queryset=docClinicSearch.objects.filter(
+                Q(doc_name__icontains=search_query) | Q(clinic_name__icontains=search_query) |
+                Q(clinic_address__icontains=search_query) | Q(clinic_introduction__icontains=search_query)|
+                Q(exp_name__icontains=search_query)
+            )
         else:
-            # Create a new dictionary for the doctor
-            new_doctor = {
-                'doc_id': doc['doc_id'],
-                'doc_name': doc['doc_name'],
-                'clinic_name': doc['clinic_name'],
-                'clinic_adress': doc['clinic_adress'],
-                'doc_exp': [doc['doc_exp']]  # Initialize doc_exp as a list
+            # Print form validation errors for debugging
+            print(f'form error:{form.errors}')
+            return JsonResponse({'error': 'Form validation failed.'}, status=400)
+   
+        #return JsonResponse(data)
+
+        # Retrieve detailed information for each filtered doctor
+        detailed_doctors = []
+        detailed_clinics = []
+        for result in queryset:
+            doctor_details = {
+                'doc_id': result.doc_id,
+                'doc_name': result.doc_name,
+                'clinic_name': result.clinic_name,
+                'clinic_address': result.clinic_address,
+                'doc_exp': result.exp_name
             }
-            doc_final.append(new_doctor)
+            detailed_doctors.append(doctor_details)
 
-    # Combine clinic details
-    clinic_final = []
-    for clinic in detailed_clinics:
-        # Check if the clinic already exists in clinic_final
-        existing_clinic = next((item for item in clinic_final if item['clinic_name'] == clinic['clinic_name']), None)
-        if existing_clinic:
-            # Append the expertise to the existing clinic's expertise list
-            existing_clinic['doc_exp'].append(clinic['doc_exp'])
-        else:
-            # Create a new dictionary for the clinic
-            new_clinic = {
-                'clinic_id': clinic['clinic_id'],
-                'clinic_name': clinic['clinic_name'],
-                'clinic_adress': clinic['clinic_adress'],
-                'clinic_introduction': clinic['clinic_introduction'],
-                'doc_exp': [clinic['doc_exp']]  # Initialize doc_exp as a list
+            clinic_details = {
+                'clinic_id': result.clinic_id,
+                'clinic_name': result.clinic_name,
+                'clinic_address': result.clinic_address,
+                'clinic_introduction': result.clinic_introduction,
+                'doc_exp': result.exp_name
             }
-            clinic_final.append(new_clinic)
+            detailed_clinics.append(clinic_details)
 
-    # Prepare data to be returned as JsonResponse
-    data = {
-        'doctors': doc_final,
-        'clinics': clinic_final,
-    }
+        # Combine doctor details
+        doc_final = []
+        for doc in detailed_doctors:
+            # Check if the doctor already exists in doc_final
+            existing_doctor = next((item for item in doc_final if item['doc_name'] == doc['doc_name']), None)
+            if existing_doctor:
+                if doc['doc_exp'] not in existing_doctor['doc_exp']:
+                # Append the expertise to the existing doctor's expertise list
+                    existing_doctor['doc_exp'].append(doc['doc_exp'])
+            else:
+                # Create a new dictionary for the doctor
+                new_doctor = {
+                    'doc_id': doc['doc_id'],
+                    'doc_name': doc['doc_name'],
+                    'clinic_name': doc['clinic_name'],
+                    'clinic_address': doc['clinic_address'],
+                    'doc_exp': [doc['doc_exp']]
+                }
+                doc_final.append(new_doctor)
 
-    return JsonResponse(data)
+        # Combine clinic details
+        clinic_final = []
+        for clinic in detailed_clinics:
+            # Check if the clinic already exists in clinic_final
+            existing_clinic = next((item for item in clinic_final if item['clinic_name'] == clinic['clinic_name']), None)
+            if existing_clinic:
+                if clinic['doc_exp'] not in existing_clinic['doc_exp']:
+                # Append the expertise to the existing clinic's expertise list
+                    existing_clinic['doc_exp'].append(clinic['doc_exp'])
+            else:
+                # Create a new dictionary for the clinic
+                new_clinic = {
+                    'clinic_id': clinic['clinic_id'],
+                    'clinic_name': clinic['clinic_name'],
+                    'clinic_address': clinic['clinic_address'],
+                    'clinic_introduction': clinic['clinic_introduction'],
+                    'doc_exp': [clinic['doc_exp']]
+                }
+                clinic_final.append(new_clinic)
+
+        # Prepare data to be returned as JsonResponse
+        data = {
+            'doctors': doc_final,
+            'clinics': clinic_final,
+        }
+        print(data)
+
+        return JsonResponse(data)
     
 #schedule tomeslot(輸入start time end time，每一小時割一次)
 def get_time_slots(schedule):
@@ -757,52 +740,20 @@ def reservationStCbD(request, reservation_id):
 
 #預約此醫生按鈕按下去
 def doctor_reserve_page(request, doc_id):
+    doctor = Doctor.objects.get(id=doc_id)
+    doctor_expertise = Doc_Expertise.objects.filter(DocID=doctor).select_related('Expertise_ID').all()
 
-	request.session['doc_id'] = doc_id  # Save session
+    expertise_list = [ expertise.Expertise_ID.name for expertise in doctor_expertise]
 
-	# Fetch the doctor based on doc_id
-	doctor = get_object_or_404(Doctor, id=doc_id)
-	clinic = get_object_or_404(Clinic, id=doctor.clinicID)
-
-	# Fetch the expertise related to the doctor
-	doctor_expertise = Doc_Expertise.objects.filter(DocID=doctor).select_related('Expertise_ID')
-
-	# Create a list of dictionaries with expertise name and time
-	expertise_list = []
-	for expertise in doctor_expertise:
-		expertise_dict = {
-			'name': expertise.Expertise_ID.name,
-			'time': expertise.Expertise_ID.time
-		}
-		expertise_list.append(expertise_dict)
-
-	# Store the expertise list in the session
-	request.session['expertise_list'] = expertise_list
-
-	context = {
-		'doctor': doctor,
-		'clinic': clinic,
-		'doctor_expertise': expertise_list,
-		#'schedules': doc_schedule_list
-		#'reserved': reservation_list
-	}
-	return render(request, 'myApp/doctor_reserve.html', context)
+    context = {
+        'doctor': doctor,
+        'clinic_name': doctor.clinicID.name,
+        'expertise_list': expertise_list
+    }
+    return render(request, 'myApp/doctor_reserve.html', context)
 
 
 #診所預約按鈕按下去
-'''def clinic_reserve_page(request, clinic_id):
-    clinic = get_object_or_404(Clinic, id=clinic_id)
-    clinic = {
-        'id': clinic.id,
-        'name': clinic.name,
-        'phone_number': clinic.phone_number,
-        'address': clinic.address,
-        'introduction':clinic.introduction,
-        # 添加其他需要的字段
-    }
-
-    return JsonResponse({'clinic': clinic})'''
-#先試用render看看
 def clinic_reserve_page(request, clinic_id):
     clinic = get_object_or_404(Clinic, id=clinic_id)
     context = {
@@ -850,7 +801,7 @@ def doctorPage_loading(request):
     user = request.user
     doctor = get_object_or_404(Doctor, id=user.id)
     # working_hours = WorkingHour.objects.filter(DoctorID=doctor)
-    
+    print(doctor)
     today = now().date()
     start_of_week = today - timedelta(days=today.weekday())
     end_of_week = start_of_week + timedelta(days=6)
@@ -860,13 +811,13 @@ def doctorPage_loading(request):
         StartDate__lte=end_of_week,
         EndDate__gte=start_of_week
     ).select_related('WorkingHour')
-    
+    print(schedules)
     reservations = Reservation.objects.filter(
         SchedulingID__in=schedules,
         Status__in=[0, 2, 3],
         time_start__date__range=[start_of_week, end_of_week]
     )
-
+    print(reservations)
     reservation_list = []
     for reservation in reservations:
         client_name = reservation.ClientID.name
@@ -904,11 +855,12 @@ def doctorPage_loading(request):
         }
         for schedule in schedules
     ]
-
+ 
     context = {
         'reservation_list': reservation_list,
         'schedule_list': schedule_list,
     }
+    print(context)
     
     return JsonResponse(context)
 
@@ -949,7 +901,7 @@ def add_times(time1, duration):
 
 def available(request):
     # Get doctor_id, date, and expertise_name from the GET request
-    doctor_id = request.get('doctor_id')
+    doctor_id = request.session.get('doctor_id')
     date_str = request.GET.get('date')
     date_reserve = datetime.strptime(date_str, '%Y-%m-%d').date()
     week_day = date_reserve.weekday()+1
@@ -1055,7 +1007,6 @@ def available(request):
 
 
 #存疑，（應該）現在這邊必須要候補時段跟被取消的預約時段一模一樣才卡的進去
-@login_required
 def waitingToResForC(request):
     user = request.user
     # Find the waiting entries for the current user with status=False
@@ -1305,6 +1256,12 @@ def get_expertise_list_doc(request, doctor_id):
     expertise_list = [{'id': de.Expertise_ID.id, 'name': de.Expertise_ID.name, 'time': de.Expertise_ID.time} for de in doctor.doctorID_exp.all()]
     return JsonResponse({'expertise_list': expertise_list})
 
+def get_expertise_list(request, doctor_id):
+    doctor = get_object_or_404(Doctor, id=doctor_id)
+    print('getDoc_exp')
+    expertise_list = [{'id': de.Expertise_ID.id, 'name': de.Expertise_ID.name, 'time': de.Expertise_ID.time} for de in doctor.doctorID_exp.all()]
+    return JsonResponse({'expertise_list': expertise_list})
+
 def get_expertise_list_clin(request, clinic_id):
     clinic = get_object_or_404(Clinic, id=clinic_id)
     doctors = Doctor.objects.filter(clinicID=clinic_id)
@@ -1337,3 +1294,108 @@ def cancel_reservation(request, reservation_id):
     reservation.Status = 5  # Set status to 'cancelled by doc'
     reservation.save()
     return JsonResponse({'status': 'success', 'message': 'Reservation status updated to cancelled.'})
+
+def get_doc_working(request, doctor_id):
+    doctor = get_object_or_404(Doctor, id=doctor_id)
+    print('getDoc_working')
+    schedulings = Scheduling.objects.filter(DoctorID=doctor)
+    
+    working_hours = []
+    for scheduling in schedulings:
+        working_hours.append({
+            'start_time': scheduling.WorkingHour.start_time,
+            'end_time': scheduling.WorkingHour.end_time,
+            'start_date': scheduling.StartDate,
+            'end_date': scheduling.EndDate
+        })
+    
+    return JsonResponse({'working_hours': working_hours})
+
+def get_available_times(request):
+    if request.method == 'GET':
+        doctor_id = request.GET.get('doctor_id')
+        chosen_date_str = request.GET.get('date')
+        expertise_name = request.GET.get('expertise_name')
+        expertise_time = Expertise.objects.get(name = expertise_name).time
+
+        if not doctor_id or not chosen_date_str or not expertise_name:
+            return JsonResponse({'error': 'Invalid input data'}, status=400)
+
+        try:
+            chosen_date = datetime.strptime(chosen_date_str, '%Y-%m-%d').date()
+            expertise_time = timedelta(hours=expertise_time.hour, minutes=expertise_time.minute)
+        except (TypeError, ValueError) as e:
+            return JsonResponse({'error': f'Invalid date format: {e}'}, status=400)
+
+        chosen_weekday = chosen_date.weekday() + 1
+
+        doctor = get_object_or_404(Doctor, id=doctor_id)
+        print(f'docID:{doctor_id}')
+        available_times = []
+        
+        # 获取可用时间段
+        for scheduling in doctor.scheduling.all():
+            if scheduling.StartDate <= chosen_date <= scheduling.EndDate and scheduling.WorkingHour.day_of_week == chosen_weekday:
+                print(f'scheduling: {scheduling.id}')
+                print(f'chosen day:{chosen_weekday}')
+                start_time = scheduling.WorkingHour.start_time
+                print(f'start time:{start_time}')
+                end_time = scheduling.WorkingHour.end_time
+                print(f'end time:{end_time}')
+
+                current_datetime = datetime.combine(chosen_date, start_time)
+                print(f'cur time:{current_datetime}')
+                end_datetime = datetime.combine(chosen_date, end_time)
+                while current_datetime  + expertise_time <= end_datetime:
+                    next_datetime = current_datetime + timedelta(hours=1)
+                    print(f'next time:{next_datetime}')
+                    available_times.append((current_datetime.time(), next_datetime.time()))
+                    current_datetime = next_datetime
+                    
+                    
+        # 检查可用时间段是否与已有预约重叠
+        available_times = sorted(available_times, key=lambda x: x[0])  # 按照开始时间排序
+        reserved_times = get_reserved_times(doctor_id, chosen_date)
+        available_times = exclude_overlapping_times(available_times, reserved_times,expertise_time)
+
+        # 只显示开始时间
+        available_times_str = [start_time.strftime("%H:%M:%S") for start_time, _ in available_times]
+
+        return JsonResponse({'reserve_choices': available_times_str})
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+def get_reserved_times(doctor_id, date):
+    reservations = Reservation.objects.filter(
+        SchedulingID__DoctorID_id=doctor_id,
+        time_start__date=date
+    ).values_list('time_start', 'time_end')
+    return list(reservations)
+def exclude_overlapping_times(available_times, reserved_times, expertise_time):
+    result = []
+    for start_time, end_time in available_times:
+        overlap = False
+        
+        # 将当前可用时间段转换为 datetime 对象以便于比较
+        start_datetime = datetime.combine(datetime.min, start_time)
+        end_datetime = datetime.combine(datetime.min, start_time) + expertise_time
+        
+        for res_start, res_end in reserved_times:
+            res_start_time = res_start.time()
+            res_end_time = res_end.time()
+
+            # 将预约时间段转换为 datetime 对象
+            res_start_datetime = datetime.combine(datetime.min, res_start_time)
+            res_end_datetime = datetime.combine(datetime.min, res_end_time)
+
+            # 判断是否有重叠
+            if (start_datetime < res_end_datetime and end_datetime > res_start_datetime) or \
+               (start_datetime <= res_start_datetime and end_datetime > res_start_datetime) or \
+               (start_datetime < res_end_datetime and end_datetime >= res_end_datetime):
+                overlap = True
+                break
+
+        if not overlap:
+            result.append((start_time, end_time))
+    
+    return result

@@ -173,6 +173,10 @@
 
         function addDocPage(event){
             event.preventDefault();
+            localStorage.removeItem('expertise');
+            localStorage.removeItem('doctorData');
+            localStorage.removeItem('working_hour_list');
+            localStorage.removeItem('schedulingForm');
             window.location.href = "/doctor/data/edit"
         }
     
@@ -204,8 +208,9 @@
                     const deleteForms = document.querySelectorAll('.delete-doctor-form');
                     deleteForms.forEach(form => {
                         form.addEventListener('submit', function(event) {
-                            event.preventDefault(); // 阻止表单默认提交行为                           
-                            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                            event.preventDefault(); // 阻止表单默认提交行为
+                            
+                        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
                             const doctorEmail = form.querySelector('button').dataset.doctorEmail;
         
                             fetch(`/doctor/delete/${doctorEmail}/`, {

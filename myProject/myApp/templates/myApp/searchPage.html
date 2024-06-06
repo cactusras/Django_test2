@@ -19,18 +19,35 @@
               display: none;
             }
           </style>
+
+          <style>
+            #resultsContainer {
+                margin-top: 20px;
+            }
+            .doctor, .clinic {
+                border: 1px solid #ccc;
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+            h3 {
+                margin: 0 0 10px;
+                cursor: pointer; /* 添加鼠标指针样式 */
+                color: blue; /* 添加链接颜色 */
+                text-decoration: underline; /* 添加下划线 */
+            }
+        </style>
     </head>
     <body>
             <!--網頁頭-->
         <nav class="navbar navbar-expand-lg" style="background-color:#F0EAD6;  height: 100px;">
             <div class="container px-4 px-lg-5">
                 <img src="{% static 'myApp/assets/dental.png' %}" alt="DEN Logo">
-                <a class="navbar-brand" href="#!"  style="font-size: 24px;" onclick="mainPage(event)"> 牙醫預約平台</a>
+                <a class="navbar-brand" href="#!"  style="font-size: 24px;"> 牙醫預約平台</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
                         <li class="nav-item"><a class="nav-link active" aria-current="page" href="#!" style="font-size: 20px;">找醫師</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/clieReserveRecord" style="font-size: 20px;">紀錄</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#!" style="font-size: 20px;">紀錄</a></li>
                         <li class="nav-item"><a class="nav-link" href="#!" style="font-size: 20px;">Q&A</a></li>
                     </ul>
                     <form class="d-flex">
@@ -44,177 +61,125 @@
         </nav>
 
             <!--搜尋頁面-->
-        <section class="py-5"  style="background-color:#FFFFF4">
-            
-            <div class="container" style="border: 1px solid #F0EAD6;">
-                <div class="row row-cols-2">
-                    <div class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:80px; font-size: 20px; ">
-                        找牙科醫師
-                    </div>
-                    <div class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:80px; font-size: 20px; ">
-                        地圖
-                    </div>
-                    <!--搜尋左半部-->
-                    <form id="searchForm">
-                    {% csrf_token %}
-                    <div class="col" style="background-color:#fffff0; border: 1px solid #ada089; height:450px; font-size: 20px;">
-                        縣市地區<br>
+            <section class="py-5" style="background-color:#FFFFF4">
+                <div class="col" style="background-color:#fffff0; border: 1px solid #ada089; height:450px; font-size: 20px;">
+                    <form id="searchForm" method='post' action="doctor/clinic/search/">
+                        {% csrf_token %}
+                        <br> 縣市地區<br>
                         <div class="row">
                             <select class="form-select" id="city" onchange="updateDistricts()" style="width: 320px; height: 40px;">
                                 <option selected value="">--請選擇縣市--</option>
-                                <option value="台北市">台北市</option>
-                                <option value="新北市">新北市</option>
-                                <option value="台中市">台中市</option>
-                                <option value="台南市">台南市</option>
-                                <option value="高雄市">高雄市</option>
-                                <option value="基隆市">基隆市</option>
-                                <option value="新竹市">新竹市</option>
-                                <option value="嘉義市">嘉義市</option>
-                                <option value="新竹縣">新竹縣</option>
-                                <option value="苗栗縣">苗栗縣</option>
-                                <option value="彰化縣">彰化縣</option>
-                                <option value="南投縣">南投縣</option>
-                                <option value="雲林縣">雲林縣</option>
-                                <option value="嘉義縣">嘉義縣</option>
-                                <option value="屏東縣">屏東縣</option>
-                                <option value="宜蘭縣">宜蘭縣</option>
-                                <option value="花蓮縣">花蓮縣</option>
-                                <option value="台東縣">台東縣</option>
-                                <option value="澎湖縣">澎湖縣</option>
-                                <option value="金門縣">金門縣</option>
-                                <option value="連江縣">連江縣</option>
+
+                                <!-- Add your options here -->
                             </select>
                             <select class="form-select" id="district" style="width: 320px; height: 40px;">
                                 <option value="">--請先選擇縣市--</option>
                             </select>
-                            <input id="addressVlue" name="addressVlue" hidden>
                         </div>
                         治療項目<br>
                         <div class="row">
                             <select class="form-select" id="category" onchange="updateTreatments()" style="width: 320px; height: 40px;">
                                 <option selected>--請選擇大範圍治療項目--</option>
-                                <option value="預防性治療">預防性治療</option>
-                                <option value="修復性治療">修復性治療</option>
-                                <option value="美學治療">美學治療</option>
-                                <option value="牙齒矯正">牙齒矯正</option>
-                                <option value="口腔外科">口腔外科</option>
-                                <option value="牙周治療">牙周治療</option>
-                                <option value="兒童牙科">兒童牙科</option>
-                                <option value="假牙及義齒">假牙及義齒</option>
+                                <!-- Add your options here -->
                             </select>
                             <select class="form-select" id="treatment" style="width: 320px; height: 40px;">
                                 <option value="">--請先選擇大範圍治療項目--</option>
                             </select>
-                            <input id="experVlue" name="experVlue" hidden>
                         </div>
                         看診日期<br>
-                       <div>
+                        <div>
                             <label>
-                                <input type="date" id="inputDate" name="inputDate" min=new Date().toISOString().split('T')[0] style="width: 240px; height: 40px;"/>
+                                開始：
+                                <input type="date" id="startDate" name="startDate" style="width: 240px; height: 40px;"/>
                             </label>
-                       </div>
+                            <label>
+                                結束：
+                                <input type="date" id="endDate" name="endDate" style="width: 250px; height: 40px;"/>
+                            </label>
+                        </div> 
+                        <br>查詢欄位<br>
+                        <div>
+                            <label for="query">Query:</label>
+                            <input type="text" id="query" name="query" style="width: 320px; height: 40px;">
+                        </div>
                         <br>
-                        <br>
-                            <div class="row">
-                              <div class="col-md-6">
-                                <div class="form-floating">
-                                  <textarea class="form-control custom-textarea" placeholder="Leave a comment here" id="clinicNameInput" name="clinicNameInput" style="height: 50px;"></textarea>
-                                  <label for="clinicNameInput" style="color:#808080">請輸入診所名稱</label>
-                                </div>
-                              </div>
-                              <div class="col-md-6">
-                                <div class="form-floating">
-                                  <textarea class="form-control custom-textarea" placeholder="Leave a comment here" id="doctorNameInput" name="doctorNameInput" style="height: 50px;"></textarea>
-                                  <label for="doctorNameInput" style="color:#808080">請輸入治療項目</label>
-                                </div>
-                              </div>
-                            </div>
-                            <br>
-                        <br>
-                        <div class="d-flex">
-                            <button id="searchButton" class="btn btn-outline-dark" type="submit" style="font-size: 20px; width: 630px; height: 40px;">
-                                <i class="bi bi-search"></i>
-                                搜尋
-                            </button>
-                            
+                        <div>
+                            {% comment %} <label for="search">Search:</label>
+                            <input type="text" id="search" name="search"> {% endcomment %}
+
+                            <button type="submit">Search</button>
                         </div>
                     </form>
-                    <!--搜尋右半部地圖-->
-                    </div>
-                    <div class="col" style="background-color:#fffff0; border: 1px solid #ada089; height:450px; font-size: 20px;">
-                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3616.360365636048!2d121.57485547533233!3d24.98786804014762!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3442aa79452c2f49%3A0x9e8d07508e3bf507!2z5ZyL56uL5pS_5rK75aSn5a24!5e0!3m2!1szh-TW!2stw!4v1713968503060!5m2!1szh-TW!2stw" width="600" height="448" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-       
+                
+            </section>
+        
             <!--搜尋結果-->
-            <section class="py-5 clickShow" style="background-color:#FFFFF4;">
-                <div class="container px-4 px-lg-5 mt-5 clickShow" style="background-color:#FFFFF4;">
-                    <h2 class="fw-bolder mb-4 clickShow">搜尋結果</h2>
-            
-                    <!--醫生與診所結果-->
-                    <div class="container clickShow" style="border: 1px solid #FFFFF4">
-                        <div class="row justify-content-evenly clickShow">
+            <section class="py-5" style="background-color:#FFFFF4;">
+                <div class="container px-4 px-lg-5 mt-5" style="background-color:#FFFFF4;">
+                    <h2 class="fw-bolder mb-4">搜尋結果</h2>
+                    <div id="resultsContainer">
+                        <!-- 搜索结果会显示在这里 -->
+                    </div>
+
+                    
+
+                    <div class="container" style="border: 1px solid #FFFFF4">
+                        <div class="row justify-content-evenly">
                             <!--醫生結果-->
-                            <div class="col-4 clickShow" style="background-color:#fffff0; border: 1px solid #ada089; width: 550px; height:600px; font-size: 20px;">
-                                <div class="h2 clickShow" style="text-align: center;">
+                            <div class="col-4" style="background-color:#fffff0; border: 1px solid #ada089; width: 550px; height:600px; font-size: 20px;">
+                                <div class="h2" style="text-align: center;">
                                     <p>醫師</p>
                                 </div>
-                                <figure class="figure clickShow">
-                                    <img src="https://cdn-icons-png.flaticon.com/512/3845/3845316.png" class="img-thumbnail clickShow" alt="doctor" style="width: 300px; height: 300px;">
-                                    <figcaption class="figure-caption clickShow">
+                                <figure class="figure">
+                                    <div id="doctors">
+                                        <h2>Doctors</h2>
+                                        <ul id="doctor-list"></ul>
+                                    </div>
+                                    <img src="https://cdn-icons-png.flaticon.com/512/3845/3845316.png" class="img-thumbnail" alt="doctor" style="width: 300px; height: 300px;">
+                                    <figcaption class="figure-caption">
                                         <p style="color: black;">醫師：</p>
                                         <p style="color: black;">診所：</p>
                                         <p style="color: black;">診所地址：</p>
                                         <p style="color: black;">治療項目：</p>
                                     </figcaption>
                                 </figure>
-                                <br> 
-                                <!--預約按鈕-->
-                                <div class="d-flex justify-content-center clickShow">
+                                <br>
+                                <div class="d-flex justify-content-center">
                                     <button class="btn btn-outline-dark" type="submit" style="font-size: 20px; width: 160px; height: 40px;" onclick="docReserve(event)">
-                                        <i class="bi bi-calendar-check-fill"></i>
-                                        預約此醫師
+                                        <i class="bi bi-calendar-check-fill"></i> 預約此醫師
                                     </button>
                                 </div>
-                            </div> 
+                            </div>
                             <!--診所結果-->
-                            <div class="col-4 clickShow" style="background-color:#fffff0; border: 1px solid #ada089;width: 550px; height:600px; font-size: 20px;">
-                                <div class="h2 clickShow" style="text-align: center;">
+                            <div class="col-4" style="background-color:#fffff0; border: 1px solid #ada089;width: 550px; height:600px; font-size: 20px;">
+                                <div class="h2" style="text-align: center;">
                                     <p>診所</p>
                                 </div>
-                                <figure class="figure clickShow">
-                                    <img src="https://cdn-icons-png.flaticon.com/512/3845/3845316.png" class="img-thumbnail clickShow" alt="clinic" style="width: 300px; height: 300px;">
-                                    <figcaption class="figure-caption clickShow">
+                                <figure class="figure">
+                                    <div id="clinics">
+                                        <h2>Clinics</h2>
+                                        <ul id="clinic-list"></ul>
+                                    </div>
+                                    <img src="https://cdn-icons-png.flaticon.com/512/4315/4315445.png" class="img-thumbnail" alt="clinic" style="width: 300px; height: 300px;">
+                                    <figcaption class="figure-caption">
                                         <p style="color: black;">診所：</p>
                                         <p style="color: black;">診所地址：</p>
-                                        <p style="color: black;">簡介：</p>
+                                        <p style="color: black;">診所電話：</p>
                                         <p style="color: black;">治療項目：</p>
                                     </figcaption>
                                 </figure>
                                 <br>
-                                <!--預約按鈕-->
-                                <div class="d-flex justify-content-center clickShow">
-                                    <button class="btn btn-outline-dark" type="submit" style="font-size: 20px; width: 160px; height: 40px;" onclick="clinReserve(event)">
-                                        <i class="bi bi-calendar-check-fill"></i>
-                                        預約
+                                <div class="d-flex justify-content-center">
+                                    <button class="btn btn-outline-dark" type="submit" style="font-size: 20px; width: 160px; height: 40px;" onclick="cliReserve(event)">
+                                        <i class="bi bi-calendar-check-fill"></i> 預約此診所
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <!--排版空格-->
-                    <br>
-                    <br>
-                    <!--返回頁面頂部按鈕-->
-                    <div class="d-flex justify-content-center clickShow">
-                        <button onclick="window.scrollTo(0, 0)" class="btn" style="background-color:#F0EAD6; border: 1px solid #ada089;">返回頂部</button>
-                    </div>
                 </div>
             </section>
-            
+        
 
              <!--頁面底-->
             <footer class="py-5 bg-dark">
@@ -226,66 +191,115 @@
             <!-- Core theme JS-->
             <script>
 
-                var searchClick = false;
-
+                function search(event) {
+                    event.preventDefault();  // 阻止默认的表单提交行为
                 
-
-                //這裡應該渲染頁面就好 其他資料會從clinic_reserve 去抓
-                function docReserve(event){
-                    event.preventDefault();
-                    if(window.localStorage.getItem('isLogin') == 'success'){
-                        window.location.href = '/doctor/reserve';
-                    }else{
-                        window.location.href = '/loginP';
-                    }
-                }
-
-                function clinReserve(event){
-                    event.preventDefault();
-                    if(window.localStorage.getItem('isLogin') == 'success'){
-                        window.location.href = '/clinic/reserve';
-                    }else{
-                        window.location.href = '/loginP';
-                    }
-                }
-
-                var searchForm = document.getElementById('searchForm');
-                searchForm.addEventListener('submit', async function(event){
-                    event.preventDefault();
-                    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-                    const form = {
-                        doc_name: document.getElementById('doctorNameInput').value,
-                        clinic_name: document.getElementById('clinicNameInput').value,
-                        clinic_address: addrVlue,
-                        appointed_date: document.getElementById('inputDate').value,
-                        exp_name: experVlue,
-                    };
-                    setTimeout(console.log("form = " + form), 5000)
-                    fetch('/doctor/clinic/search/', {
+                    // 获取表单数据
+                    const form = document.getElementById('searchForm');
+                    const formData = new FormData(form);
+                
+                    // 发送 POST 请求
+                    fetch('doctor/clinic/search/', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken':  csrfToken
-                        },
-                        body: JSON.stringify(form),
+                        body: formData,
                     })
-                    .then(async response => {
+                    .then(response => {
                         if (!response.ok) {
-                            throw new Error('Failed to add doctor');
+                            throw new Error('Network response was not ok');
                         }
-                        const data = await response.json();
-                        console.log("doctors = " + data.doctors + "   clinics = " + data.clinics)
+                        return response.json();
+                    })
+                    .then(data => {
+                        // 处理从后端返回的 JSON 数据
+                        console.log(data);  // 可以在控制台查看数据，根据需要进行处理
+                        const resultsContainer = document.getElementById('resultsContainer');
+                        resultsContainer.innerHTML = '';
 
-                        window.location.href = '/home';
+                        if (data.doctors.length > 0) {
+                            const doctorTitle = document.createElement('h2');
+                            doctorTitle.textContent = 'Doctors';
+                            resultsContainer.appendChild(doctorTitle);
+                
+                            data.doctors.forEach(doctor => {
+                                const doctorDiv = document.createElement('div');
+                                doctorDiv.classList.add('doctor');
+                                doctorDiv.innerHTML = `
+                                    <h3 class="doctor-name" data-doc-id="${doctor.doc_id}">${doctor.doc_name}</h3>
+                                    <p><strong>Clinic:</strong> ${doctor.clinic_name}</p>
+                                    <p><strong>Address:</strong> ${doctor.clinic_address}</p>
+                                    <p><strong>Expertise:</strong> ${doctor.doc_exp.join(', ')}</p>
+                                `;
+                                resultsContainer.appendChild(doctorDiv);
+                            });
+
+                            document.querySelectorAll('.doctor-name').forEach(element => {
+                                element.addEventListener('click', function() {
+                                    const docId = this.dataset.docId;
+                                    window.location.href = `doctor/reserve/${docId}/`;
+                                });
+                            });
+                        }
+                
+                        if (data.clinics.length > 0) {
+                            const clinicTitle = document.createElement('h2');
+                            clinicTitle.textContent = 'Clinics';
+                            resultsContainer.appendChild(clinicTitle);
+                        
+                            data.clinics.forEach(clinic => {
+                                const clinicDiv = document.createElement('div');
+                                clinicDiv.classList.add('clinic');
+                                
+                                clinicDiv.innerHTML = `
+                                    <h3 class="clinic-name" data-clinic-id="${clinic.clinic_id}">${clinic.clinic_name}</h3>
+                                    <p><strong>Address:</strong> ${clinic.clinic_address}</p>
+                                    <p><strong>Introduction:</strong> ${clinic.clinic_introduction}</p>
+                                    <p><strong>Expertise:</strong> ${clinic.doc_exp.join(', ')}</p>
+                                `;
+                                
+                                resultsContainer.appendChild(clinicDiv);
+                            });
+                        
+                            // 确保事件监听器绑定在元素添加到文档后
+                            document.querySelectorAll('.clinic-name').forEach(element => {
+                                element.addEventListener('click', function() {
+                                    const clinic_id = this.getAttribute('data-clinic-id');
+                                    console.log(clinic_id);  // 确认可以获取到clinic_id
+                                    window.location.href = `clinic/reserve/${clinic_id}/`;
+                                });
+                            });
+                        }
+
                     })
                     .catch(error => {
-                        // 处理错误情况，例如显示错误消息给用户
-                        alert('Error searching: ' + error.message);
+                        console.error('There was a problem with the fetch operation:', error);
                     });
-                })
+                }
+                
+                // 监听表单的 submit 事件，并调用 search 函数
+                const searchForm = document.getElementById('searchForm');
+                searchForm.addEventListener('submit', search);
 
-                var addrVlue = "";
-                var experVlue = "";
+
+
+                //這裡應該渲染頁面就好 其他資料會從clinic_reserve 去抓
+              {% comment %} function docReserve(docId){
+                    %event.preventDefault();
+                    if(window.isLogin){
+                        window.location.href = '/doctor/reserve';
+                    }else{
+                        window.location.href = 'login';
+                    }
+                } {% endcomment %}
+
+                {% comment %} function clinReserve(event){
+                    event.preventDefault();
+                    if(window.isLogin){
+                        window.location.href = '/clinic/reserve';
+                    }else{
+                        window.location.href = 'login';
+                    }
+                } {% endcomment %}
+
                 function updateDistricts() {
                     const cityToDistricts = {
                         '台北市': ['中正區', '大同區', '中山區', '松山區', '大安區', '萬華區', '信義區', '士林區', '北投區', '內湖區', '南港區', '文山區'],
@@ -330,7 +344,7 @@
                             districtSelect.appendChild(option);
                         });
                     }
-                    addrVlue = updateCombinedLocation();
+                    updateCombinedLocation();
                 }
 
                 function updateCombinedLocation() {
@@ -338,7 +352,6 @@
                     const districtSelect = document.getElementById("district");
                     const address = document.getElementById("addressVlue");
                     address.value = citySelect.value + districtSelect.value;
-                    return address.value;
                 }
 
                 function updateCombinedExpertise() {
@@ -346,7 +359,6 @@
                     const treatmentSelect = document.getElementById("treatment");
                     const expertise = document.getElementById("experVlue");
                     expertise.value = categorySelect.value + '-' + treatmentSelect.value;
-                    return expertise.value;
                 }
 
                 function updateTreatments() {
@@ -380,10 +392,16 @@
                             treatmentSelect.appendChild(option);
                         });
                     }
-                    experVlue = updateCombinedExpertise();
+                    updateCombinedExpertise();
                 }
 
             </script>
+
+            <script>
+                {% comment %} gpt生成的，如果還有要顯示的條件在這裡加一加就好 {% endcomment %}
+                
+            </script>
+        
           
            
             

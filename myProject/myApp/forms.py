@@ -86,10 +86,10 @@ class SchedulingForm(forms.ModelForm):
         model = Scheduling
         fields = ['StartDate','EndDate']
         
-#class Doctor_ExpertiseForm(forms.ModelForm):
-#    class Meta:
-#        model = Doc_Expertise
-#        fields = ['DocID','Expertise_ID']
+class Doctor_ExpertiseForm(forms.ModelForm):
+    class Meta:
+        model = Doc_Expertise
+        fields = ['DocID','Expertise_ID']
 
 class ExpertiseForm(forms.ModelForm):
     class Meta:
@@ -99,7 +99,7 @@ class ExpertiseForm(forms.ModelForm):
 class ReservationForm(forms.ModelForm):
     class Meta:
         model = Reservation
-        fields = ['ClientID','SchedulingID','expertiseID','time_start','time_end','Status']
+        fields = ['ClientID','SchedulingID','expertiseID','time_start']
         
        
 class WaitingForm(forms.ModelForm):
@@ -166,3 +166,12 @@ class AuthenticationForm(forms.Form):
 class LoginForm(forms.Form):
     email = forms.EmailField()
     password = forms.CharField(widget=forms.PasswordInput)
+
+class SearchForm(forms.Form):
+    query = forms.CharField(label='查詢欄位', max_length=255)
+    city = forms.ChoiceField(label='縣市', choices=[], required=False)
+    district = forms.ChoiceField(label='地區', choices=[], required=False)
+    category = forms.ChoiceField(label='治療項目', choices=[], required=False)
+    treatment = forms.ChoiceField(label='具體治療', choices=[], required=False)
+    start_date = forms.DateField(label='看診日期 開始', required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(label='結束', required=False, widget=forms.DateInput(attrs={'type': 'date'}))

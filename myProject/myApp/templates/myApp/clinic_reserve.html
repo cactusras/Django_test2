@@ -113,7 +113,7 @@
                         <label for="date1">醫師</label>
                         <select class="form-select" aria-label="Default select example" style="width: 320px; height: 40px; font-size: 16px;" id="doctorSelect" name="doctorSelect">
                         </select>
-                        <button id="btnDoctor" type="submit">確認選擇醫生</button>
+                        <button id="btnDoctor"  type="submit">確認選擇醫生</button>
                         
                     <br>
                         
@@ -186,13 +186,22 @@
                                 });
                             }
 
+                            {% comment %} document.getElementById('btnDoctor').addEventListener('click', function(event){
+                                event.preventDefault();
+                                const doctorSelect = document.getElementById('doctorSelect');
+                                const selectedDoctorId = doctorSelect.value;
+                                console.log('selected doctor:'+selectedDoctorId)
+                                window.location.assign(`home/doctor/reserve/${selectedDoctorId}/`);   
+                                
+                            }) {% endcomment %}
+
                             document.getElementById('btnDoctor').addEventListener('click', function(event){
                                 event.preventDefault();
                                 const doctorSelect = document.getElementById('doctorSelect');
                                 const selectedDoctorId = doctorSelect.value;
-                                window.location.href = `/doctor/reserve/${selectedDoctorId}/`   
-                                
-                            })
+                                console.log('Selected doctor:', selectedDoctorId);
+                                window.location.href = `/home/doctor/reserve/${selectedDoctorId}/`;
+                            });
                                 
 
                         </script>

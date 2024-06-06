@@ -34,7 +34,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const loginHide = document.querySelectorAll('.loginHide')
         const pwInput = document.getElementById('password')
         const emailShow = document.getElementById('emailShow')
-        const photoInput = document.getElementById('photo')
         fetch_element();
 
         //canva11進入canva12   
@@ -44,7 +43,6 @@ document.addEventListener('DOMContentLoaded', function() {
             btnRegis.innerText = '完成'
             btnLogout.hidden = false;
             pwInput.required = false
-            //photoInput.style.display = 'none'
             loginHide.forEach(element => {
                 if (element.tagName.toLowerCase() === 'label') {
                     element.style.display = 'none'

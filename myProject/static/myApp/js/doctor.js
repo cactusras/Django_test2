@@ -15,8 +15,10 @@
             docField['name'] = document.getElementById('name').value,
             docField['phone_number'] = document.getElementById('phone_number').value,
             docField['password'] = document.getElementById('password').value,
-            docField['experience'] = document.getElementById('experience').value,
-            docField['photo'] = document.getElementById('photo').files[0]
+            docField['experience'] = document.getElementById('experience').value;
+            if(window.localStorage.getItem('isLogin') == 'failed'){
+                docField['photo'] = document.getElementById('photo').files[0]
+            }
             console.log('experience' + docField['experience']);
     }
     
