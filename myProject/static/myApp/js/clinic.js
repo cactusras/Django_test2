@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
             btnLogout.hidden = false;
             pwInput.required = false
             loginHide.forEach(element => {
-                if (element.tagName.toLowerCase() === 'label') {
+                if (element.tagName.toLowerCase() === 'label' || element.tagName.toLowerCase() === 'span') {
                     element.style.display = 'none'
                 } else {
                     element.type = 'hidden'

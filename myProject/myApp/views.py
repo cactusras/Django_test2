@@ -1088,12 +1088,6 @@ def home(request):
     context={}
     return render(request, "myApp/searchPage.html", context)
 
-#client_reservation
-#client/reserve/
-def clieReserve(request):
-    context={}
-    return render(request, "myApp/client_reservation.html", context)
-
 #client_dataEdit
 #client/data/edit/
 def cliedataEd(request):
