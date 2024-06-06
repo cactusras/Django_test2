@@ -162,6 +162,8 @@
         document.addEventListener("DOMContentLoaded", function(){
             document.getElementById('btnClinPage').innerText = "回到主頁"
             doc_info();
+            //const rows = document.querySelectorAll('.clickable-row');
+            
         })
         
 
@@ -189,11 +191,12 @@
                     const tableBody = document.getElementById('doctor_info_body');
                     doctors.forEach(doctor => {
                         const row = document.createElement('tr');
+                        //row.setAttribute('data-url', `doctor/data/edit/${doctor.id}`);
                         row.innerHTML = `
                             <td>${doctor.name}</td>
                             <td>${doctor.email}</td>
                             <td>${doctor.phone_number}</td>
-                            <td>${doctor.exoerience}</td>
+                            <td>${doctor.experience}</td>
                             <td>
                                 <form class="delete-doctor-form">
                                     {% csrf_token %}
@@ -203,6 +206,12 @@
                                 </form>
                             </td>
                         `;
+
+                        //row.addEventListener('click', function () {
+                        //    const url = row.getAttribute('data-url');
+                        //    window.location.href = url;
+                        //});
+
                         tableBody.appendChild(row);
                     });
                     const deleteForms = document.querySelectorAll('.delete-doctor-form');

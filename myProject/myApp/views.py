@@ -6,7 +6,7 @@ from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 #from rest_framework import serializers
 #from myProject.encoder import CustomEncoder
-from .forms import DoctorForm,ClinicForm,ClientForm, LoginForm,SchedulingForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm,TestingForm,SearchForm
+from .forms import DoctorForm,ClinicForm,ClientForm, LoginForm,SchedulingForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm,TestingForm,SearchForm,ClientUpdateForm,ClinicUpdateForm
 from django.db.models import Q
 from django.db import connection
 from django.contrib.auth.decorators import login_required
@@ -127,28 +127,37 @@ def isUniqueEmail_doc(request):
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
-# add/client/
 def add_client(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)  # 解析 JSON 數據
         except json.JSONDecodeError:
             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
+        
         password = data.get('password')
+        email = data.get('email')
         # 創建一個包含數據的 QueryDict
         data = {
-            'email': data.get('email'),
+            'email': email,
             'name': data.get('name'),
             'phone_number': data.get('phone_number'),
-            'password': password,  # 对密码进行哈希处理
+            'password': password,
             'address': data.get('address'),
             'birth_date': data.get('birth_date'),
             'gender': data.get('gender'),
             'occupation': data.get('occupation'),
             'notify': data.get('notify')
         }
-
-        form = ClientForm(data)
+        print('password here = ', password)
+        try:
+            client = Client.objects.get(email=email)
+        except Client.DoesNotExist:
+            client = None
+        print('data = ', data)
+        if client:
+            form = ClientUpdateForm(data, instance=client)
+        else:
+            form = ClientForm(data)
         if form.is_valid():
             cleaned_data = form.cleaned_data
 
@@ -162,66 +171,87 @@ def add_client(request):
                 defaults=cleaned_data
             )
 
-            if password:
-                client.password = make_password(password)
+            if password != '':
+                client.password = make_password(data['password'])
                 client.save()
 
             if created_client:
                 message = 'Client created successfully.'
             else:
-                message = 'Client updated successfully.'
+                message = "Client updated successfully."
 
             return JsonResponse({'message': message, 'status': 'success'})
         else:
+            print('error = ', form.errors)
             return JsonResponse({'message': 'Invalid form data', 'errors': form.errors, 'status': 'error'})
     else:
         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
+
 
 # add/clinic/  
 #clinic posting
 def add_clinic(request):
     if request.method == 'POST':
         try:
-            form = ClinicForm(request.POST, request.FILES)
-        except json.JSONDecodeError:
-            return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
-        if form.is_valid():
-            cleaned_data = form.cleaned_data
-            print(cleaned_data)
-            cleaned_data['is_active'] = True
-            cleaned_data['is_admin'] = False
-            cleaned_data['password'] = make_password(cleaned_data['password'])
-
-            if cleaned_data['photo'] is not None:
-                # photo = cleaned_data.pop('photo')
-                photo = cleaned_data['photo']
-                image = Image.open(photo)
-                print("photo opend")
-                # Define the save path using Path from pathlib
-                save_dir = Path('media/uploaded_files')
-                save_dir.mkdir(parents=True, exist_ok=True)  # Create directories if they don't exist
-                save_path = save_dir / photo.name
-                image.save(save_path)
-                print("photo saved")
-                photo_path = f'uploaded_files/{photo.name}'
-                cleaned_data['photo'] = photo_path
-                print("photo path saved to clean_data")
-
-            # Prepare data for update_or_create
-            email = cleaned_data.pop('email')
-            clinic, created_clinic = Clinic.objects.update_or_create(
-                email=email,
-                defaults=cleaned_data
-            )
-
-            if created_clinic:
-                message = 'Clinic created successfully.'
+            # 檢查用戶是否存在
+            email = request.POST.get('email')
+            if email:
+                try:
+                    clinic = Clinic.objects.get(email=email)
+                    update_clinic = True  # 更新現有診所
+                except Clinic.DoesNotExist:
+                    update_clinic = False  # 新建診所
             else:
-                message = 'Clinic updated successfully.'
+                update_clinic = False
+            #print('type = ', type(clinic))
+            if update_clinic:
+                form = ClinicUpdateForm(request.POST, instance=clinic)
+            else:
+                form = ClinicForm(request.POST, request.FILES)
+            if form.is_valid():
+                cleaned_data = form.cleaned_data
+                print(cleaned_data)
+                cleaned_data['is_active'] = True
+                cleaned_data['is_admin'] = False
+                #如果為資料更新則不進入此判斷
+                if 'photo' in cleaned_data:
+                    #(註冊時)如果有選擇加照片
+                    if cleaned_data['photo'] is not None:
+                        # photo = cleaned_data.pop('photo')
+                        photo = cleaned_data['photo']
+                        image = Image.open(photo)
+                        print("photo opend")
+                        # Define the save path using Path from pathlib
+                        save_dir = Path('media/uploaded_files')
+                        save_dir.mkdir(parents=True, exist_ok=True)  # Create directories if they don't exist
+                        save_path = save_dir / photo.name
+                        image.save(save_path)
+                        print("photo saved")
+                        photo_path = f'uploaded_files/{photo.name}'
+                        cleaned_data['photo'] = photo_path
+                        print("photo path saved to clean_data")
 
-            return JsonResponse({'message': message, 'status': 'success'})
-        else:
-            return JsonResponse({'message': 'Invalid form data', 'errors': form.errors, 'status': 'error'})
+                # Prepare data for update_or_create
+                email = cleaned_data.pop('email')
+                clinic, created_clinic = Clinic.objects.update_or_create(
+                    email=email,
+                    defaults=cleaned_data
+                )
+
+                if 'password' in cleaned_data:
+                    clinic.password = make_password(cleaned_data['password'])
+                    clinic.save()
+
+                if created_clinic:
+                    message = 'Clinic created successfully.'
+                else:
+                    message = 'Clinic updated successfully.'
+
+                return JsonResponse({'message': message, 'status': 'success'})
+            else:
+                return JsonResponse({'message': 'Invalid form data', 'errors': form.errors, 'status': 'error'})
+        except json.JSONDecodeError:
+            return JsonResponse({'message': '無效的 JSON', 'status': 'error'})
     else:
         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
 
@@ -958,15 +988,11 @@ def clinic_load(request):
 
     return JsonResponse(context)
 
-
-
-# doctor/page/loading/
-@login_required
 def doctorPage_loading(request):
     user = request.user
     doctor = get_object_or_404(Doctor, id=user.id)
-    working_hours = WorkingHour.objects.filter(DoctorID=doctor.id)
-    
+    # working_hours = WorkingHour.objects.filter(DoctorID=doctor)
+    print(doctor)
     today = now().date()
     start_of_week = today - timedelta(days=today.weekday())
     end_of_week = start_of_week + timedelta(days=6)
@@ -976,26 +1002,34 @@ def doctorPage_loading(request):
         StartDate__lte=end_of_week,
         EndDate__gte=start_of_week
     ).select_related('WorkingHour')
-    
+    print(schedules)
     reservations = Reservation.objects.filter(
         SchedulingID__in=schedules,
-        status__in=[0, 2, 3],
+        Status__in=[0, 2, 3],
         time_start__date__range=[start_of_week, end_of_week]
     )
-
-    reservation_list = [
-        {
-            'client_name': reservation.ClientID.name,
-            'appointment_date': reservation.time_start.date(),
-            'starting': reservation.time_start.strftime('%H:%M'),
+    print(reservations)
+    reservation_list = []
+    for reservation in reservations:
+        client_name = reservation.ClientID.name
+        client_gender = reservation.ClientID.gender
+        if client_gender == 'male':
+            client_name += " 先生"
+        elif client_gender == 'female':
+            client_name += " 小姐"
+        
+        day_of_week = reservation.time_start.strftime('%A')
+        reservation_list.append({
+            'id': reservation.id,
+            'client_name': client_name,
+            'appointment_date': reservation.time_start.date().isoformat(),
+            'day_of_week': day_of_week,
+            'starting': reservation.time_start.time().strftime('%H:%M'),
             'expertise': reservation.expertiseID.name,
-            'ending': reservation.time_end.strftime('%H:%M'),
             'status': reservation.get_status_display(),
-            'WDforfront': reservation.WDforFront(),
-            'OccupiedHour': reservation.TimeSlotNumber(),
-        }
-        for reservation in reservations
-    ]
+        })
+    
+
 
     schedule_list = [
         {
@@ -1005,14 +1039,19 @@ def doctorPage_loading(request):
             'valid_from': schedule.StartDate,
             'valid_to': schedule.EndDate,
             'WDforfront': schedule.WDforFront(),
+            'OccupiedHour': Reservation().TimeSlotNumber(
+                start_time=schedule.WorkingHour.start_time,
+                end_time=schedule.WorkingHour.end_time
+            ),
         }
         for schedule in schedules
     ]
-
+ 
     context = {
         'reservation_list': reservation_list,
         'schedule_list': schedule_list,
     }
+    print(context)
     
     return JsonResponse(context)
 @login_required        
@@ -1529,6 +1568,12 @@ def add_Reservation(request):
 def searchTest(request):
     context={}
     return render(request, "myApp/searchTest.html", context)
+@login_required
+def cancel_reservation(request, reservation_id):
+    reservation = get_object_or_404(Reservation, id=reservation_id)
+    reservation.Status = 5  # Set status to 'cancelled by doc'
+    reservation.save()
+    return JsonResponse({'status': 'success', 'message': 'Reservation status updated to cancelled.'})
 
 
 

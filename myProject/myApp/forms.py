@@ -137,6 +137,34 @@ class TestingForm(forms.Form):
     date = forms.DateField(label='Date', widget=forms.DateInput(attrs={'type': 'date'}))
     expertise_name = forms.CharField(label='Expertise Name', max_length=100)
     expertise_list = forms.CharField(label='Expertise List', widget=forms.Textarea)
+    
+    
+    
+
+class ClinicUpdateForm(forms.ModelForm):
+    email = forms.EmailField(required=True)
+    license_number = forms.CharField(required=True)
+
+    class Meta:
+        model = Clinic
+        #fields = ['name', 'license_number','phone_number','address','introduction','photo','email','password' ]
+        fields = ['email', 'name','phone_number','license_number','address','introduction']
+    def __init__(self, *args, **kwargs):
+        super(ClinicUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['email'].validators = []
+        self.fields['license_number'].validators = []
+        
+
+class ClientUpdateForm(forms.ModelForm):
+    email = forms.EmailField(required=True)
+    
+    class Meta:
+        model = Client
+        fields = ['email', 'name', 'phone_number', 'address', 'birth_date', 'gender', 'occupation', 'notify']
+
+    def __init__(self, *args, **kwargs):
+        super(ClientUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['email'].validators = []
 
 
 

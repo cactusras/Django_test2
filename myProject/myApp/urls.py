@@ -40,8 +40,9 @@ urlpatterns = [
     #add_time(改過) 下面這有一個我的版本的
     #path('available/', views.get_available_times, name='available_times'),
     path('waitinglist/to/reservation/', views.waitingToResForC, name='waiting_to_reservation'),
-    path('client/delete/reserve/', views.client_cancel_reservation, name='client_cancel_reservation'),
+    path('client/delete/reserve/<int:reservation_id>/', views.client_cancel_reservation, name='client_cancel_reservation'),
     path('check_reservations/', views.check_reservations, name='check_reservations'),
+
 
     #頁面載入、跳轉
     path('clinic/load/', views.clinic_load, name='clinic_load'),
@@ -64,6 +65,7 @@ urlpatterns = [
     path('doctor_info/', views.doctor_info, name='doctor_info'),
     path('clinic_info/', views.clinic_info, name='clinic_info'),
     path('client_info/', views.client_info, name='client_info'),
+    path('doctor/page/cancel_reservation/<int:reservation_id>/', views.cancel_reservation, name='cancel_reservation'),
     #added by L
     path('doctor/expertise-list/<int:doctor_id>/', views.get_expertise_list, name = 'getexpertise'),
     path('get_doc_working/<int:doctor_id>/', views.get_doc_working, name = 'getworking'),

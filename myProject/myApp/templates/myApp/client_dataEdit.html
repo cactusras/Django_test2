@@ -31,7 +31,7 @@
         <nav class="navbar navbar-expand-lg" style="background-color:#F0EAD6;  height: 100px;">
             <div class="container px-4 px-lg-5">
                 <img src="{% static 'myApp/assets/dental.png' %}" alt="DEN Logo">
-                <a class="navbar-brand" href="#!"  style="font-size: 24px;"> 牙醫預約平台</a>
+                <a class="navbar-brand" href="#!"  style="font-size: 24px;" onclick="mainPage(event)"> 牙醫預約平台</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                    
@@ -62,7 +62,8 @@
                             <div class="col">
                                 <label for="email" class="required">帳號(電子郵件)</label>
                                 <div class="form-floating">
-                                    <input type="email" class="form-control" id="email" name="email" required>
+                                    <input type="email" class="form-control loginHide" id="email" name="email" required>
+                                    <span id="emailShow"></span>
                                 </div>
                             </div>
                             <div class="col">
@@ -75,16 +76,17 @@
                         <br>
                         <div class="row">
                             <div class="col">
-                                <label for="password" class="required">密碼</label>
+                                <label for="password" class="required loginHide">密碼</label>
                                 <div class="form-floating">
-                                    <input type="password" class="form-control" id="password" name="password" required>
+                                    <input type="password" class="form-control loginHide" id="password" name="password">
+
                                 </div>
                             </div>
                             <div class="col">
                                 <label for="gender" class="required">性別</label>
                                 <div class="form-floating">
                                     <select class="form-select" id="gender" name="gender" required>
-                                        <option value="">選擇性別</option>
+                                        <option value="" selected disabled>選擇性別</option>
                                         <option value="male">男</option>
                                         <option value="female">女</option>
                                     </select>
@@ -170,6 +172,6 @@
             <!-- Core theme JS-->
             <script src="{% static 'myApp/js/scripts.js' %}"></script>
             <script src="{% static 'myApp/js/client.js' %}"></script>
-        
+            <script src="{% static 'myApp/js/logout.js' %}"></script>
     </body>
 </html>

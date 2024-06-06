@@ -148,6 +148,10 @@
                         {% csrf_token %}
                         <button id="btnDocRegis" class="rectangle-button" type="submit" onclick="clickRegis(event)">完成</button>
                     </form> 
+                    <button class="btn btn-outline-dark" type="button" onclick="docManPage(event)" id="btnClinPage" style="font-size: 20px; width: 160px; height: 40px;" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        <i class="bi bi-calendar-check-fill"></i>
+                        回上頁
+                    </button>
                 </div>
             </div>
         </section>
@@ -162,6 +166,13 @@
             </div>
             <br>
              <!--頁面底-->
+             <script>
+                function docManPage(event){
+                    event.preventDefault();
+                    window.location.href = '/doctor/manage/'
+                
+                }
+            </script>
             <footer class="py-5 bg-dark">
                 <div class="container"><p class="m-0 text-center text-white">Copyright &copy; Your Website 2023</p></div>
             </footer>
