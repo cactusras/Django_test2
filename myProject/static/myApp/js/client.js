@@ -44,6 +44,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const loginHide = document.querySelectorAll('.loginHide');
         const pwInput = document.getElementById('password')
         const emailShow = document.getElementById('emailShow')
+        const checkSpan = document.getElementById('checkVlue')
+        document.getElementById('notify').addEventListener('change', function(){
+            if(checkVlue()){
+                checkSpan.innerText = '是'
+            }else{
+                checkSpan.innerText = '否'
+            }
+        })
         fetch_element();
         //canva11進入canva12   
         if (window.localStorage.getItem('isLogin') == 'success'){
@@ -52,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
             btnLogout.hidden = false;
             pwInput.required = false
             loginHide.forEach(element => {
-                if (element.tagName.toLowerCase() === 'label') {
+                if (element.tagName.toLowerCase() === 'label' || element.tagName.toLowerCase() === 'span') {
                     element.style.display = 'none'
                 } else {
                     element.type = 'hidden'
