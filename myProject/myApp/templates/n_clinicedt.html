@@ -23,18 +23,6 @@
         #gender option {
             color: #808080; /* 您可以根據需要設置不同的顏色 */
         }
-        .btn-outline-dark {
-            color: #343a40;
-            border-color: #343a40;
-            background-color: transparent;
-        }
-
-        .btn-outline-dark:hover {
-            color: #fff;
-            background-color: #343a40;
-            border-color: #343a40;
-        }
-
     </style>
 </head>
 <body style="background-color:#FFFFF4">
@@ -44,20 +32,14 @@
             <img src="{% static 'myApp/assets/dental.png' %}" alt="DEN Logo">
             <a class="navbar-brand" href="#!" style="font-size: 24px;" onclick="mainPage(event)">牙醫預約平台</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
+<span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
-                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="#!" style="font-size: 20px;">找醫師</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/clieReserveRecord/" style="font-size: 20px;">紀錄</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#!" style="font-size: 20px;">Q&A</a></li>
-                </ul>
-                <form class="d-flex">
-                    <button class="btn btn-outline-dark" type="submit"  style="font-size: 20px;" id = 'nav_btn' onclick='navBtn_listener(event)'>
-                        <i class="bi bi-person-fill"></i>
-                        登入
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <div class="ms-auto">
+                    <button class="btn btn-outline-dark" id="nav_btn" type="submit" onclick="navBtn_listener(event)" style="font-size: 20px;">
+                        <i class="bi bi-person-fill"></i> 使用者
                     </button>
-                </form>
+                </div>
             </div>
         </div>
     </nav>
@@ -65,24 +47,24 @@
     <section class="py-5" style="background-color:#FFFFF4;">
         <div class="container">
             <div class="row row-cols-1">
-                <form id="clientForm" >
+                <form id="clientForm" style="background-color: #F0EAD6; border: 1px solid #ada089;">
                     {% csrf_token %}
                     <fieldset>
                         <legend id="barTitle" class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: #F0EAD6; height:70px; font-size: 20px;">
                             我的帳號
                         </legend>
                         <!--註冊內容-->
-                        <div class="col" style="background-color:#fffff0; border: 1px solid #ada089; height:650px; font-size: 20px;">
+                        <div class="col" style="background-color:#fffff0; border: 1px solid #ada089;  height:650px; font-size: 20px;">
                             <div class="container">
                                 <div class="row">
                                     <!-- 郵件 -->
                                     <div class="col-sm-6 col-md-5 col-lg-6">
                                         <br>
-                                        <label for="email" class="required">帳號(電子郵件)</label><span style="color: red;" class="loginHide">*</span>
+                                        <label for="email" class="required">帳號(電子郵件)</label>
                                         <div class="form-floating">
-                                            <input type="email" class="form-control loginHide" id="email" name="email" required>
+                                            <input type="email" class="form-control loginHide" id="email" name="email" placeholder="請輸入電子郵件" required>
                                             <span id="emailShow"></span>
-                                </div>
+                                        </div>
                                     </div>
                                     <!-- 電話 -->
                                     <div class="col-sm-6 col-md-5 col-lg-6">
@@ -118,7 +100,7 @@
                                         <label for="gender" class="required">性別</label><span style="color: red;">*</span>
                                         <div class>
                                             <select class="form-floating" id="gender" name="gender" required>
-                                                <option value="" selected disabled>選擇性別</option>
+                                                <option value="">選擇性別</option>
                                                 <option value="male">男</option>
                                                 <option value="female">女</option>
                                                 <option value="unknown">不公開</option>
@@ -140,7 +122,7 @@
                                         <br>
                                         <label>是否願意接收通知</label><span style="color: red;">*</span>
                                         <div class="form-floating">
-                                            <input type="checkbox" id="notify" name="notify" value="isNotify" checked><span id="checkVlue">是</span>
+                                            <input type="checkbox" id="notify" name="notify" value="isNotify" checked>是
                                         </div>
                                     </div>
                                     <!-- 職業 -->
@@ -156,7 +138,7 @@
                                     <!-- 密碼-->  
                                     <div class="col-sm-6 col-md-5 col-lg-6">
                                         <br>
-                                        <label for="password" class="required loginHide">密碼</label><span style="color: red;" class="loginHide">*</span>
+                                        <label for="password"  class="required loginHide">密碼</label><span style="color: red;">*</span>
                                         <div class="form-floating">
                                             <input type="password" class="form-control loginHide" id="password" name="password">
                                         </div> 
@@ -169,9 +151,7 @@
                                 <!--設定編輯按鈕-->
                                 <div class="col-sm-6 col-md-5 col-lg-6"> 
                                     <br>
-                                    <form class="d-flex">
-                                        <button class="btn btn-outline-dark" id="btnClieRegis" type="submit" style="font-size: 20px;">完成</button>
-                                    </form>
+                                    <button class="rectangle-button" id="btnClieRegis" type="submit">完成</button>
                                 </div>
                             </div>
                         </div>
@@ -192,13 +172,12 @@
                 window.location.href = 'http://127.0.0.1:8000/home';
             }
             </script>
-
     </div>
     <!-- Bootstrap core JS-->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Core theme JS-->
     <script src="{% static 'myApp/js/scripts.js' %}"></script>
-    <script src="{% static 'myApp/js/client.js' %}"></script>
+    <script src="{% static 'myApp/js/clinic.js' %}"></script>
     <script src="{% static 'myApp/js/logout.js' %}"></script>
 </body>
 </html>
