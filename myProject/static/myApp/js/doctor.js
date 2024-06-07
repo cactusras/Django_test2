@@ -16,8 +16,10 @@ function fetch_element(){
     docField['name'] = document.getElementById('name').value,
     docField['phone_number'] = document.getElementById('phone_number').value,
     docField['password'] = document.getElementById('password').value,
-    docField['experience'] = document.getElementById('experience').value,
-    docField['photo'] = document.getElementById('photo').files[0]
+    docField['experience'] = document.getElementById('experience').value;
+    if(window.localStorage.getItem('isLogin') == 'failed' && window.localStorage.getItem('readyRegis') == 'no'){
+        docField['photo'] = document.getElementById('photo').files[0]
+    }
     // console.log('exoerience' + docField['exoerience']);
 }
 
@@ -44,6 +46,7 @@ function fillFormFromLocalStorage(form) {
     }
 }
 
+//這裡的fillForm有避免填入photo 且password是填入另創的localStorage(存沒有hash過的密碼)
 function fillForm(data, form) {
     if (!form) {
         console.error('Form not found');
@@ -53,7 +56,13 @@ function fillForm(data, form) {
     Object.keys(data).forEach(key => {
         const field = form.querySelector(`[name=${key}]`);
         if (field) {
-            field.value = data[key];
+            if(key != 'photo'){
+                if(key == 'password'){
+                    field.value = window.localStorage.getItem('password');
+                }else{
+                    field.value = data[key];
+                }
+            }    
         }
     });
 }
@@ -178,6 +187,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // info_before_regis(docForm);
                 photoInput.hidden = true;
                 photoLabel.hidden = true;
+                console.log('readyRegis')
             }
         }
 })
@@ -313,7 +323,7 @@ function clickRegis(event){
         const expertises = JSON.parse(localStorage.getItem('expertise_list'));
         const working_hour_list = JSON.parse(localStorage.getItem('working_hour_list'));
         const schedulingForm = JSON.parse(localStorage.getItem('schedulingForm'));
-        const clinicName = JSON.parse(localStorage.getItem('username'));
+        const clinicName = localStorage.getItem('username');
         const requestData = {
             doctorData: doctorData,
             expertises: expertises,

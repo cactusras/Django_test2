@@ -71,57 +71,7 @@
                                   </tr>
                               </thead>
                               <tbody id="clinic_reserve_body">
-                                <!--<tr>
-                                    <td>A</td>
-                                    <td>A</td>
-                                    <td>A</td>
-                                    <td>
-                                        <button type="button" class="btn btn-outline-dark" id="reportButton1" data-bs-toggle="modal" data-bs-target="#staticBackdrop1" style="font-size: 15px;">
-                                            <i class="bi bi-x-circle"></i> 未報到
-                                        </button>
-                                        <!-- Report Modal 1
-                                        <div class="modal fade" id="staticBackdrop1" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel1" aria-hidden="true">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="staticBackdropLabel1">報到確認</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        是否確認報到？
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-primary" id="confirmReportButton1" data-bs-dismiss="modal">是</button>
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">否</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-outline-dark" id="appointmentButton1" data-bs-toggle="modal" data-bs-target="#appointmentModal1" style="font-size: 15px;" disabled>
-                                            <i class="bi bi-calendar-check"></i> 預約
-                                        </button>
-                                        <!-- New Appointment Modal 1 
-                                        <div class="modal fade" id="appointmentModal1" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="appointmentModalLabel1" aria-hidden="true">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="appointmentModalLabel1">下次預約確認</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        是否要預約下次服務？
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-primary" id="confirmAppointmentButton1" data-bs-dismiss="modal">是</button>
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">否</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>-->
+                                
                               </tbody>
                           </table>
                       </div>
@@ -161,6 +111,7 @@
                     const tableBody = document.getElementById('clinic_reserve_body');
                     reservations.forEach(reservation => {
                         reservation_id = reservation.id
+                        client = reservation.client
                         console.log("id in" + reservation_id)
                         const row = document.createElement('tr');
                         const statusCell = document.createElement('td');
@@ -169,7 +120,7 @@
                         row.innerHTML = `
                             <td>${reservation.appointment_date}  ${reservation.appointment_time}</td>
                            
-                            <td> ${reservation.client_name}</td>
+                            <td> ${reservation.client} ${reservation.client_name}</td>
                             <td>${reservation.expertise}</td>
                         `;
                         row.appendChild(statusCell);
@@ -180,7 +131,7 @@
           }
         
         //根據不同狀態改變innerHtml
-        function change_status(status, reservation_id, clinic_id,client_id){
+        function change_status(status, reservation_id, clinic_id, client_id){
             let result = "";
             if(status == 'reserved'){
                 result = `<button type="button" class="btn btn-outline-dark" 
@@ -235,7 +186,7 @@
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-primary appointment-button" id="confirmAppointmentButton${reservation_id}" 
-                                                data-bs-dismiss="modal" data-clinic-id="${clinic_id}">
+                                                data-bs-dismiss="modal" data-clinic-id="${clinic_id}" data-client-id="${client}">
                                                 是
                                             </button>
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -256,12 +207,10 @@
                 const clinicId = event.target.dataset.clinicId;
                 const client_Id = event.target.dataset.client_Id;
                 console.log('client_Id:'+client_Id)
-                window.location.href = `/home/clinic/reserve/${clinicId}/`;
-               // window.location.href = `/home/doctor/reserve/${client_Id}/`;
-
-               
-
-
+                
+               // window.location.href = `/home/clinic/reserve/${clinicId}/`;
+                window.location.href = `/home/clinic/Nextreserve/${clinicId}/${client}/`;
+                
             
             }
         });

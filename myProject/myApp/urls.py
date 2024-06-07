@@ -17,10 +17,10 @@ urlpatterns = [
     path('add/clinic/', views.add_clinic, name='add_clinic'),
     #handle_upload_file
     path('doc/upload/', views.Doc_uploading, name='doc_upload'),
-    path('doc/expertise/upload/', views.DocExp_uploading, name='doc_expertise_upload'),
-    path('workingHour/upload/', views.workingHour_upload, name='working_hour_upload'),
+    #path('doc/expertise/upload/', views.DocExp_uploading, name='doc_expertise_upload'),
+    #path('workingHour/upload/', views.workingHour_upload, name='working_hour_upload'),
     path('scheduling/upload/', views.scheduling_upload, name='scheduling_upload'),
-    path('doc/session/', views.doc_session, name='doc_session'),
+    #path('doc/session/', views.doc_session, name='doc_session'),
     path('add/doctor/', views.add_doctor, name='add_doctor'),
     path('success/', views.success, name='success'),
     path('doctor/delete/<str:doctor_email>/', views.delete_doctor, name='delete_doctor'),
@@ -36,10 +36,13 @@ urlpatterns = [
     path('reservation/status/change/cancelledbydoc/<int:reservation_id>/', views.reservationStCbD, name='reservation_status_cancelled_by_doctor'),
     path('home/doctor/reserve/<int:doc_id>/', views.doctor_reserve_page, name='doctor_reserve_page'),
     path('home/clinic/reserve/<int:clinic_id>/', views.clinic_reserve_page, name='clinic_reserve_page'),
+    path('home/clinic/Nextreserve/<int:clinic_id>/<int:client_id>/', views.clinicNextreserve_page, name='clinicNextreserve_page'),
+    
+    
     path('clinic/doctor/<int:doctor_id>/reserve/', views.clinic_reserve_doctor_confirmed, name='clinic_reserve_doctor_confirmed'),
     #add_time(改過) 下面這有一個我的版本的
     #path('available/', views.get_available_times, name='available_times'),
-    path('waitinglist/to/reservation/', views.waitingToResForC, name='waiting_to_reservation'),
+    #path('waitinglist/to/reservation/', views.waitingToResForC, name='waiting_to_reservation'),
     path('client/delete/reserve/<int:reservation_id>/', views.client_cancel_reservation, name='client_cancel_reservation'),
     path('check_reservations/', views.check_reservations, name='check_reservations'),
 
@@ -49,7 +52,6 @@ urlpatterns = [
     path('doctor/page/loading/', views.doctorPage_loading, name='doctor_page_loading'),
     path('client/records/', views.clientRecord_loading, name='client_records'),
     path('home/',views.home, name = 'home'),
-    path('client/reserve/', views.clieReserve, name='client_reservation'),
     path('client/data/edit/', views.cliedataEd, name='client_data_edit'),
     path('clinic/data/edit/', views.clinDataEd, name='clinic_data_edit'),
     path('doctor/data/edit/', views.docDataEd, name='doctor_data_edit'),
@@ -61,7 +63,6 @@ urlpatterns = [
     path('doctor/page/', views.docPage, name='doctor_page'),
     path('clieReserveRecord/', views.clieReserveRecord, name='clieReserveRecord'),
     path('check_authentication/', views.check_authentication, name='check_authentication'),
-    path('dentalLogin/', views.dentalLogin, name='dentalLogin'),
     path('doctor_info/', views.doctor_info, name='doctor_info'),
     path('clinic_info/', views.clinic_info, name='clinic_info'),
     path('client_info/', views.client_info, name='client_info'),
@@ -77,7 +78,7 @@ urlpatterns = [
     path('doctor/delete/<str:doctor_email>/', views.delete_doctor, name='delete_doctor'),
     path('doctor/expertise-list/<int:doctor_id>/', views.get_expertise_list_doc, name = 'get_expertise_list_doc'),
     path('clinic/expertise-list/<int:clinic_id>/', views.get_expertise_list_clin, name = 'get_expertise_list_clin'),
-    path('doctor-list/expertise/<int:expertise_id>/', views.get_doctor_from_exp, name = 'get_doctor_from_exp'),
+    path('doctor-list/expertise/<int:expertise_id>/<int:clinic_id>/', views.get_doctor_from_exp, name='get_doctor_from_exp'),
     #path('add_reservation/<int:client_id>/<int:doctor_id>/', views.add_Reservation_for_clin, name='add_Reservation_for_clin'),
     
     

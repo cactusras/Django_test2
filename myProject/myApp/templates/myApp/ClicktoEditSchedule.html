@@ -47,7 +47,7 @@
                 <div class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:80px; font-size: 20px;">
                     編輯班表
                 </div>
-                <div class="col" style="background-color:#fffff0; border: 1px solid #ada089; height:600px; font-size: 20px;">
+                <div class="col" style="background-color:#fffff0; border: 1px solid #ada089; height:600px; font-size: 20px; overflow-y: auto;" >
                     <div class="container">
                         <button class="btn btn-outline-dark" type="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop" style="font-size: 20px; width: 160px; height: 40px;">
                             <i class="bi bi-calendar2-plus-fill"></i>
@@ -61,7 +61,7 @@
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h5 class="modal-title" id="staticBackdropLabel">編輯時段</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
                                         <select class="form-select" id="day_of_week" name="day_of_week" aria-label="Default select example" required>
@@ -85,8 +85,8 @@
                                         </div>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">刪除</button>
-                                        <button type="submit" class="btn btn-primary" id="addTimeSlot" onclick="timePopClick(event)">新增</button>
+                                        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">刪除</button>
+                                        <button type="submit" class="btn btn-outline-dark" id="addTimeSlot" onclick="timePopClick(event)">新增</button>
                                     </div>
                                        
                                 </div>
@@ -104,7 +104,7 @@
                            <input type="date"  min="2024-05-20" id="EndDate" name="EndDate"/>
                         </div>
 
-                        <table class="table table-bordered" style="border: 1px solid #ada089;" id = "schedule_table">
+                        <table class="table table-hover" style="border: 1px solid #ada089;" id = "schedule_table">
                             <thead>
                                 <tr>
                                     <th scope="col"><i class="bi bi-clock-fill"></i></th>
