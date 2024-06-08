@@ -6,7 +6,7 @@ from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 #from rest_framework import serializers
 #from myProject.encoder import CustomEncoder
-from .forms import DoctorForm,ClinicForm,ClientForm, LoginForm,SchedulingForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm,TestingForm,SearchForm,ClientUpdateForm,ClinicUpdateForm
+from .forms import DoctorForm,ClinicForm,ClientForm, DoctorUpdateForm, LoginForm,SchedulingForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm,TestingForm,SearchForm,ClientUpdateForm,ClinicUpdateForm
 from django.db.models import Q
 from django.db import connection
 from django.contrib.auth.decorators import login_required
@@ -266,35 +266,51 @@ def handle_uploaded_file(file):
             destination.write(chunk)
     return str(save_path)
 
-@login_required    
+@login_required
 def Doc_uploading(request):
     if request.method == 'POST':
         try:
-            doctor_form = DoctorForm(request.POST, request.FILES)
+            email = request.POST.get('email')
+            print("email: ",email)
+            if email:
+                try:
+                    doctor = Doctor.objects.get(email=email)
+                    print(doctor)
+                    update_doctor = True  # 更新現有醫生
+                except Doctor.DoesNotExist:
+                    update_doctor = False  # 新建醫生
+            else:
+                update_doctor = False
+            print("update_doctor: ", update_doctor)
+            if update_doctor:
+                doctor_form = DoctorUpdateForm(request.POST, request.FILES)
+            else:
+                doctor_form = DoctorForm(request.POST, request.FILES)
+            
+            print("doctor_form: ", doctor_form)
+            if doctor_form.is_valid():
+                clean = doctor_form.cleaned_data
+                clean['password'] = make_password(clean['password'])
+                photo = request.FILES.get('photo')
+
+                if photo is not None:
+                    photo_url = handle_uploaded_file(photo)
+                    clean['photo'] = photo_url
+
+                localStorage_data = json.dumps(clean)  # Convert data to JSON string
+
+                return JsonResponse({
+                    'message': 'Doctor Data added',
+                    'status': 'success',
+                    'localStorageData': localStorage_data  # Send data to client-side
+                })
+            else:
+                print('error : ', doctor_form.errors)
+                # print('error:', doctor_form.email)
+                return JsonResponse({'message': 'Invalid form data', 'errors': doctor_form.errors, 'status': 'error'})
+        ###    
         except json.JSONDecodeError:
             return JsonResponse({'message': 'Invalid JSON', 'status': 'error'})
-
-        if doctor_form.is_valid():
-            clean = doctor_form.cleaned_data
-            clean['password'] = make_password(clean['password'])
-            photo = request.FILES.get('photo')
-
-            if photo is not None:
-                photo_url = handle_uploaded_file(photo)
-                clean['photo'] = photo_url
-
-            # Store data in local storage
-            localStorage_data = json.dumps(clean)  # Convert data to JSON string
-            # Use JavaScript to access localStorage (see client-side code)
-
-            return JsonResponse({
-                'message': 'Doctor Data added',
-                'status': 'success',
-                'localStorageData': localStorage_data  # Send data to client-side
-            })
-        else:
-            print('error : ', doctor_form.errors)
-            return JsonResponse({'message': 'Invalid form data', 'errors': doctor_form.errors, 'status': 'error'})
     else:
         doctor_form = DoctorForm()
         return JsonResponse({'message': 'Invalid request method', 'status': 'error'})
@@ -747,7 +763,7 @@ def clinic_load(request):
     print('context = ', context)
 
     return JsonResponse(context)
-
+#doctor/page/loading
 def doctorPage_loading(request):
     user = request.user
     doctor = get_object_or_404(Doctor, id=user.id)
@@ -789,8 +805,6 @@ def doctorPage_loading(request):
             'status': reservation.get_status_display(),
         })
     
-
-
     schedule_list = [
         {
             'work_day': schedule.WorkingHour.get_day_of_week_display(),
@@ -814,6 +828,7 @@ def doctorPage_loading(request):
     print(context)
     
     return JsonResponse(context)
+
 @login_required        
 def clientRecord_loading(request):
     user = request.user
@@ -869,7 +884,57 @@ def docDataEd(request):
 #ClicktoEditSchedule.html
 #click/schedule/
 def clickSchedule(request):
-    context={}
+    user = request.user
+    doctor = get_object_or_404(Doctor, id=user.id)
+    
+    today = now().date()
+    start_of_week = today - timedelta(days=today.weekday())
+    end_of_week = start_of_week + timedelta(days=6)
+
+    schedules = Scheduling.objects.filter(
+        DoctorID=doctor,
+        StartDate__lte=end_of_week,
+        EndDate__gte=start_of_week
+    ).select_related('WorkingHour')
+    
+    schedule_list = [
+        {
+            'StartDate': schedule.StartDate,
+            'EndDate': schedule.EndDate,
+            'day_of_week': schedule.WorkingHour.get_day_of_week_display(),
+            'start_time': schedule.WorkingHour.start_time.strftime('%H:%M'),
+            'end_time': schedule.WorkingHour.end_time.strftime('%H:%M'),
+            'WDforfront': schedule.WDforFront(),
+            'OccupiedHours': Reservation().TimeSlotNumber(
+                start_time=schedule.WorkingHour.start_time,
+                end_time=schedule.WorkingHour.end_time
+            ),
+        }
+        for schedule in schedules
+    ]
+
+    latest_schedule = max(schedule_list, key=lambda x: (x['StartDate'], x['EndDate']))
+    valid_start = latest_schedule.get("StartDate")
+    valid_end = latest_schedule.get("EndDate")
+    schedule_data = {
+        'StartDate': valid_start,
+        'EndDate': valid_end
+    }
+    working_hour = {
+        'day_of_week': latest_schedule.get("day_of_week"),
+        'start_time': latest_schedule.get("start_time"),
+        'end_time': latest_schedule.get("end_time")
+    }
+    paired_numbers = []
+    wd = latest_schedule.get('WDforfront')
+    for hour in latest_schedule.get('OccupiedHours'):
+        paired_numbers.append((wd, hour))
+    
+    context = {
+        'paired_numbers': paired_numbers,
+        'schedule_data': schedule_data,
+        'working_hour': working_hour
+    }
     return render(request, "myApp/ClicktoEditSchedule.html", context)
 
 #ClicktoEditSchedule_new.html
@@ -933,6 +998,11 @@ def doctor_info(request):
         }
         if user.doctor.photo and user.doctor.photo.name:
            info['photo'] =  user.doctor.photo.url
+        
+        expertise_records = Doc_Expertise.objects.filter(DocID=user.doctor).select_related('Expertise_ID')
+        expertise_list = [{"name": f"{record.Expertise_ID.name}"} for record in expertise_records]
+        info['expertises'] = expertise_list
+
         return JsonResponse({'status': 'success', 'data': info}, status=200)
     else:
         return JsonResponse({'status': 'error', 'error': 'User is not a doctor'}, status=400)

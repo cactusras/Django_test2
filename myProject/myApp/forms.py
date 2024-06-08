@@ -21,8 +21,7 @@ class DoctorForm(forms.ModelForm):
         fields = ['email', 'name','phone_number','password','photo','experience']
     def __init__(self, *args, **kwargs):
         super(DoctorForm, self).__init__(*args,**kwargs)
-    #  self.fields['is_active'].initial = True
-     #   self.fields['is_admin'].initial = False
+
         
 class ClinicForm(forms.ModelForm):
     class Meta:
@@ -139,7 +138,18 @@ class TestingForm(forms.Form):
     expertise_list = forms.CharField(label='Expertise List', widget=forms.Textarea)
     
     
-    
+class DoctorUpdateForm(forms.ModelForm):
+    email = forms.EmailField(required=True)
+    class Meta:
+        model = Doctor
+        fields = ['email', 'name','phone_number','password','photo','experience']
+    def __init__(self, *args, **kwargs):
+        super(DoctorUpdateForm, self).__init__(*args,**kwargs)
+        self.fields['email'].validators = []
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        # You can add any custom email validation logic here if needed
+        return email
 
 class ClinicUpdateForm(forms.ModelForm):
     email = forms.EmailField(required=True)

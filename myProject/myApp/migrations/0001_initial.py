@@ -97,7 +97,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('customuser_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to=settings.AUTH_USER_MODEL)),
                 ('photo', models.ImageField(blank=True, null=True, upload_to='doctors/')),
-                ('exoerience', models.TextField(blank=True, null=True)),
+                ('experience', models.TextField(blank=True, null=True)),
                 ('clinicID', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='doctors', to='myApp.clinic')),
             ],
             options={
@@ -160,7 +160,7 @@ class Migration(migrations.Migration):
                 ('ClientID', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='reservations', to='myApp.client')),
             ],
             options={
-                'unique_together': {('ClientID', 'SchedulingID', 'Status')},
+                'unique_together': {('ClientID', 'time_start','SchedulingID', 'Status')},
             },
         ),
     ]

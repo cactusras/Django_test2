@@ -189,6 +189,7 @@ class Reservation(models.Model):
         duration = end_time - start_time
         total_hours = int(duration.total_seconds() // 3600)  # Total hours between start and end
         slot_numbers = [i + 1 for i in range(total_hours)]  # Generate slot numbers for each hour
+        print(slot_numbers)
         return slot_numbers
     
     

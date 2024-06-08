@@ -20,7 +20,6 @@ function fetch_element(){
     if(window.localStorage.getItem('isLogin') == 'failed' && window.localStorage.getItem('readyRegis') == 'no'){
         docField['photo'] = document.getElementById('photo').files[0]
     }
-    // console.log('exoerience' + docField['exoerience']);
 }
 
 function fillForm(data, form) {
@@ -46,27 +45,6 @@ function fillFormFromLocalStorage(form) {
     }
 }
 
-//這裡的fillForm有避免填入photo 且password是填入另創的localStorage(存沒有hash過的密碼)
-function fillForm(data, form) {
-    if (!form) {
-        console.error('Form not found');
-        return;
-    }
-
-    Object.keys(data).forEach(key => {
-        const field = form.querySelector(`[name=${key}]`);
-        if (field) {
-            if(key != 'photo'){
-                if(key == 'password'){
-                    field.value = window.localStorage.getItem('password');
-                }else{
-                    field.value = data[key];
-                }
-            }    
-        }
-    });
-}
-
 //登入狀態從後端抓資料放到dataEdit
 function fetch_info(formFilled){
     fetch('/doctor_info/', {
@@ -77,17 +55,18 @@ function fetch_info(formFilled){
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
-
         if (data.status === 'success') {
             const docInfo = data.data;
             if (docInfo['photo'] != ''){
                 docInfo['photo'] = '';
             }
-            if (docInfo['password'] != ''){
-                docInfo['password'] = '';
-            }
-            //console.log(clinInfo.photo_url)
-            //console.log("info_type = " + typeof(data.data) + "  info = " + data.data)
+            // if (docInfo['password'] != ''){
+            //     docInfo['password'] = '';
+            // }
+            const expertise_list = docInfo['expertises']; // Extract the expertises
+            delete docInfo['expertises'];
+            localStorage.setItem('expertise_list', JSON.stringify(expertise_list));
+            localStorage.setItem('doctorData', JSON.stringify(docInfo));
             fillForm(docInfo, formFilled);
         } else {
             console.error(data.error);
@@ -98,59 +77,15 @@ function fetch_info(formFilled){
     });
 }
 
-// //編輯完班表之後回到醫生註冊頁會出現的資料
-// function info_before_regis(filledForm){
-//     const doctorFormData = 
-//     if (doctorFormData['photo'] != ''){
-//         doctorFormData['photo'] = '';
-//     }
-//     doctorFormData['password'] = window.localStorage.getItem('password')
-//     for (let i = 0; i < localStorage.length; i++) {
-//         const key = localStorage.key(i);
-//         const value = localStorage.getItem(key);
-//         console.log(`${key}: ${value}`); // This loop iterates through all local storage, not just working hours
-//         if(key == 'email'){
-//             doctorFormData
-//         }else if(key == 'name'){
-
-//         }else if(key == 'phone_number'){
-
-//         }else if(key =='password'){
-
-//         }else if(key =='photo'){
-
-//         }
-//     }
-//     // console.log(doctorFormData)
-//     fillForm(doctorFormData, filledForm)
-//     // fetch('/doc/session/', {
-//     //     method: 'GET',
-//     //     headers: {
-//     //         'Content-Type': 'application/json',
-//     //     },
-//     // })
-//     // .then(response => response.json())
-//     // .then(data => {
-//     //     //const doctorForm = document.getElementById('doctorForm');
-        
-//     // })
-//     // .catch(error => {
-//     //     console.error('Error fetching session data:', error);
-//     // });
-// }
-
-
 document.addEventListener('DOMContentLoaded', function() {
         //頁面加載後才能把這些element load進來
-        const btnRegis = document.getElementById('btnDocRegis');
+        const btnRegis = document.getElementById('btnClinPage');
         const barTitle = document.getElementById('barTitle');
         const docForm = document.getElementById('doctorForm');
         const photoInput = document.getElementById('photo');
         const photoLabel = document.getElementById('photoLbl');
         const loginHide = document.querySelectorAll('.loginHide')
         const btnLogout = document.getElementById('logoutButton')
-        fetch_element();
-        fillFormFromLocalStorage(docForm);
         // 清空localstorage有關醫生註冊的東西
         // const doctorData = JSON.parse(localStorage.getItem('doctorData'));
         // const expertises = JSON.parse(localStorage.getItem('expertise_list'));
@@ -168,16 +103,19 @@ document.addEventListener('DOMContentLoaded', function() {
             btnRegis.innerText = '回到主頁'
             btnLogout.hidden = false;
             btnRegis.addEventListener('click', function(){
-                window.location.href = "/doctor/home"
+                window.location.href = "/doctor/page/"
             })
             loginHide.forEach(element => {
                 element.hidden = true;
             });
-            fetch_info(docForm);
+            
         }else if (window.localStorage.getItem('user_type') == 'clinic'){
             barTitle.innerText = '註冊'
             btnLogout.hidden = true;
-            btnRegis.innerText = '完成'
+            btnRegis.innerText = '回管理/新增醫師'
+            btnRegis.addEventListener('click', function(){
+                window.location.href = "/doctor/manage/"
+            })
             for (let i = 0; i < expExist.length; i++){
                 const optionToEdit = document.querySelector(`#expertiseSelect option[value="${expertise}"]`);
                 optionToEdit.disabled = true;
@@ -189,6 +127,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 photoLabel.hidden = true;
                 console.log('readyRegis')
             }
+        }
+        fetch_info(docForm);
+        fillFormFromLocalStorage(docForm);
+        fetch_element();
+        let expertiseList = JSON.parse(localStorage.getItem('expertise_list')) || [];
+        expExist = expertiseList.map(exp => exp.name);
+        const expertiseSelect = document.getElementById('expertiseSelect');
+        for (let i = 0; i < expertiseSelect.options.length; i++) {
+            const option = expertiseSelect.options[i];
+            if (expExist.includes(option.value)) {
+                // option.disabled = true;
+                option.innerText = option.innerText + " (已選)";
+            }
+        }
+
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            const value = localStorage.getItem(key);
+            console.log(`${key}: ${value}`); // This loop iterates through all local storage, not just working hours
         }
 })
 
@@ -205,13 +162,30 @@ document.getElementById('experForm').addEventListener('submit', async function(e
     }
 
     const expertise = document.getElementById('expertiseSelect').value;
-    console.log("new selected exp: ", expertise)
     const newExpertise = {
         'name': expertise
     };
+    const select = document.getElementById('expertiseSelect');
+    const selectedOption = select.options[select.selectedIndex];
+    const text = selectedOption.text;
+    console.log("text: ", text)
     let expertiseList = JSON.parse(localStorage.getItem('expertise_list')) || [];
-    expertiseList.push(newExpertise);
-    localStorage.setItem('expertise_list', JSON.stringify(expertiseList));
+
+    if (text.endsWith('(已選)')) {
+        selectedOption.text = text.slice(0, -4).trim();
+        console.log(text.slice(0, -5))
+        expertiseList = expertiseList.filter(expertise => expertise.name !== text.slice(0, -5));
+        localStorage.setItem('expertise_list', JSON.stringify(expertiseList));
+        expExist = expExist.filter(name => name !== text.slice(0, -5));
+    } else {
+        selectedOption.text = `${text} (已選)`;
+        expertiseList.push(newExpertise);
+        localStorage.setItem('expertise_list', JSON.stringify(expertiseList));
+        expExist.push(expertise);
+        alert('Expertise added successfully!');
+    }
+
+    // selectedOption.innerText = expertise + "(已選)"
 
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -220,39 +194,33 @@ document.getElementById('experForm').addEventListener('submit', async function(e
             console.log(`${key}: ${value}`);
         }
       }
-    alert('Expertise added successfully!');
-    expExist.push(expertise);
-    const optionToEdit = document.querySelector(`#expertiseSelect option[value="${expertise}"]`);
-    optionToEdit.disabled = true;
-    optionToEdit.innerText = expertise + "(已選)"
 })
 
 
-async function isUniqueEmail(email){
-    try {
-        const response = await fetch('/isUniqueEmail_doc', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                //'X-CSRFToken': getCookie('csrftoken')
-            },
-            body: JSON.stringify({email: email})
-        });
-        const uniqueEmail = await response.json();
-        return uniqueEmail.isUnique;
-    } catch (error) {
-        console.log('Error fetching registered emails:', error);
-        //alert('Error checking email availability');
-        return false;
-    }
-}
+// async function isUniqueEmail(email){
+//     try {
+//         const response = await fetch('/isUniqueEmail_doc', {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json',
+//                 //'X-CSRFToken': getCookie('csrftoken')
+//             },
+//             body: JSON.stringify({email: email})
+//         });
+//         const uniqueEmail = await response.json();
+//         return uniqueEmail.isUnique;
+//     } catch (error) {
+//         console.log('Error fetching registered emails:', error);
+//         //alert('Error checking email availability');
+//         return false;
+//     }
+// }
 
 
 document.getElementById('doctorForm').addEventListener('submit', async function(event){
     let isValid = false;
     // console.log("clicked regis")
     event.preventDefault(); // 防止user沒填必填資料
-    
     //在這裡處理這些attribute的限制(不能default vlue.length...)
     //有任一項不符合就進到return; 不會繼續往下
     fetch_element();
@@ -381,3 +349,66 @@ function clickRegis(event){
     }
     
 }
+
+
+// //編輯完班表之後回到醫生註冊頁會出現的資料
+// function info_before_regis(filledForm){
+//     const doctorFormData = 
+//     if (doctorFormData['photo'] != ''){
+//         doctorFormData['photo'] = '';
+//     }
+//     doctorFormData['password'] = window.localStorage.getItem('password')
+//     for (let i = 0; i < localStorage.length; i++) {
+//         const key = localStorage.key(i);
+//         const value = localStorage.getItem(key);
+//         console.log(`${key}: ${value}`); // This loop iterates through all local storage, not just working hours
+//         if(key == 'email'){
+//             doctorFormData
+//         }else if(key == 'name'){
+
+//         }else if(key == 'phone_number'){
+
+//         }else if(key =='password'){
+
+//         }else if(key =='photo'){
+
+//         }
+//     }
+//     // console.log(doctorFormData)
+//     fillForm(doctorFormData, filledForm)
+//     // fetch('/doc/session/', {
+//     //     method: 'GET',
+//     //     headers: {
+//     //         'Content-Type': 'application/json',
+//     //     },
+//     // })
+//     // .then(response => response.json())
+//     // .then(data => {
+//     //     //const doctorForm = document.getElementById('doctorForm');
+        
+//     // })
+//     // .catch(error => {
+//     //     console.error('Error fetching session data:', error);
+//     // });
+// }
+
+//這裡的fillForm有避免填入photo 且password是填入另創的localStorage(存沒有hash過的密碼)
+// function fillForm(data, form) {
+//     if (!form) {
+//         console.error('Form not found');
+//         return;
+//     }
+
+//     Object.keys(data).forEach(key => {
+//         const field = form.querySelector(`[name=${key}]`);
+//         if (field) {
+//             if(key != 'photo'){
+//                 if(key == 'password'){
+//                     field.value = window.localStorage.getItem('password');
+//                 }else{
+//                     field.value = data[key];
+//                 }
+//             }    
+//         }
+//     });
+// }

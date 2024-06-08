@@ -85,7 +85,7 @@
                                         </div>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">刪除</button>
+                                        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal" onclick="removeTimePopClick(event)">刪除</button>
                                         <button type="submit" class="btn btn-outline-dark" id="addTimeSlot" onclick="timePopClick(event)">新增</button>
                                     </div>
                                        
@@ -236,18 +236,88 @@
     <!-- <script src="{% static 'myApp/js/doctor.js' %}"></script>
     Custom JS to handle adding time slots -->
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const pairedNumbers = JSON.parse('{{ paired_numbers|escapejs }}');
+            const scheduleData = JSON.parse('{{ schedule_data|escapejs }}');
+            const workingHour = JSON.parse('{{ working_hour|escapejs }}');
+
+            localStorage.setItem('schedulingForm', JSON.stringify(scheduleData));
+            localStorage.setItem('working_hour_list', JSON.stringify(workingHour));
+
+            // Check if pairedNumbers is empty
+            if (pairedNumbers.length === 0) {
+                console.log('No cells to color.');
+                return; // Exit if there are no paired numbers
+            }
+
+            // Get the table element
+            const table = document.getElementById('schedule_table');
+
+            // Iterate over the paired numbers and color the cells
+            pairedNumbers.forEach(pair => {
+                const rowIndex = pair[0];
+                const colIndex = pair[1];
+                const row = table.rows[rowIndex];
+                if (row) {
+                    const cell = row.cells[colIndex];
+                    if (cell) {
+                        const initialWidth = cell.offsetWidth;
+                        cell.style.backgroundColor = '#6D6460';
+                        cell.style.width = `${initialWidth}px`;
+                    }
+                }
+            });
+        });
+
+        function removeTimePopClick(event) {
+            event.preventDefault();
+            const day_of_week = document.getElementById('day_of_week').value;
+            const start_time = document.getElementById('start_time').value;
+            const end_time = document.getElementById('end_time').value;
+
+            const rowIndex = getRowIndex(start_time, end_time);
+            rowIndex[0] += 1;
+            rowIndex[1] += 1;
+
+            let working_hour_list = JSON.parse(localStorage.getItem('working_hour_list')) || [];
+            
+            // Remove the working hour from local storage
+            working_hour_list = working_hour_list.filter(working_hour => 
+                !(working_hour.day_of_week === day_of_week &&
+                working_hour.start_time === start_time &&
+                working_hour.end_time === end_time)
+            );
+            localStorage.setItem('working_hour_list', JSON.stringify(working_hour_list));
+
+            // Update the table cells
+            if (rowIndex[0] >= 0 && rowIndex[1] <= 8) {
+                const table = document.getElementById('schedule_table');
+                for (var i = rowIndex[0]; i <= rowIndex[1]; i++) {
+                    const row = table.rows[i];
+                    const cell = row.cells[day_of_week];
+                    if (cell) {
+                        cell.style.backgroundColor = ''; // Reset the cell background color
+                        cell.style.width = ''; // Reset the cell width if it was changed
+                    }
+                }
+            } else {
+                console.log("no row");
+            }
+            alert('Working hour removed successfully!');
+            const modal = document.getElementById('staticBackdrop');
+            const modalInstance = bootstrap.Modal.getInstance(modal);
+            modalInstance.hide();
+        }
+
+
         function timePopClick(event) {
             event.preventDefault();
             let checkValue = checkTime();
             if (checkValue == 'success') {
                 const day_of_week = document.getElementById('day_of_week').value;
-                // console.log("day_of: ", day_of_week)
                 const start_time = document.getElementById('start_time').value;
-                // console.log("First_get_startTime: ", start_time);
                 const end_time = document.getElementById('end_time').value;
                 
-                // const formData = new FormData(form);
-                // Convert FormData to a plain object
                 const working_hour = {
                     'day_of_week': day_of_week,
                     'start_time': start_time,
@@ -260,7 +330,8 @@
                 for (let i = 0; i < localStorage.length; i++) {
                     const key = localStorage.key(i);
                     const value = localStorage.getItem(key);
-                    console.log(`${key}: ${value}`); // This loop iterates through all local storage, not just working hours
+                    console.log(`${key}: ${value}`);
+                    // This loop iterates through all local storage, not just working hours
                 }
                 
                 const rowIndex = getRowIndex(start_time, end_time);
@@ -269,7 +340,8 @@
 
                 // Verify if rowIndex is within the range 0 to 8
                 if (rowIndex[0] >= 0 && rowIndex[1] <= 8) {
-                    const table = document.getElementById('schedule_table'); // Ensure you have the correct table ID
+                    const table = document.getElementById('schedule_table');
+                    // Ensure you have the correct table ID
                     const cells = [];
                     for (var i = rowIndex[0]; i <= rowIndex[1]; i++) {
                         const row = table.rows[i];
@@ -286,10 +358,7 @@
                 }else{
                     console.log("no row")
                 }
-
                 alert('Working hour added successfully!');
-
-                // Close the modal
                 const modal = document.getElementById('staticBackdrop');
                 const modalInstance = bootstrap.Modal.getInstance(modal);
                 modalInstance.hide();
@@ -306,7 +375,6 @@
             event.preventDefault();
             const StartDate = document.getElementById('StartDate').value;
             const EndDate = document.getElementById('EndDate').value;
-            // const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
             if (!StartDate || !EndDate) {
                 alert("請填寫開始日期和結束日期。");

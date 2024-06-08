@@ -78,7 +78,7 @@
                                             <option value="假牙及義齒-活動義齒">假牙及義齒-活動義齒</option>
                                             <option value="假牙及義齒-固定義齒">假牙及義齒-固定義齒</option>
                                         </select>
-                                        <button id="btnExper"  type="submit">加入專長</button>
+                                        <button id="btnExper"  type="submit">(加入/刪除)專長</button>
                                         </div>
                                     </form>
                                 </div>
@@ -148,7 +148,7 @@
                         {% csrf_token %}
                         <button id="btnDocRegis" class="rectangle-button" type="submit" onclick="clickRegis(event)">完成</button>
                     </form> 
-                    <button class="btn btn-outline-dark" type="button" onclick="docManPage(event)" id="btnClinPage" style="font-size: 20px; width: 160px; height: 40px;" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    <button class="btn btn-outline-dark" type="button" id="btnClinPage" style="font-size: 20px; width: 160px; height: 40px;" data-bs-toggle="modal" data-bs-target="#exampleModal">
                         <i class="bi bi-calendar-check-fill"></i>
                         回上頁
                     </button>
@@ -167,7 +167,7 @@
             <br>
              <!--頁面底-->
              <script>
-                function docManPage(event){
+                function changePage(event){
                     event.preventDefault();
                     window.location.href = '/doctor/manage/'
                 
