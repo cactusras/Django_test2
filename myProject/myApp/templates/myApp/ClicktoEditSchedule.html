@@ -244,6 +244,16 @@
             localStorage.setItem('schedulingForm', JSON.stringify(scheduleData));
             localStorage.setItem('working_hour_list', JSON.stringify(workingHour));
 
+            // Set the date values
+            const startDateInput = document.getElementById('StartDate');
+            const endDateInput = document.getElementById('EndDate');
+            if (scheduleData.StartDate) {
+                startDateInput.value = scheduleData.StartDate;
+            }
+            if (scheduleData.EndDate) {
+                endDateInput.value = scheduleData.EndDate;
+            }
+
             // Check if pairedNumbers is empty
             if (pairedNumbers.length === 0) {
                 console.log('No cells to color.');

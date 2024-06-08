@@ -146,10 +146,18 @@ class DoctorUpdateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(DoctorUpdateForm, self).__init__(*args,**kwargs)
         self.fields['email'].validators = []
+    
     def clean_email(self):
-        email = self.cleaned_data.get('email')
-        # You can add any custom email validation logic here if needed
+        email = self.data.get('email')
         return email
+    def is_valid(self):
+        valid = super(DoctorUpdateForm, self).is_valid()
+        email = self.data.get('email')
+        self.cleaned_data['email'] = email  # Add raw email to cleaned_data
+        valid=True
+
+        # Return True regardless of email validation
+        return valid
 
 class ClinicUpdateForm(forms.ModelForm):
     email = forms.EmailField(required=True)
@@ -157,7 +165,6 @@ class ClinicUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Clinic
-        #fields = ['name', 'license_number','phone_number','address','introduction','photo','email','password' ]
         fields = ['email', 'name','phone_number','license_number','address','introduction']
     def __init__(self, *args, **kwargs):
         super(ClinicUpdateForm, self).__init__(*args, **kwargs)

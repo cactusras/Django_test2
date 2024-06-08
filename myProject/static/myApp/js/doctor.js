@@ -103,6 +103,10 @@ document.addEventListener('DOMContentLoaded', function() {
             btnRegis.innerText = '回到主頁'
             btnLogout.hidden = false;
             btnRegis.addEventListener('click', function(){
+                localStorage.removeItem('doctorData');
+                localStorage.removeItem('expertise_list');
+                localStorage.removeItem('working_hour_list');
+                localStorage.removeItem('schedulingForm');
                 window.location.href = "/doctor/page/"
             })
             loginHide.forEach(element => {
@@ -114,6 +118,10 @@ document.addEventListener('DOMContentLoaded', function() {
             btnLogout.hidden = true;
             btnRegis.innerText = '回管理/新增醫師'
             btnRegis.addEventListener('click', function(){
+                localStorage.removeItem('doctorData');
+                localStorage.removeItem('expertise_list');
+                localStorage.removeItem('working_hour_list');
+                localStorage.removeItem('schedulingForm');
                 window.location.href = "/doctor/manage/"
             })
             for (let i = 0; i < expExist.length; i++){
@@ -196,30 +204,8 @@ document.getElementById('experForm').addEventListener('submit', async function(e
       }
 })
 
-
-// async function isUniqueEmail(email){
-//     try {
-//         const response = await fetch('/isUniqueEmail_doc', {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json',
-//                 //'X-CSRFToken': getCookie('csrftoken')
-//             },
-//             body: JSON.stringify({email: email})
-//         });
-//         const uniqueEmail = await response.json();
-//         return uniqueEmail.isUnique;
-//     } catch (error) {
-//         console.log('Error fetching registered emails:', error);
-//         //alert('Error checking email availability');
-//         return false;
-//     }
-// }
-
-
 document.getElementById('doctorForm').addEventListener('submit', async function(event){
     let isValid = false;
-    // console.log("clicked regis")
     event.preventDefault(); // 防止user沒填必填資料
     //在這裡處理這些attribute的限制(不能default vlue.length...)
     //有任一項不符合就進到return; 不會繼續往下
@@ -292,60 +278,66 @@ function clickRegis(event){
         const working_hour_list = JSON.parse(localStorage.getItem('working_hour_list'));
         const schedulingForm = JSON.parse(localStorage.getItem('schedulingForm'));
         const clinicName = localStorage.getItem('username');
+        const user_type = localStorage.getItem('user_type');
         const requestData = {
             doctorData: doctorData,
             expertises: expertises,
             working_hour_list: working_hour_list,
             schedulingForm: schedulingForm,
-            clinicName: clinicName
-            // Add any other data you need to send in the request
+            user_type: user_type,
+            clinicName: ""
         };
+        if (user_type == 'clinic'){
+            requestData['clinicName'] = clinicName;
+        }
         console.log('requestData_doctorData:', doctorData)
         console.log('requestData_expertises: ', expertises)
         console.log('requestData_working_hour_list:', working_hour_list)
         console.log('requestData_schedulingForm: ', schedulingForm)
         console.log('requestData_clinicID: ', clinicName)
 
-        if(window.localStorage.getItem('user_type') == 'clinic'){
-            fetch('/add/doctor/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFTOKEN' : csrfToken
-                },
-                body: JSON.stringify({requestData}),
-            })
-            .then(async response => {
-                if (!response.ok) {
-                    throw new Error('Failed to add doctor');
-                }
-                const data = await response.json();
-                // 处理成功响应，例如显示成功消息或重定向
-                if(data.status == 'success'){
-                    window.localStorage.setItem('readyRegis', 'no')
-                    window.localStorage.setItem('password', '')
-                    localStorage.removeItem('doctorData');
-                    localStorage.removeItem('expertise_list');
-                    localStorage.removeItem('working_hour_list');
-                    localStorage.removeItem('schedulingForm');
-                    alert('Doctor added successfully!');
+        // if(window.localStorage.getItem('user_type') == 'clinic'){
+        fetch('/add/doctor/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFTOKEN' : csrfToken
+            },
+            body: JSON.stringify({requestData}),
+        })
+        .then(async response => {
+            if (!response.ok) {
+                throw new Error('Failed to add doctor');
+            }
+            const data = await response.json();
+            // 处理成功响应，例如显示成功消息或重定向
+            if(data.status == 'success'){
+                window.localStorage.setItem('readyRegis', 'no')
+                window.localStorage.setItem('password', '')
+                localStorage.removeItem('doctorData');
+                localStorage.removeItem('expertise_list');
+                localStorage.removeItem('working_hour_list');
+                localStorage.removeItem('schedulingForm');
+                alert('Doctor added successfully!');
+                if(window.localStorage.getItem('user_type') == 'clinic'){
                     window.location.href = '/doctor/manage';
-                }else{
-                    console.log('requestData:', requestData)
-                    alert('Error : ' + data.message)
+                }else if(window.localStorage.getItem('user_type') == 'doctor'){
+                    window.location.href = '/doctor/page'
                 }
-            })
-            .catch(error => {
-                // 处理错误情况，例如显示错误消息给用户
-                alert('Error adding doctor: ' + error.message);
-            });
-        }else if(window.localStorage.getItem('user_type') == 'doctor'){
-            event.preventDefault()
-            window.location.href = '/doctor/page'
-        }
+            }else{
+                console.log('requestData:', requestData)
+                alert('Error : ' + data.message)
+            }
+        })
+        .catch(error => {
+            alert('Error adding doctor: ' + error.message);
+        });
+        // }else if(window.localStorage.getItem('user_type') == 'doctor'){
+        //     event.preventDefault()
+        //     window.location.href = '/doctor/page'
+        // }
     } catch (error) {
         console.error('Error parsing JSON:', error.message);
-        // Handle the parsing error gracefully (e.g., display an error message)
     }
     
 }
@@ -411,4 +403,23 @@ function clickRegis(event){
 //             }    
 //         }
 //     });
+// }
+
+// async function isUniqueEmail(email){
+//     try {
+//         const response = await fetch('/isUniqueEmail_doc', {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json',
+//                 //'X-CSRFToken': getCookie('csrftoken')
+//             },
+//             body: JSON.stringify({email: email})
+//         });
+//         const uniqueEmail = await response.json();
+//         return uniqueEmail.isUnique;
+//     } catch (error) {
+//         console.log('Error fetching registered emails:', error);
+//         //alert('Error checking email availability');
+//         return false;
+//     }
 // }

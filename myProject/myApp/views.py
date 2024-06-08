@@ -283,11 +283,14 @@ def Doc_uploading(request):
                 update_doctor = False
             print("update_doctor: ", update_doctor)
             if update_doctor:
+                print("update")
                 doctor_form = DoctorUpdateForm(request.POST, request.FILES)
+                # print("POST Data: ", request.POST)
+                # print("FILES Data: ", request.FILES)
             else:
                 doctor_form = DoctorForm(request.POST, request.FILES)
             
-            print("doctor_form: ", doctor_form)
+            # print("doctor_form: ", doctor_form)
             if doctor_form.is_valid():
                 clean = doctor_form.cleaned_data
                 clean['password'] = make_password(clean['password'])
@@ -432,18 +435,24 @@ def add_doctor(request):
         # Process photo if included in doctor_form_data
         if doctor_form_data['photo'] is not None:
             photo_url = doctor_form_data.pop('photo', '')  # Remove photo from form data
-            try:
-                save_dir = Path('media/uploaded_files')
-                save_dir.mkdir(parents=True, exist_ok=True)
-                final_path = save_dir / Path(photo_url).name
-                os.rename(photo_url, final_path)
-                print("Photo saved successfully")
-                doctor_form_data['photo'] = photo_url  # Update form data with saved photo path
-            except Exception as e:
-                print(f"Error saving photo: {e}")
-                return JsonResponse({'message': 'Error saving photo', 'status': 'error'})
+            if photo_url:
+                try:
+                    save_dir = Path('media/uploaded_files')
+                    save_dir.mkdir(parents=True, exist_ok=True)
+                    final_path = save_dir / Path(photo_url).name
+                    print(f"Moving photo from {photo_url} to {final_path}")
+                    Path(photo_url).rename(final_path)
+                    print("Photo saved successfully")
+                    doctor_form_data['photo'] = photo_url  # Update form data with saved photo path
+                except Exception as e:
+                    print(f"Error saving photo: {e}")
+                    return JsonResponse({'message': 'Error saving photo', 'status': 'error'})
+        if clinicName != "":
+            clinic = Clinic.objects.get(name=clinicName)#理論上要用id才能取到唯一
+        else:
 
-        clinic = Clinic.objects.get(name=clinicName)#理論上要用id才能取到唯一
+            doctor = Doctor.objects.select_related('clinicID').get(email=doctor_form_data["email"])
+            clinic = doctor.clinicID
         doctor_form_data['clinicID'] = clinic
         email = doctor_form_data.pop('email')
         doctor, created = Doctor.objects.update_or_create(email=email, defaults=doctor_form_data)
@@ -810,8 +819,8 @@ def doctorPage_loading(request):
             'work_day': schedule.WorkingHour.get_day_of_week_display(),
             'work_start_time': schedule.WorkingHour.start_time.strftime('%H:%M'),
             'work_end_time': schedule.WorkingHour.end_time.strftime('%H:%M'),
-            'valid_from': schedule.StartDate,
-            'valid_to': schedule.EndDate,
+            'valid_from': schedule.StartDate.strftime('%H:%M'),
+            'valid_to': schedule.EndDate.strftime('%H:%M'),
             'WDforfront': schedule.WDforFront(),
             'OccupiedHour': Reservation().TimeSlotNumber(
                 start_time=schedule.WorkingHour.start_time,
@@ -917,23 +926,25 @@ def clickSchedule(request):
     valid_start = latest_schedule.get("StartDate")
     valid_end = latest_schedule.get("EndDate")
     schedule_data = {
-        'StartDate': valid_start,
-        'EndDate': valid_end
+        'StartDate': valid_start.strftime('%Y-%m-%d'),
+        'EndDate': valid_end.strftime('%Y-%m-%d')
     }
+    print("schedule_data: ", schedule_data)
     working_hour = {
         'day_of_week': latest_schedule.get("day_of_week"),
         'start_time': latest_schedule.get("start_time"),
         'end_time': latest_schedule.get("end_time")
     }
+    print("working_hour: ", working_hour)
     paired_numbers = []
     wd = latest_schedule.get('WDforfront')
     for hour in latest_schedule.get('OccupiedHours'):
         paired_numbers.append((wd, hour))
     
     context = {
-        'paired_numbers': paired_numbers,
-        'schedule_data': schedule_data,
-        'working_hour': working_hour
+        'paired_numbers': json.dumps(paired_numbers),
+        'schedule_data': json.dumps(schedule_data),
+        'working_hour': json.dumps(working_hour)
     }
     return render(request, "myApp/ClicktoEditSchedule.html", context)
 
