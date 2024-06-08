@@ -153,35 +153,6 @@
                     <br>
                        
 
-
-{% comment %} 
-                        <label for="date1">時段</label>
-                        <div class="button-container">
-                            <div class="button-row">
-                                <button id="timeslot" class="rounded-button" onclick="showPopup('時段1', 'timeslot')">時段1</button>
-                                <button id="timeslot2" class="rounded-button" onclick="showPopup('時段2', 'timeslot2')">時段2</button>
-                                <button id="timeslot3" class="rounded-button" onclick="showPopup('時段3', 'timeslot3')">時段3</button>
-                                <button id="timeslot4" class="rounded-button" onclick="showPopup('時段4', 'timeslot4')">時段4</button>
-                                <button id="timeslot5" class="rounded-button" onclick="showPopup('時段5', 'timeslot5')">時段5</button>
-                            </div>
-                            <div class="button-row">
-                                <button id="timeslot6" class="rounded-button" onclick="showPopup('時段6', 'timeslot6')">時段6</button>
-                                <button id="timeslot7" class="rounded-button" onclick="showPopup('時段7', 'timeslot7')">時段7</button>
-                                <button id="timeslot8" class="rounded-button" onclick="showPopup('時段8', 'timeslot8')">時段8</button>
-                                <button id="timeslot9" class="rounded-button" onclick="showPopup('時段9', 'timeslot9')">時段9</button>
-                                <button id="timeslot10" class="rounded-button" onclick="showPopup('時段10', 'timeslot10')">時段10</button>
-                            </div>
-                        </div>
-
-                        <div class="popup-overlay" id="popupOverlay"></div>
-                        <div class="popup" id="popup">
-                            <div id="popupContent"></div>
-                            <div class="popup-buttons">
-                            <button onclick="confirmSelection(true)">是</button>
-                            <button onclick="confirmSelection(false)">否</button>
-                            </div>
-                        </div> {% endcomment %}
-
                          <!-- 確認預約 -->
                          <script src="{% static 'myApp/js/scripts.js' %}" ></script>
 
@@ -259,72 +230,6 @@
 
 </script>
 
-     <script>
-
-                            let currentButtonId = null;
-                            const confirmedButtons = new Set();
-
-                            function showPopup(timeSlot, buttonId) {
-                                currentButtonId = buttonId;
-                                const button = document.getElementById(buttonId);
-
-                                let message = '是否確認預約?' ;
-
-                                if (confirmedButtons.has(buttonId)) {
-                                    message = '是否確認候補?' ;
-                                }
-
-                                document.getElementById('popupContent').innerText = message ;
-                                document.getElementById('popup').style.display = 'block';
-                                document.getElementById('popupOverlay').style.display = 'block';
-                            }
-
-                            function changeText(buttonId) {
-                                const button = document.getElementById(buttonId);
-                                if (confirmedButtons.has(buttonId)) {
-                                    button.textContent = '確認候補';
-                                } else {
-                                    button.textContent = '確認預約';
-                                }
-                                    button.style.backgroundColor = '#2e1a02';
-                            }
-
-                            function confirmSelection(isConfirmed) {
-                                if (isConfirmed) {
-                                    const button = document.getElementById(currentButtonId);
-                                    if(button.textContent == '確認預約'){
-                                        alert('您已預約此時段');
-                                    } else{
-                                        alert('您已確認此時段候補');
-                                    }
-
-                                    changeText(currentButtonId);
-                                    button.disabled = true;
-                                } else {
-                                    alert('您已取消預約此時段');
-                                }
-                                document.getElementById('popup').style.display = 'none';
-                                document.getElementById('popupOverlay').style.display = 'none';
-                            }
-                        </script>
-                         
-                        <script>
-                            function showup(message) {
-                                document.getElementById('popContent').innerText = message;
-                                document.getElementById('popContent').appendChild(document.createElement('br')); // 插入換行
-                                document.getElementById('pop').style.display = 'block';
-                                document.getElementById('popOverlay').style.display = 'block';
-                                var okButton = document.createElement('button');
-                                okButton.innerText = 'OK';
-                                okButton.onclick = closeup;
-                                document.getElementById('popContent').appendChild(okButton);
-                            }
-
-                            function closeup() {
-                                document.getElementById('pop').style.display = 'none';
-                                document.getElementById('popOverlay').style.display = 'none';
-                            }
-
-                        </script>
+     
 
                         

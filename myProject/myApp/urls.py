@@ -14,6 +14,8 @@ urlpatterns = [
     path('isUniqueEmail_doc/', views.isUniqueEmail_doc, name='isUniqueEmail_doc'),
     path('add/client/', views.add_client, name='add_client'),
     path('add/reservation/', views.add_Reservation, name='add_reservation'),
+    
+    
     path('add/clinic/', views.add_clinic, name='add_clinic'),
     #handle_upload_file
     path('doc/upload/', views.Doc_uploading, name='doc_upload'),
@@ -72,14 +74,19 @@ urlpatterns = [
     path('get_doc_working/<int:doctor_id>/', views.get_doc_working, name = 'getworking'),
     #我的版本的available顯示
     path('available/', views.get_available_times, name='get_available_times'),
-    path('testing',views.testing,name='testing'),
-    path('Searchtesting',views.searchTest,name='Stesting'),
+    path('availableFClin/', views.get_available_times_for_clin, name='get_available_times'),
+
     path('home/doctor/reserve/<int:doctor_id>/add/reservation/',views.add_Reservation, name ='added'),
     path('doctor/delete/<str:doctor_email>/', views.delete_doctor, name='delete_doctor'),
     path('doctor/expertise-list/<int:doctor_id>/', views.get_expertise_list_doc, name = 'get_expertise_list_doc'),
     path('clinic/expertise-list/<int:clinic_id>/', views.get_expertise_list_clin, name = 'get_expertise_list_clin'),
     path('doctor-list/expertise/<int:expertise_id>/<int:clinic_id>/', views.get_doctor_from_exp, name='get_doctor_from_exp'),
-    #path('add_reservation/<int:client_id>/<int:doctor_id>/', views.add_Reservation_for_clin, name='add_Reservation_for_clin'),
+
+    
+    #以下是診所下次預約
+    path('add_Reservation_for_Clin/', views.add_Reservation_for_Clin, name='add_reservation_for_Clin'),
+    path('home/clinic/Nextreserve/<int:clinic_id>/<int:client_id>/add_Reservation_for_Clin/', views.add_Reservation_for_Clin, name='add_reservation'),
+    
     
     
    

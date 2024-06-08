@@ -129,18 +129,7 @@
                             //載入診所名 介紹 地址(改用render)
                             // 此診所的所有expertise(用ajax)
                             function initialData(event){
-                                /*event.preventDefault();
-                                fetch(`/clinic/reserve/<int:clinic_id>/`)
-                                .then(response => response.json())
-                                .then(data => {
-                                    診所基本資料
-                                    document.getElementById('clinic-introduction').textContent = data.name + 診所;
-                                    document.getElementById('clinic-introduction').textContent = data.introduction;
-                                    document.getElementById('clinic-address').textContent = data.address;
-                                })
-                                .catch(error => {
-                                    console.error('Error fetching initial info:', error);
-                                });*/
+                                
                                 const clinic_id = {{ clinic.id }}
 
                                 fetch(`/clinic/expertise-list/${clinic_id}/`)
@@ -188,14 +177,7 @@
                                 });
                             }
 
-                            {% comment %} document.getElementById('btnDoctor').addEventListener('click', function(event){
-                                event.preventDefault();
-                                const doctorSelect = document.getElementById('doctorSelect');
-                                const selectedDoctorId = doctorSelect.value;
-                                console.log('selected doctor:'+selectedDoctorId)
-                                window.location.assign(`home/doctor/reserve/${selectedDoctorId}/`);   
-                                
-                            }) {% endcomment %}
+                   
 
                             document.getElementById('btnDoctor').addEventListener('click', function(event){
                                 event.preventDefault();
