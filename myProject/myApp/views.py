@@ -753,6 +753,7 @@ def clinic_load(request):
     #schedules = Scheduling.objects.filter(DoctorID__in=doctors)
     #reservations = Reservation.objects.filter(SchedulingID__in=schedules)
     reservation_list = []
+    schedule_list = []
     for reservation in reservations:
         client = reservation.ClientID
         client_name = reservation.ClientID.name

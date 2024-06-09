@@ -7,6 +7,7 @@ name = "pypi"
 pymysql = "*"
 pillow = "*"
 django-filter = "*"
+django = "*"
 
 [dev-packages]
 

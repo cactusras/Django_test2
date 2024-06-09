@@ -196,7 +196,7 @@ document.getElementById('clientForm').addEventListener('submit', async function(
                 }else{
                     alert(data.message);
                     window.localStorage.setItem('username', clieField.name)
-                    window.location.href = '/home/';
+                    window.location.href = '/';
                 }
             } else {
                 alert(data.message);
