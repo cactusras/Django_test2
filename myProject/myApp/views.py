@@ -755,6 +755,7 @@ def clinic_load(request):
     #reservations = Reservation.objects.filter(SchedulingID__in=schedules)
     reservation_list = []
     for reservation in reservations:
+        client = reservation.ClientID
         client_name = reservation.ClientID.name
         client_gender = reservation.ClientID.gender
         if client_gender == 'male':
@@ -767,7 +768,7 @@ def clinic_load(request):
                 'appointment_time': reservation.time_start.strftime('%H:%M'),
                 'id': reservation.id,
                 'client_name': client_name,
-                'client_id': reservation.ClientID,
+                'client_id': client.id,
                 'appointment_date': reservation.time_start.date().isoformat(),
                 'day_of_week': day_of_week,
                 'starting': reservation.time_start.time().strftime('%H:%M'),
