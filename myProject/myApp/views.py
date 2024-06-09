@@ -810,7 +810,7 @@ def doctorPage_loading(request):
             'appointment_date': reservation.time_start.date().isoformat(),
             'day_of_week': day_of_week,
             'starting': reservation.time_start.time().strftime('%H:%M'),
-            'ending': reservation.time_end.time.strftime('%H:%M'),
+            'ending': reservation.time_end.time().strftime('%H:%M'),
             'expertise': reservation.expertiseID.name,
             'status': reservation.get_status_display(),
         })

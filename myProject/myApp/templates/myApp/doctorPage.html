@@ -264,7 +264,7 @@
               });
 
               reservations.forEach(reservation => {
-                const rowIndexes = getRowIndex(reservation['starting'],reservation['starting']);
+                const rowIndexes = getRowIndex(reservation['starting'],reservation['ending']);
                 const colIndex = reservation['day_of_week'];
                 for (let i = rowIndexes[0]; i <= rowIndexes[1]; i++) {
                     const row = table.rows[i+1];
