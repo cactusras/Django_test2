@@ -810,13 +810,14 @@ def doctorPage_loading(request):
             'appointment_date': reservation.time_start.date().isoformat(),
             'day_of_week': day_of_week,
             'starting': reservation.time_start.time().strftime('%H:%M'),
+            'ending': reservation.time_end.time.strftime('%H:%M'),
             'expertise': reservation.expertiseID.name,
             'status': reservation.get_status_display(),
         })
     
     schedule_list = [
         {
-            'work_day': schedule.WorkingHour.get_day_of_week_display(),
+            'work_day': schedule.WorkingHour.day_of_week,
             'work_start_time': schedule.WorkingHour.start_time.strftime('%H:%M'),
             'work_end_time': schedule.WorkingHour.end_time.strftime('%H:%M'),
             'valid_from': schedule.StartDate.strftime('%H:%M'),

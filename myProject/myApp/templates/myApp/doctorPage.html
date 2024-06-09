@@ -209,6 +209,35 @@
         document.addEventListener("DOMContentLoaded", function() {
             clin_reserve_info();
         });
+        function getRowIndex(startTime, endTime) {
+            console.log("startTime_for_mapping: ", startTime);
+            const timeMapping = {
+                'startTimeMap' :{
+                    '10:00': 0,
+                    '11:00': 1,
+                    '12:00': 2,
+                    '13:00': 3,
+                    '15:00': 4,
+                    '16:00': 5,
+                    '17:00': 6,
+                    '19:00': 7,
+                    '20:00': 8
+                },
+                'endTimeMap' :{
+                    '11:00': 0,
+                    '12:00': 1,
+                    '13:00': 2,
+                    '14:00': 3,
+                    '16:00': 4,
+                    '17:00': 5,
+                    '18:00': 6,
+                    '20:00': 7,
+                    '21:00': 8
+                }
+                
+            };
+            return [timeMapping.startTimeMap[startTime], timeMapping.endTimeMap[endTime]];
+        }
 
         function clin_reserve_info() {
           event.preventDefault();
@@ -216,6 +245,40 @@
             .then(response => response.json())
             .then(data => {
               const reservations = data.reservation_list;
+              const schedule_list = data.schedule_list;
+              const table = document.getElementById('schedule_table');
+              schedule_list.forEach(schedule => {
+                const rowIndexes = getRowIndex(schedule['work_start_time'],schedule['work_end_time']);
+                const colIndex = schedule['work_day'];
+                for (let i = rowIndexes[0]; i <= rowIndexes[1]; i++) {
+                    const row = table.rows[i+1];
+                    if (row) {
+                        const cell = row.cells[colIndex];
+                        if (cell) {
+                            const initialWidth = cell.offsetWidth;
+                            cell.style.backgroundColor = '#6D6460';
+                            cell.style.width = `${initialWidth}px`;
+                        }
+                    }
+                }
+              });
+
+              reservations.forEach(reservation => {
+                const rowIndexes = getRowIndex(reservation['starting'],reservation['starting']);
+                const colIndex = reservation['day_of_week'];
+                for (let i = rowIndexes[0]; i <= rowIndexes[1]; i++) {
+                    const row = table.rows[i+1];
+                    if (row) {
+                        const cell = row.cells[colIndex];
+                        if (cell) {
+                            const initialWidth = cell.offsetWidth;
+                            cell.style.backgroundColor = '#FFBD33';
+                            cell.style.width = `${initialWidth}px`;
+                        }
+                    }
+                }
+              });
+
               const tableBody = document.getElementById('doctor_reserve_body');
               reservations.forEach(reservation => {
                   const row = document.createElement('tr');
