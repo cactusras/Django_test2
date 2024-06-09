@@ -748,7 +748,6 @@ def clinic_load(request):
     
     reservations = Reservation.objects.filter(
         SchedulingID__in=schedules,
-        Status__in=[0, 2, 3],
         time_start__date__range=[start_of_week, end_of_week]
     )
     #schedules = Scheduling.objects.filter(DoctorID__in=doctors)
@@ -826,6 +825,7 @@ def doctorPage_loading(request):
     
     reservations = Reservation.objects.filter(
         SchedulingID__in=schedules,
+        Status__in=[0, 2, 3],
         time_start__date__range=[start_of_week, end_of_week]
     )
     print(reservations)
@@ -1485,10 +1485,18 @@ def get_available_times_for_clin(request):
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-
+@login_required
+def clinNextR(request,clinic_id,client_id):
+    clinic = get_object_or_404(Clinic, id=clinic_id)
+    client = get_object_or_404(Client, id=client_id)
+    context = {
+        'clinic': clinic,
+        'client': client,
+    }
+    return render(request, 'clinicNextR.html', context)
 
 @login_required
-def add_Reservation_for_Clin(request,clinic_id,client_id):
+def add_Reservation_for_Clin(request):
     if request.method == 'POST' :
         
         clientId = request.POST.get('client_id')
@@ -1513,7 +1521,7 @@ def add_Reservation_for_Clin(request,clinic_id,client_id):
         # print(expertise_name)
 
         if not doctor_id or not date_str or not start_time_str or not expertise_name:
-            return JsonResponse({'error': 'Invalid input data'}, status=400)
+            return JsonResponse({'error': 'Invalid input data', 'status':'error'})
 
         try:
            
@@ -1530,7 +1538,7 @@ def add_Reservation_for_Clin(request,clinic_id,client_id):
                 WorkingHour__start_time__lte=time_obj,
                 WorkingHour__end_time__gte=time_obj
             ).first()
-
+            print('sch = ', scheduling)
             
             expertise = Expertise.objects.get(id=expertise_name)
             expertise_time = expertise.time
@@ -1545,11 +1553,11 @@ def add_Reservation_for_Clin(request,clinic_id,client_id):
                 time_end=time_end,
                 Status=0
             )
-            
+            print('re = ', reservation)
             reservation.save()
-         
-            return JsonResponse({'success': 'Reservation added successfully'}, status=201)
+            return JsonResponse({'success': 'Reservation added successfully', 'status':'success'})
         except (Doctor.DoesNotExist, Scheduling.DoesNotExist, ValueError) as e:
-            return JsonResponse({'error': f'Failed to add reservation: {e}'}, status=400)
+            print('error = ', e)
+            return JsonResponse({'error': f'Failed to add reservation: {e}', 'status':'error'})
 
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
+    return JsonResponse({'error': 'Invalid request method', 'status':'error'})

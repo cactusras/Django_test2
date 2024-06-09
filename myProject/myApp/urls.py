@@ -85,7 +85,7 @@ urlpatterns = [
     
     #以下是診所下次預約
     path('add_Reservation_for_Clin/', views.add_Reservation_for_Clin, name='add_reservation_for_Clin'),
-    path('clinic/Nextreserve/<int:clinic_id>/<int:client_id>/add_Reservation_for_Clin/', views.add_Reservation_for_Clin, name='add_reservation'),
+    path('clinic/Nextreserve/<int:clinic_id>/<int:client_id>/add_Reservation_for_Clin/', views.clinicNextreserve_page, name='clinicNextreserve_page'),
     
     
     
