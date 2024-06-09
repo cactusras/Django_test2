@@ -820,8 +820,8 @@ def doctorPage_loading(request):
             'work_day': schedule.WorkingHour.day_of_week,
             'work_start_time': schedule.WorkingHour.start_time.strftime('%H:%M'),
             'work_end_time': schedule.WorkingHour.end_time.strftime('%H:%M'),
-            'valid_from': schedule.StartDate.strftime('%H:%M'),
-            'valid_to': schedule.EndDate.strftime('%H:%M'),
+            'valid_from': schedule.StartDate.strftime('%Y-%m-%d'),
+            'valid_to': schedule.EndDate.strftime('%Y-%m-%d'),
             'WDforfront': schedule.WDforFront(),
             'OccupiedHour': Reservation().TimeSlotNumber(
                 start_time=schedule.WorkingHour.start_time,

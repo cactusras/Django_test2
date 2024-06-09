@@ -142,12 +142,13 @@
                             <br>
                             </fieldset>
                             </form>
+                            <!--設定完成按鈕-->
+                            <form id="regisBtn_Form">
+                                {% csrf_token %}
+                                <button id="btnDocRegis" class="rectangle-button" type="submit" onclick="clickRegis(event)">完成</button>
+                            </form>
                         </div>
-                    <!--設定完成按鈕-->
-                    <form id="regisBtn_Form">
-                        {% csrf_token %}
-                        <button id="btnDocRegis" class="rectangle-button" type="submit" onclick="clickRegis(event)">完成</button>
-                    </form> 
+                     
                     <button class="btn btn-outline-dark" type="button" id="btnClinPage" style="font-size: 20px; width: 160px; height: 40px;" data-bs-toggle="modal" data-bs-target="#exampleModal">
                         <i class="bi bi-calendar-check-fill"></i>
                         回上頁
