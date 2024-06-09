@@ -17,6 +17,18 @@
         <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" />
         <link href="https://cdn.bootcss.com/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css" rel="stylesheet" />
     </head>
+    <style>
+        .btn-outline-dark {
+           color: #343a40;
+           border-color: #343a40;
+           background-color: transparent;
+       }
+       .btn-outline-dark:hover {
+           color: #fff;
+           background-color: #343a40;
+           border-color: #343a40;
+       }
+   </style>
     <body style="background-color:#FFFFF4">
         <!--網頁頭-->
         <nav class="navbar navbar-expand-lg" style="background-color:#F0EAD6;  height: 100px;">
@@ -38,7 +50,7 @@
         <section class="py-5"  style="background-color:#FFFFF4">
             <div class="container">
                 <div class="row row-cols-1">
-                    <form id="clinicForm"  enctype="multipart/form-data" style="background-color: #F0EAD6; border: 1px solid #ada089;">
+                    <form id="clinicForm"  enctype="multipart/form-data">
                      {% csrf_token %}
                         <fieldset>
                             <legend id="barTitle" class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: #F0EAD6; height:76px; font-size: 20px;">
@@ -52,8 +64,6 @@
                             <div class="col-sm-6 col-md-5 col-lg-6" style="height: 50px;">
                                 <br>
                                 <!-- 診所名稱 -->
-                                <div class="col-sm-6 col-md-5 col-lg-6" style="height: 50px;">
-                                    <br>
                                     <label for="name" class="required">診所名稱</label><span style="color: red;">*</span>
                                     <div class="form-floating">
                                         <input type="text" class="form-control half-width" id="name" name="name" placeholder="請輸入診所名稱" required>
@@ -131,7 +141,7 @@
                                 <div class="col-sm-6 col-md-5 col-lg-6 d-flex justify-content-end">
                                     <br>
                                     
-                                    <button class="rectangle-button" id="btnClinRegis" type="submit">完成</button>
+                                    <button class="btn btn-outline-dark" style="font-size: 20px; width: 160px; height: 40px;" id="btnClinRegis" type="submit">完成</button>
                                 </fieldset>
                             </form>
                                 </div>

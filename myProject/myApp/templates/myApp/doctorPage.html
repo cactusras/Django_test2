@@ -27,6 +27,7 @@
             .content {
               padding: 20px;
             }
+            
           </style>
           <script>
             const csrfToken = "{{ csrf_token}}";
@@ -239,6 +240,19 @@
             return [timeMapping.startTimeMap[startTime], timeMapping.endTimeMap[endTime]];
         }
 
+        function getColIndex(weekday) {
+          const dayMapping = {
+              'Monday': 1,
+              'Tuesday': 2,
+              'Wednesday': 3,
+              'Thursday': 4,
+              'Friday': 5,
+              'Saturday': 6,
+              'Sunday': 7             
+          };
+          return dayMapping[weekday];
+      }
+
         function clin_reserve_info() {
           event.preventDefault();
             fetch('/doctor/page/loading/')
@@ -258,14 +272,16 @@
                             const initialWidth = cell.offsetWidth;
                             cell.style.backgroundColor = '#6D6460';
                             cell.style.width = `${initialWidth}px`;
+                            cell.style.position = 'relative';
+                            cell.style.zIndex = 1;
                         }
                     }
                 }
               });
 
               reservations.forEach(reservation => {
-                const rowIndexes = getRowIndex(reservation['starting'],reservation['starting']);
-                const colIndex = reservation['day_of_week'];
+                const rowIndexes = getRowIndex(reservation['starting'],reservation['ending']);
+                const colIndex = getColIndex(reservation['day_of_week']);
                 for (let i = rowIndexes[0]; i <= rowIndexes[1]; i++) {
                     const row = table.rows[i+1];
                     if (row) {
@@ -274,6 +290,8 @@
                             const initialWidth = cell.offsetWidth;
                             cell.style.backgroundColor = '#FFBD33';
                             cell.style.width = `${initialWidth}px`;
+                            cell.style.position = 'relative';
+                            cell.style.zIndex = 2;
                         }
                     }
                 }

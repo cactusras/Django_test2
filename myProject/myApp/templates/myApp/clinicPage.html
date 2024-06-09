@@ -55,6 +55,126 @@
 
     <section class="py-5"  style="background-color:#FFFFF4">
         <div class="container">
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <div class="p-3" style="height:600px;">
+                        <div class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:80px; font-size: 20px;">
+                            診所時程
+                        </div>
+
+                        <div class="col d-flex justify-content-center" style="background-color:#FFFFF0; border: 1px solid #ada089; height:500px; font-size: 20px; overflow:auto;">
+                            <table class="table table-hover" style="border: 1px solid #ada089;" id = "schedule_table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col"><i class="bi bi-clock-fill"></i></th>
+                                        <th scope="col">週一</th>
+                                        <th scope="col">週二</th>
+                                        <th scope="col">週三</th>
+                                        <th scope="col">週四</th>
+                                        <th scope="col">週五</th>
+                                        <th scope="col">週六</th>
+                                        <th scope="col">週日</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th scope="col"><p>10:00<br>-<br>11:00<br></p></th>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="col"><p>11:00<br>-<br>12:00<br></p></th>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="col"><p>12:00<br>-<br>13:00<br></p></th>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="col"><p>13:00<br>-<br>14:00<br></p></th>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="col"><p>15:00<br>-<br>16:00<br></p></th>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="col"><p>16:00<br>-<br>17:00<br></p></th>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="col"><p>17:00<br>-<br>18:00<br></p></th>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="col"><p>19:00<br>-<br>20:00<br></p></th>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="col"><p>20:00<br>-<br>21:00<br></p></th>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                        <td contenteditable="true"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+   
+                <div class="col-md-6">
                     <div class="p-3" style="height:600px;">
                         <div class="col d-flex align-items-center justify-content-center" style="background-color:#F0EAD6; border: 1px solid #ada089; height:80px; font-size: 20px;">
                             當日預約確認報到
@@ -71,12 +191,12 @@
                                   </tr>
                               </thead>
                               <tbody id="clinic_reserve_body">
-                                
                               </tbody>
                           </table>
-                      </div>
-                      
+                     </div>  
                     </div>
+            
+            </div>
         </div>
     </section>
 
@@ -92,8 +212,50 @@
     <script src="{% static 'myApp/js/scripts.js' %}"></script>
     <script>
 
-        document.addEventListener("DOMContentLoaded", function(event){
-            event.preventDefault()
+        function getRowIndex(startTime, endTime) {
+            console.log("startTime_for_mapping: ", startTime);
+            const timeMapping = {
+                'startTimeMap' :{
+                    '10:00': 0,
+                    '11:00': 1,
+                    '12:00': 2,
+                    '13:00': 3,
+                    '15:00': 4,
+                    '16:00': 5,
+                    '17:00': 6,
+                    '19:00': 7,
+                    '20:00': 8
+                },
+                'endTimeMap' :{
+                    '11:00': 0,
+                    '12:00': 1,
+                    '13:00': 2,
+                    '14:00': 3,
+                    '16:00': 4,
+                    '17:00': 5,
+                    '18:00': 6,
+                    '20:00': 7,
+                    '21:00': 8
+                }
+                
+            };
+            return [timeMapping.startTimeMap[startTime], timeMapping.endTimeMap[endTime]];
+        }
+
+        function getColIndex(weekday) {
+          const dayMapping = {
+              'Monday': 1,
+              'Tuesday': 2,
+              'Wednesday': 3,
+              'Thursday': 4,
+              'Friday': 5,
+              'Saturday': 6,
+              'Sunday': 7             
+          };
+          return dayMapping[weekday];
+      }
+
+        document.addEventListener("DOMContentLoaded", function(){
             clin_reserve_info();
         })
         
@@ -103,8 +265,51 @@
             fetch('/clinic/load/')
                 .then(response => response.json())
                 .then(data => {
-                    const reservations = data.reservations;
+                    const reservations = data.reservation_list;
+                    const schedule_list = data.schedule_list;
                     const clinic_info = data.clinic;
+                    const table = document.getElementById('schedule_table');
+                    schedule_list.forEach(schedule => {
+                        const rowIndexes = getRowIndex(schedule['work_start_time'],schedule['work_end_time']);
+                        const colIndex = schedule['work_day'];
+                        console.log('schedule rows = ' + rowIndexes + ' col = ' + colIndex)
+                        for (let i = rowIndexes[0]; i <= rowIndexes[1]; i++) {
+                            const row = table.rows[i+1];
+                            console.log('i = ' + i)
+                            if (row) {
+                                const cell = row.cells[colIndex];
+                                console.log(('yes row'))
+                                if (cell) {
+                                    const initialWidth = cell.offsetWidth;
+                                    console.log('iniW = ' + initialWidth)
+                                    cell.style.backgroundColor = '#6D6460';
+                                    cell.style.width = `${initialWidth}px`;
+                                    cell.style.position = 'relative';
+                                    cell.style.zIndex = 1;
+                                }
+                            }
+                        }
+                      });
+        
+                      reservations.forEach(reservation => {
+                        const rowIndexes = getRowIndex(reservation['starting'],reservation['ending']);
+                        const colIndex = getColIndex(reservation['day_of_week']);
+                        console.log('res rows = ' + rowIndexes + ' col = ' + colIndex)
+                        for (let i = rowIndexes[0]; i <= rowIndexes[1]; i++) {
+                            const row = table.rows[i+1];
+                            if (row) {
+                                const cell = row.cells[colIndex];
+                                if (cell) {
+                                    const initialWidth = cell.offsetWidth;
+                                    cell.style.backgroundColor = '#FFBD33';
+                                    cell.style.width = `${initialWidth}px`;
+                                    cell.style.position = 'relative';
+                                    cell.style.zIndex = 2;
+                                }
+                            }
+                        }
+                      });
+
                     /*reservation_id = clinic_info.id
                     console.log("id out" + reservation_id)*/
                     console.log('res = ' + clinic_info)
@@ -120,7 +325,7 @@
                         row.innerHTML = `
                             <td>${reservation.appointment_date}  ${reservation.appointment_time}</td>
                            
-                            <td> ${reservation.client} ${reservation.client_name}</td>
+                            <td>${reservation.client_name}</td>
                             <td>${reservation.expertise}</td>
                         `;
                         row.appendChild(statusCell);
@@ -207,7 +412,7 @@
                 const clinicId = event.target.dataset.clinicId;
                 const client_Id = event.target.dataset.client_Id;
                 console.log('client_Id:'+client_Id)
-                window.location.href = `/home/clinic/Nextreserve/${clinicId}/${client}/`;
+                window.location.href = `/clinic/Nextreserve/${clinicId}/${client}/`;
                 
             
             }

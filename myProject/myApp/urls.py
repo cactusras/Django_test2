@@ -27,7 +27,7 @@ urlpatterns = [
     path('success/', views.success, name='success'),
     path('doctor/delete/<str:doctor_email>/', views.delete_doctor, name='delete_doctor'),
     path('doctor/clinic/search/', views.doctor_clinic_search_view, name='doctor_clinic_search'),
-    path('home/doctor/clinic/search/', views.doctor_clinic_search_view, name='doctor_clinic_search'),
+    path('doctor/clinic/search/', views.doctor_clinic_search_view, name='doctor_clinic_search'),
 
     #預約
     #get_time_slots
@@ -36,9 +36,9 @@ urlpatterns = [
     path('reservation/status/change/intreatment/<int:reservation_id>/', views.reservationStIt, name='reservation_status_in_treatment'),
     path('reservation/status/change/finished/<int:reservation_id>/', views.reservationStFn, name='reservation_status_finished'),
     path('reservation/status/change/cancelledbydoc/<int:reservation_id>/', views.reservationStCbD, name='reservation_status_cancelled_by_doctor'),
-    path('home/doctor/reserve/<int:doc_id>/', views.doctor_reserve_page, name='doctor_reserve_page'),
-    path('home/clinic/reserve/<int:clinic_id>/', views.clinic_reserve_page, name='clinic_reserve_page'),
-    path('home/clinic/Nextreserve/<int:clinic_id>/<int:client_id>/', views.clinicNextreserve_page, name='clinicNextreserve_page'),
+    path('doctor/reserve/<int:doc_id>/', views.doctor_reserve_page, name='doctor_reserve_page'),
+    path('clinic/reserve/<int:clinic_id>/', views.clinic_reserve_page, name='clinic_reserve_page'),
+    path('clinic/Nextreserve/<int:clinic_id>/<int:client_id>/', views.clinicNextreserve_page, name='clinicNextreserve_page'),
     
     
     path('clinic/doctor/<int:doctor_id>/reserve/', views.clinic_reserve_doctor_confirmed, name='clinic_reserve_doctor_confirmed'),
@@ -53,7 +53,7 @@ urlpatterns = [
     path('clinic/load/', views.clinic_load, name='clinic_load'),
     path('doctor/page/loading/', views.doctorPage_loading, name='doctor_page_loading'),
     path('client/records/', views.clientRecord_loading, name='client_records'),
-    path('home/',views.home, name = 'home'),
+    #path('home/',views.home, name = 'home'),
     path('client/data/edit/', views.cliedataEd, name='client_data_edit'),
     path('clinic/data/edit/', views.clinDataEd, name='clinic_data_edit'),
     path('doctor/data/edit/', views.docDataEd, name='doctor_data_edit'),
@@ -76,7 +76,7 @@ urlpatterns = [
     path('available/', views.get_available_times, name='get_available_times'),
     path('availableFClin/', views.get_available_times_for_clin, name='get_available_times'),
 
-    path('home/doctor/reserve/<int:doctor_id>/add/reservation/',views.add_Reservation, name ='added'),
+    path('doctor/reserve/<int:doctor_id>/add/reservation/',views.add_Reservation, name ='added'),
     path('doctor/delete/<str:doctor_email>/', views.delete_doctor, name='delete_doctor'),
     path('doctor/expertise-list/<int:doctor_id>/', views.get_expertise_list_doc, name = 'get_expertise_list_doc'),
     path('clinic/expertise-list/<int:clinic_id>/', views.get_expertise_list_clin, name = 'get_expertise_list_clin'),
@@ -85,7 +85,7 @@ urlpatterns = [
     
     #以下是診所下次預約
     path('add_Reservation_for_Clin/', views.add_Reservation_for_Clin, name='add_reservation_for_Clin'),
-    path('home/clinic/Nextreserve/<int:clinic_id>/<int:client_id>/add_Reservation_for_Clin/', views.add_Reservation_for_Clin, name='add_reservation'),
+    path('clinic/Nextreserve/<int:clinic_id>/<int:client_id>/add_Reservation_for_Clin/', views.add_Reservation_for_Clin, name='add_reservation'),
     
     
     

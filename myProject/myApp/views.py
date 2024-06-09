@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from PIL import Image
 from django.shortcuts import render,redirect, get_object_or_404
-from django.http import HttpResponse, JsonResponse
+from django.http import Http404, HttpResponse, JsonResponse
 #from rest_framework import serializers
 #from myProject.encoder import CustomEncoder
 from .forms import DoctorForm,ClinicForm,ClientForm, DoctorUpdateForm, LoginForm,SchedulingForm,WorkingHourForm,ExpertiseForm,ReservationForm,WaitingForm,TestingForm,SearchForm,ClientUpdateForm,ClinicUpdateForm
@@ -30,7 +30,7 @@ from operator import attrgetter
 def index(request):
     
     context={}
-    return render(request, "myApp/index.html", context)
+    return render(request, "myApp/searchPage.html", context)
 
 #login check身份別，django 自帶，用isinstance分身份，此處等migrate完可進行初步測試，看要手動加資料還是把register頁面都弄好一併測試（需要頁面跳轉邏輯）
 # login/
@@ -293,12 +293,13 @@ def Doc_uploading(request):
             # print("doctor_form: ", doctor_form)
             if doctor_form.is_valid():
                 clean = doctor_form.cleaned_data
-                clean['password'] = make_password(clean['password'])
-                photo = request.FILES.get('photo')
+                if not update_doctor:
+                    clean['password'] = make_password(clean['password'])
+                    photo = request.FILES.get('photo')
 
-                if photo is not None:
-                    photo_url = handle_uploaded_file(photo)
-                    clean['photo'] = photo_url
+                    if photo is not None:
+                        photo_url = handle_uploaded_file(photo)
+                        clean['photo'] = photo_url
 
                 localStorage_data = json.dumps(clean)  # Convert data to JSON string
 
@@ -734,9 +735,61 @@ def clinic_load(request):
     user = request.user
     clinic = Clinic.objects.get(id=user.id)
     doctors = Doctor.objects.filter(clinicID=user.id)
-    schedules = Scheduling.objects.filter(DoctorID__in=doctors)
-    reservations = Reservation.objects.filter(SchedulingID__in=schedules)
+    today = now().date()
+    start_of_week = today - timedelta(days=today.weekday())
+    end_of_week = start_of_week + timedelta(days=6)
 
+    schedules = Scheduling.objects.filter(
+        DoctorID__in=doctors,
+        StartDate__lte=end_of_week,
+        EndDate__gte=start_of_week
+    ).select_related('WorkingHour')
+    print(schedules)
+    
+    reservations = Reservation.objects.filter(
+        SchedulingID__in=schedules,
+        Status__in=[0, 2, 3],
+        time_start__date__range=[start_of_week, end_of_week]
+    )
+    #schedules = Scheduling.objects.filter(DoctorID__in=doctors)
+    #reservations = Reservation.objects.filter(SchedulingID__in=schedules)
+    reservation_list = []
+    for reservation in reservations:
+        client_name = reservation.ClientID.name
+        client_gender = reservation.ClientID.gender
+        if client_gender == 'male':
+            client_name += " 先生"
+        elif client_gender == 'female':
+            client_name += " 小姐"
+        
+        day_of_week = reservation.time_start.strftime('%A')
+        reservation_list.append({
+                'appointment_time': reservation.time_start.strftime('%H:%M'),
+                'id': reservation.id,
+                'client_name': client_name,
+                'appointment_date': reservation.time_start.date().isoformat(),
+                'day_of_week': day_of_week,
+                'starting': reservation.time_start.time().strftime('%H:%M'),
+                'ending': reservation.time_end.time().strftime('%H:%M'),
+                'expertise': reservation.expertiseID.name,
+                'status': reservation.get_status_display(),
+            })
+        
+        schedule_list = [
+            {
+                'work_day': schedule.WorkingHour.day_of_week,
+                'work_start_time': schedule.WorkingHour.start_time.strftime('%H:%M'),
+                'work_end_time': schedule.WorkingHour.end_time.strftime('%H:%M'),
+                'valid_from': schedule.StartDate.strftime('%H:%M'),
+                'valid_to': schedule.EndDate.strftime('%H:%M'),
+                'WDforfront': schedule.WDforFront(),
+                'OccupiedHour': Reservation().TimeSlotNumber(
+                    start_time=schedule.WorkingHour.start_time,
+                    end_time=schedule.WorkingHour.end_time
+                ),
+            }
+            for schedule in schedules
+        ]
     # Build the context as a dictionary
     context = {
         'clinic': {
@@ -746,28 +799,8 @@ def clinic_load(request):
             'phone_number': clinic.phone_number,
             'email': clinic.email,
         },
-        'schedules': [
-            {
-                'id': schedule.id,
-                'doctor_name': schedule.DoctorID.name,
-                'start_date': datetime.combine(schedule.StartDate, datetime.min.time()).strftime('%Y-%m-%d'),
-                'end_date': datetime.combine(schedule.EndDate, datetime.min.time()).strftime('%Y-%m-%d'),
-                'time_slots': get_time_slots(schedule),
-            }
-            for schedule in schedules
-        ],
-        'reservations': [
-            {
-                'id': reservation.id,
-                'client': reservation.ClientID.id,
-                'client_name': reservation.ClientID.name,
-                'appointment_date': reservation.time_start.strftime('%Y-%m-%d'),
-                'appointment_time': reservation.time_start.strftime('%H:%M'),
-                'expertise': reservation.expertiseID.name,
-                'status': reservation.get_status_display(),
-            }
-            for reservation in reservations
-        ],
+        'reservation_list': reservation_list,
+        'schedule_list': schedule_list,
     }
     print('context = ', context)
 
@@ -791,7 +824,6 @@ def doctorPage_loading(request):
     
     reservations = Reservation.objects.filter(
         SchedulingID__in=schedules,
-        Status__in=[0, 2, 3],
         time_start__date__range=[start_of_week, end_of_week]
     )
     print(reservations)
@@ -811,7 +843,7 @@ def doctorPage_loading(request):
             'appointment_date': reservation.time_start.date().isoformat(),
             'day_of_week': day_of_week,
             'starting': reservation.time_start.time().strftime('%H:%M'),
-            'ending': reservation.time_end.time.strftime('%H:%M'),
+            'ending': reservation.time_end.time().strftime('%H:%M'),
             'expertise': reservation.expertiseID.name,
             'status': reservation.get_status_display(),
         })
@@ -870,9 +902,9 @@ def clientRecord_loading(request):
 
 #searchPage.html
 #home/
-def home(request):
+'''def home(request):
     context={}
-    return render(request, "myApp/searchPage.html", context)
+    return render(request, "myApp/searchPage.html", context)'''
 
 #client_dataEdit
 #client/data/edit/
@@ -896,7 +928,11 @@ def docDataEd(request):
 #click/schedule/
 def clickSchedule(request):
     user = request.user
-    doctor = get_object_or_404(Doctor, id=user.id)
+    try:
+        doctor = get_object_or_404(Doctor, id=user.id)
+    except Http404:
+        # 如果抓不到 doctor，渲染一個沒有 context 資料的乾淨的頁面
+        return render(request, "myApp/ClicktoEditSchedule.html")
     
     today = now().date()
     start_of_week = today - timedelta(days=today.weekday())

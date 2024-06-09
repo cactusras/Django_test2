@@ -61,7 +61,7 @@
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h5 class="modal-title" id="staticBackdropLabel">編輯時段</h5>
-                                        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
                                         <select class="form-select" id="day_of_week" name="day_of_week" aria-label="Default select example" required>
@@ -333,7 +333,10 @@
                     'start_time': start_time,
                     'end_time': end_time
                 };
-                let working_hour_list= JSON.parse(localStorage.getItem('working_hour_list')) || [];
+                let working_hour_list= JSON.parse(localStorage.getItem('working_hour_list'));
+                if (!Array.isArray(working_hour_list)) {
+                    working_hour_list = [];
+                }
                 working_hour_list.push(working_hour);
                 localStorage.setItem('working_hour_list', JSON.stringify(working_hour_list));
 

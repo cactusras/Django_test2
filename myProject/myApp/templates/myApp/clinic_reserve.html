@@ -113,7 +113,7 @@
                         <label for="date1">醫師</label>
                         <select class="form-select" aria-label="Default select example" style="width: 320px; height: 40px; font-size: 16px;" id="doctorSelect" name="doctorSelect">
                         </select>
-                        <button id="btnDoctor"  type="submit">確認選擇醫生</button>
+                        <button id="btnDoctor" class="btn btn-outline-dark" style="font-size: 20px; width: 160px; height: 40px;"  type="submit">確認選擇醫生</button>
                         
                     <br>
                         
@@ -184,7 +184,7 @@
                                 const doctorSelect = document.getElementById('doctorSelect');
                                 const selectedDoctorId = doctorSelect.value;
                                 console.log('Selected doctor:', selectedDoctorId);
-                                window.location.href = `/home/doctor/reserve/${selectedDoctorId}/`;
+                                window.location.href = `/doctor/reserve/${selectedDoctorId}/`;
                             });
                                 
 

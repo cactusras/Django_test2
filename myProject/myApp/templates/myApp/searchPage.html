@@ -107,14 +107,14 @@
                             {% comment %} <label for="search">Search:</label>
                             <input type="text" id="search" name="search"> {% endcomment %}
 
-                            <button type="submit">Search</button>
+                            <button type="submit" class="btn btn-outline-dark" style="font-size: 20px; width: 160px; height: 40px;">Search</button>
                         </div>
                     </form>
                 
             </section>
         
             <!--搜尋結果-->
-            <section class="py-5" style="background-color:#FFFFF4;">
+            <section class="py-5" style="background-color:#FFFFF4;" id="searchAppear">
                 <div class="container px-4 px-lg-5 mt-5" style="background-color:#FFFFF4;">
                     <h2 class="fw-bolder mb-4">搜尋結果</h2>
                     <div id="resultsContainer">
@@ -123,9 +123,9 @@
 
                     
 
-                    <div class="container" style="border: 1px solid #FFFFF4">
+                   <!-- <div class="container" style="border: 1px solid #FFFFF4">
                         <div class="row justify-content-evenly">
-                            <!--醫生結果-->
+                            醫生結果
                             <div class="col-4" style="background-color:#fffff0; border: 1px solid #ada089; width: 550px; height:600px; font-size: 20px;">
                                 <div class="h2" style="text-align: center;">
                                     <p>醫師</p>
@@ -150,7 +150,7 @@
                                     </button>
                                 </div>
                             </div>
-                            <!--診所結果-->
+                            <!--診所結果
                             <div class="col-4" style="background-color:#fffff0; border: 1px solid #ada089;width: 550px; height:600px; font-size: 20px;">
                                 <div class="h2" style="text-align: center;">
                                     <p>診所</p>
@@ -176,7 +176,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div>-->
                 </div>
             </section>
         
@@ -190,7 +190,9 @@
             <script src="{% static 'myApp/js/scripts.js' %}" ></script>
             <!-- Core theme JS-->
             <script>
-
+                document.addEventListener("DOMContentLoaded", function(){
+                    document.getElementById('searchAppear').hidden = true
+                })
                 function search(event) {
                     event.preventDefault();  // 阻止默认的表单提交行为
                 
@@ -212,6 +214,8 @@
                     .then(data => {
                         // 处理从后端返回的 JSON 数据
                         console.log(data);  // 可以在控制台查看数据，根据需要进行处理
+                        document.getElementById('searchAppear').hidden = false;
+                        document.getElementById('searchAppear').scrollIntoView({ behavior: 'smooth' });
                         const resultsContainer = document.getElementById('resultsContainer');
                         resultsContainer.innerHTML = '';
 

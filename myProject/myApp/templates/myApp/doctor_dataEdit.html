@@ -45,7 +45,7 @@
                             <br>
                             <div class="row">
                                 <div class="col">
-                                    <label for="name" class="required">專長</label>
+                                    <label for="name" class="required">專長</label><span style="color: red;">*</span>
                                     <form id="experForm">
                                         {% csrf_token %}
                                         <div class="form-floating">
@@ -78,7 +78,7 @@
                                             <option value="假牙及義齒-活動義齒">假牙及義齒-活動義齒</option>
                                             <option value="假牙及義齒-固定義齒">假牙及義齒-固定義齒</option>
                                         </select>
-                                        <button id="btnExper"  type="submit">(加入/刪除)專長</button>
+                                        <button id="btnExper" class="btn btn-outline-dark" style="font-size: 20px; width: 200px; height: 40px;" type="submit">(加入/刪除)專長</button>
                                         </div>
                                     </form>
                                 </div>
@@ -88,13 +88,13 @@
                             <fieldset>
                             <div class="row">
                                 <div class="col">
-                                    <label for="name" class="required">名字</label>
+                                    <label for="name" class="required">名字</label><span style="color: red;">*</span>
                                     <div class="form-floating">
                                         <input type="text" class="form-control half-width" id="name" name="name" autocomplete="name" required>
                                     </div>
                                 </div>
                                 <div class="col">
-                                    <label for="phone_number" class="required">電話</label>
+                                    <label for="phone_number" class="required">電話</label><span style="color: red;">*</span>
                                     <div class="form-floating">
                                         <input type="tel" class="form-control" id="phone_number" name="phone_number" required>
                                     </div>
@@ -103,24 +103,10 @@
                             <br>
                             <div class="row">
                                 <div class="col">
-                                    <label for="email" class="required">帳號(信箱)</label>
+                                    <label for="email" class="required">帳號(信箱)</label><span style="color: red;" class="loginHide">*</span>
                                     <div class="form-floating">
-                                        <input type="email" class="form-control half-width" id="email" name="email" autocomplete="email" required>
-                                    </div>
-                                </div>
-                                <div class="col">
-                                    <label for="password" class="required loginHide">密碼</label>
-                                    <div class="form-floating">
-                                        <input type="password" class="form-control loginHide" id="password" name="password" required>
-                                    </div>
-                                </div>
-                            </div>
-                            <br>
-                            <div class="row">
-                                <div class="col">
-                                    <label for="photo" class="loginHide" id="photoLbl">個人相片</label>
-                                    <div class="form-floating">
-                                        <input type="file" class="form-control-file loginHide" id="photo" name="photo">
+                                        <input type="email" class="form-control half-width loginHide" id="email" name="email" autocomplete="email" required>
+                                        <span id="emailShow"></span>
                                     </div>
                                 </div>
                                 <div class="col">
@@ -133,9 +119,24 @@
                             <br>
                             <div class="row">
                                 <div class="col">
-                                    <label for="schedule" class="required">時刻表</label>
+                                    <label for="photo" class="loginHide" id="photoLbl">個人相片</label>
                                     <div class="form-floating">
-                                        <button class="time-button" type="submit" id="btnSchedule">編輯班表</button>
+                                        <input type="file" class="form-control-file loginHide" id="photo" name="photo">
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <label for="password" class="required loginHide">密碼</label><span style="color: red;" class="loginHide">*</span>
+                                    <div class="form-floating">
+                                        <input type="password" class="form-control loginHide" id="password" name="password" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <br>
+                            <div class="row">
+                                <div class="col">
+                                    <label for="schedule" class="required">時刻表</label><span style="color: red;">*</span>
+                                    <div class="form-floating">
+                                        <button class="btn btn-outline-dark time-button" style="font-size: 20px; width: 220px; height: 40px;" type="submit" id="btnSchedule">編輯班表</button>
                                     </div>
                                 </div>
                             </div>
@@ -146,9 +147,9 @@
                     <!--設定完成按鈕-->
                     <form id="regisBtn_Form">
                         {% csrf_token %}
-                        <button id="btnDocRegis" class="rectangle-button" type="submit" onclick="clickRegis(event)">完成</button>
+                        <button id="btnDocRegis" class="btn btn-outline-dark" style="font-size: 20px; width: 160px; height: 40px;" type="submit" onclick="clickRegis(event)">完成</button>
                     </form> 
-                    <button class="btn btn-outline-dark" type="button" id="btnClinPage" style="font-size: 20px; width: 160px; height: 40px;" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    <button class="btn btn-outline-dark" type="button" id="btnClinPage" style="font-size: 20px; width: 220px; height: 40px; margin-left: auto;" data-bs-toggle="modal" data-bs-target="#exampleModal">
                         <i class="bi bi-calendar-check-fill"></i>
                         回上頁
                     </button>

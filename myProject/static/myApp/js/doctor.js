@@ -31,7 +31,11 @@ function fillForm(data, form) {
     Object.keys(data).forEach(key => {
         const field = form.querySelector(`[name=${key}]`);
         if (field) {
-            field.value = data[key];
+            if(key == 'password'){
+                field.value = window.localStorage.getItem('password');
+            }else{
+                field.value = data[key];
+            }
         }
     });
 }
@@ -67,6 +71,7 @@ function fetch_info(formFilled){
             delete docInfo['expertises'];
             localStorage.setItem('expertise_list', JSON.stringify(expertise_list));
             localStorage.setItem('doctorData', JSON.stringify(docInfo));
+            document.getElementById('emailShow').innerText = docInfo['email']
             fillForm(docInfo, formFilled);
         } else {
             console.error(data.error);
@@ -86,6 +91,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const photoLabel = document.getElementById('photoLbl');
         const loginHide = document.querySelectorAll('.loginHide')
         const btnLogout = document.getElementById('logoutButton')
+        const emailShow = document.getElementById('emailShow')
+        const expertiseSelect = document.getElementById('expertiseSelect');
         // 清空localstorage有關醫生註冊的東西
         // const doctorData = JSON.parse(localStorage.getItem('doctorData'));
         // const expertises = JSON.parse(localStorage.getItem('expertise_list'));
@@ -102,6 +109,15 @@ document.addEventListener('DOMContentLoaded', function() {
             barTitle.innerText = '醫生資料'
             btnRegis.innerText = '回到主頁'
             btnLogout.hidden = false;
+            let expertiseList = JSON.parse(localStorage.getItem('expertise_list')) || [];
+            expExist = expertiseList.map(exp => exp.name);
+            for (let i = 0; i < expertiseSelect.options.length; i++) {
+                const option = expertiseSelect.options[i];
+                if (expExist.includes(option.value)) {
+                    console.log("inner = " + option.innerText);
+                    option.innerText = option.innerText + " (已選)";
+                }
+            }
             btnRegis.addEventListener('click', function(){
                 localStorage.removeItem('doctorData');
                 localStorage.removeItem('expertise_list');
@@ -110,13 +126,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.location.href = "/doctor/page/"
             })
             loginHide.forEach(element => {
-                element.hidden = true;
+                if (element.tagName.toLowerCase() === 'label' || element.tagName.toLowerCase() === 'span') {
+                    element.style.display = 'none'
+                } else {
+                    element.type = 'hidden'
+                }
             });
+            
             
         }else if (window.localStorage.getItem('user_type') == 'clinic'){
             barTitle.innerText = '註冊'
             btnLogout.hidden = true;
             btnRegis.innerText = '回管理/新增醫師'
+            emailShow.style.display = 'none'
             btnRegis.addEventListener('click', function(){
                 localStorage.removeItem('doctorData');
                 localStorage.removeItem('expertise_list');
@@ -141,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch_element();
         let expertiseList = JSON.parse(localStorage.getItem('expertise_list')) || [];
         expExist = expertiseList.map(exp => exp.name);
-        const expertiseSelect = document.getElementById('expertiseSelect');
+        
         for (let i = 0; i < expertiseSelect.options.length; i++) {
             const option = expertiseSelect.options[i];
             if (expExist.includes(option.value)) {

@@ -23,6 +23,17 @@
         #gender option {
             color: #808080; /* 您可以根據需要設置不同的顏色 */
         }
+        .btn-outline-dark {
+            color: #343a40;
+            border-color: #343a40;
+            background-color: transparent;
+        }
+
+        .btn-outline-dark:hover {
+            color: #fff;
+            background-color: #343a40;
+            border-color: #343a40;
+        }
     </style>
 </head>
 <body style="background-color:#FFFFF4">
@@ -32,7 +43,7 @@
             <img src="{% static 'myApp/assets/dental.png' %}" alt="DEN Logo">
             <a class="navbar-brand" href="#!" style="font-size: 24px;" onclick="mainPage(event)">牙醫預約平台</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-<span class="navbar-toggler-icon"></span>
+            <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
@@ -109,7 +120,6 @@
                                                 <option value="" selected disabled>選擇性別</option>
                                                 <option value="male">男</option>
                                                 <option value="female">女</option>
-                                                <option value="unknown">不公開</option>
                                             </select>
                                         </div>
                                     </div>
@@ -175,7 +185,7 @@
         </button>
         <script>
             function redirectToPage() {
-                window.location.href = 'http://127.0.0.1:8000/home';
+                window.location.href = 'http://127.0.0.1:8000/';
             }
             </script>
 

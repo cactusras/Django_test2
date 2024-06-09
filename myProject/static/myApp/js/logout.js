@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                window.location.href = '/home';
+                window.location.href = '/';
             } else {
                 console.error('Logout failed:', data.message);
             }

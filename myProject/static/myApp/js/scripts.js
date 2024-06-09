@@ -52,14 +52,14 @@ function mainPage(event){
   if (window.localStorage.getItem('isLogin') == 'success') {
     let usertype = window.localStorage.getItem('user_type')
     if(usertype == 'client'){
-      window.location.href = '/home'
+      window.location.href = '/'
     }else if(usertype == 'clinic'){
       window.location.href = '/clinic/home'
     }else if(usertype == 'doctor'){
       window.location.href = '/doctor/page'
     }
   }else if(window.localStorage.getItem('isLogin') == 'failed'){
-    window.location.href = '/home'
+    window.location.href = '/'
   }
 }
 
