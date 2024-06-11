@@ -944,45 +944,57 @@ def clickSchedule(request):
         EndDate__gte=start_of_week
     ).select_related('WorkingHour')
     
+    # Check if there are any schedules
+    if not schedules.exists():
+        # 如果沒有 schedules，渲染一個沒有 context 資料的乾淨的頁面
+        return render(request, "myApp/ClicktoEditSchedule.html")
+
+    # Find the latest schedule
+    latest_schedule = max(schedules, key=lambda x: (x.StartDate, x.EndDate))
+    valid_start = latest_schedule.StartDate
+    valid_end = latest_schedule.EndDate
+
+    # Filter out schedules that do not match the valid_start and valid_end dates
+    valid_schedules = schedules.filter(StartDate=valid_start, EndDate=valid_end)
+
     schedule_list = [
         {
             'StartDate': schedule.StartDate,
             'EndDate': schedule.EndDate,
-            'day_of_week': schedule.WorkingHour.get_day_of_week_display(),
+            'day_of_week': schedule.WorkingHour.day_of_week,
             'start_time': schedule.WorkingHour.start_time.strftime('%H:%M'),
             'end_time': schedule.WorkingHour.end_time.strftime('%H:%M'),
-            'WDforfront': schedule.WDforFront(),
+            # 'WDforfront': schedule.WDforFront(),
             'OccupiedHours': Reservation().TimeSlotNumber(
                 start_time=schedule.WorkingHour.start_time,
                 end_time=schedule.WorkingHour.end_time
             ),
         }
-        for schedule in schedules
+        for schedule in valid_schedules
     ]
-
-    latest_schedule = max(schedule_list, key=lambda x: (x['StartDate'], x['EndDate']))
-    valid_start = latest_schedule.get("StartDate")
-    valid_end = latest_schedule.get("EndDate")
     schedule_data = {
         'StartDate': valid_start.strftime('%Y-%m-%d'),
         'EndDate': valid_end.strftime('%Y-%m-%d')
     }
     print("schedule_data: ", schedule_data)
-    working_hour = {
-        'day_of_week': latest_schedule.get("day_of_week"),
-        'start_time': latest_schedule.get("start_time"),
-        'end_time': latest_schedule.get("end_time")
-    }
-    print("working_hour: ", working_hour)
-    paired_numbers = []
-    wd = latest_schedule.get('WDforfront')
-    for hour in latest_schedule.get('OccupiedHours'):
-        paired_numbers.append((wd, hour))
     
+    paired_numbers = []
+    working_hours = []
+    for schedule in schedule_list:
+        wd = schedule.get('day_of_week')
+        working_hour = {
+            'day_of_week': schedule.get("day_of_week"),
+            'start_time': schedule.get("start_time"),
+            'end_time': schedule.get("end_time")
+        }
+        working_hours.append(working_hour)
+        for hour in schedule['OccupiedHours']:
+            paired_numbers.append((hour, wd))
+    print("paired_numbers: ", paired_numbers)
     context = {
         'paired_numbers': json.dumps(paired_numbers),
         'schedule_data': json.dumps(schedule_data),
-        'working_hour': json.dumps(working_hour)
+        'working_hour': json.dumps(working_hours)
     }
     return render(request, "myApp/ClicktoEditSchedule.html", context)
 
@@ -1051,7 +1063,7 @@ def doctor_info(request):
         expertise_records = Doc_Expertise.objects.filter(DocID=user.doctor).select_related('Expertise_ID')
         expertise_list = [{"name": f"{record.Expertise_ID.name}"} for record in expertise_records]
         info['expertises'] = expertise_list
-
+        print(info)
         return JsonResponse({'status': 'success', 'data': info}, status=200)
     else:
         return JsonResponse({'status': 'error', 'error': 'User is not a doctor'}, status=400)

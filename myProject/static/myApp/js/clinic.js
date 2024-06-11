@@ -68,7 +68,7 @@ function regis_click(event){
     event.preventDefault();
     if (window.isLogin) {
         
-        window.location.href = "/clinic/home";
+        window.location.href = "/clinic/home/";
     } else {
         
         window.location.href = "/doctor/manage";
@@ -218,7 +218,7 @@ document.getElementById('clinicForm').addEventListener('submit', async function(
                 if(window.localStorage.getItem('isLogin') == 'success'){
                     alert(data.message);
                     window.localStorage.setItem('username', clinField.name)
-                    window.location.href = '/clinic/home';
+                    window.location.href = '/clinic/home/';
                 }else{
                     alert(data.message);
                     window.location.href = '/loginP';

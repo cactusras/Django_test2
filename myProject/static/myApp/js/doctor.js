@@ -50,134 +50,130 @@ function fillFormFromLocalStorage(form) {
 }
 
 //登入狀態從後端抓資料放到dataEdit
-function fetch_info(formFilled){
-    fetch('/doctor_info/', {
-        method: 'GET'
-    })
-    .then(async response => {
+async function fetch_info(formFilled) {
+    try {
+        const response = await fetch('/doctor_info/', {
+            method: 'GET'
+        });
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
         if (data.status === 'success') {
             const docInfo = data.data;
-            if (docInfo['photo'] != ''){
+            if (docInfo['photo'] != '') {
                 docInfo['photo'] = '';
             }
             // if (docInfo['password'] != ''){
             //     docInfo['password'] = '';
             // }
             const expertise_list = docInfo['expertises']; // Extract the expertises
+            console.log("expertises: ", JSON.stringify(expertise_list));
             delete docInfo['expertises'];
             localStorage.setItem('expertise_list', JSON.stringify(expertise_list));
+            console.log("stored: ", JSON.parse(localStorage.getItem('expertise_list')));
             localStorage.setItem('doctorData', JSON.stringify(docInfo));
-            document.getElementById('emailShow').innerText = docInfo['email']
+            document.getElementById('emailShow').innerText = docInfo['email'];
             fillForm(docInfo, formFilled);
         } else {
             console.error(data.error);
         }
-    })   
-    .catch(error => {
+    } catch (error) {
         console.log('Error:', error);
-    });
+    }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-        //頁面加載後才能把這些element load進來
-        const btnRegis = document.getElementById('btnClinPage');
-        const barTitle = document.getElementById('barTitle');
-        const docForm = document.getElementById('doctorForm');
-        const photoInput = document.getElementById('photo');
-        const photoLabel = document.getElementById('photoLbl');
-        const loginHide = document.querySelectorAll('.loginHide')
-        const btnLogout = document.getElementById('logoutButton')
-        const emailShow = document.getElementById('emailShow')
-        const expertiseSelect = document.getElementById('expertiseSelect');
-        // 清空localstorage有關醫生註冊的東西
-        // const doctorData = JSON.parse(localStorage.getItem('doctorData'));
-        // const expertises = JSON.parse(localStorage.getItem('expertise_list'));
-        // const working_hour_list = JSON.parse(localStorage.getItem('working_hour_list'));
-        // const schedulingForm = JSON.parse(localStorage.getItem('schedulingForm'));
-        // const clinicName = JSON.parse(localStorage.getItem('username'));
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            const value = localStorage.getItem(key);
-            console.log(`${key}: ${value}`); // This loop iterates through all local storage, not just working hours
-        }
-        //canva11進入canva12   
-        if (window.localStorage.getItem('user_type') == 'doctor'){
-            barTitle.innerText = '醫生資料'
-            btnRegis.innerText = '回到主頁'
-            btnLogout.hidden = false;
-            let expertiseList = JSON.parse(localStorage.getItem('expertise_list')) || [];
-            expExist = expertiseList.map(exp => exp.name);
-            for (let i = 0; i < expertiseSelect.options.length; i++) {
-                const option = expertiseSelect.options[i];
-                if (expExist.includes(option.value)) {
-                    console.log("inner = " + option.innerText);
-                    option.innerText = option.innerText + " (已選)";
-                }
-            }
-            btnRegis.addEventListener('click', function(){
-                localStorage.removeItem('doctorData');
-                localStorage.removeItem('expertise_list');
-                localStorage.removeItem('working_hour_list');
-                localStorage.removeItem('schedulingForm');
-                window.location.href = "/doctor/page/"
-            })
-            loginHide.forEach(element => {
-                if (element.tagName.toLowerCase() === 'label' || element.tagName.toLowerCase() === 'span') {
-                    element.style.display = 'none'
-                } else {
-                    element.type = 'hidden'
-                }
-            });
-            
-            
-        }else if (window.localStorage.getItem('user_type') == 'clinic'){
-            barTitle.innerText = '註冊'
-            btnLogout.hidden = true;
-            btnRegis.innerText = '回管理/新增醫師'
-            emailShow.style.display = 'none'
-            btnRegis.addEventListener('click', function(){
-                localStorage.removeItem('doctorData');
-                localStorage.removeItem('expertise_list');
-                localStorage.removeItem('working_hour_list');
-                localStorage.removeItem('schedulingForm');
-                window.location.href = "/doctor/manage/"
-            })
-            for (let i = 0; i < expExist.length; i++){
-                const optionToEdit = document.querySelector(`#expertiseSelect option[value="${expertise}"]`);
-                optionToEdit.disabled = true;
-                optionToEdit.innerText = expertise + "(已選)";
-            }
-            if(window.localStorage.getItem('readyRegis') == 'yes'){
-                // info_before_regis(docForm);
-                photoInput.hidden = true;
-                photoLabel.hidden = true;
-                console.log('readyRegis')
-            }
-        }
-        fetch_info(docForm);
-        fillFormFromLocalStorage(docForm);
-        fetch_element();
+document.addEventListener('DOMContentLoaded', function(event) {
+    event.preventDefault();
+    //頁面加載後才能把這些element load進來
+    const btnRegis = document.getElementById('btnClinPage');
+    const barTitle = document.getElementById('barTitle');
+    const docForm = document.getElementById('doctorForm');
+    const photoInput = document.getElementById('photo');
+    const photoLabel = document.getElementById('photoLbl');
+    const loginHide = document.querySelectorAll('.loginHide');
+    const btnLogout = document.getElementById('logoutButton');
+    const emailShow = document.getElementById('emailShow');
+    const expertiseSelect = document.getElementById('expertiseSelect');
+    
+    fetch_info(docForm).then(() => {
+        console.log("after fetch_info");
         let expertiseList = JSON.parse(localStorage.getItem('expertise_list')) || [];
         expExist = expertiseList.map(exp => exp.name);
+        console.log("localstorage_expertiseList: ", expertiseList);
+        console.log("expExist", expExist);
         
         for (let i = 0; i < expertiseSelect.options.length; i++) {
             const option = expertiseSelect.options[i];
             if (expExist.includes(option.value)) {
-                // option.disabled = true;
+                console.log("inner = " + option.innerText);
                 option.innerText = option.innerText + " (已選)";
             }
         }
-
+        
+        if (window.localStorage.getItem('user_type') == 'doctor') {
+            barTitle.innerText = '醫生資料';
+            btnRegis.innerText = '回到主頁';
+            btnLogout.hidden = false;
+            btnRegis.addEventListener('click', function(){
+                localStorage.removeItem('doctorData');
+                localStorage.removeItem('expertise_list');
+                localStorage.removeItem('working_hour_list');
+                localStorage.removeItem('schedulingForm');
+                window.location.href = "/doctor/page/";
+            });
+            loginHide.forEach(element => {
+                if (element.tagName.toLowerCase() === 'label' || element.tagName.toLowerCase() === 'span') {
+                    element.style.display = 'none';
+                } else {
+                    element.type = 'hidden';
+                }
+            });
+            
+        } else if (window.localStorage.getItem('user_type') == 'clinic') {
+            barTitle.innerText = '註冊';
+            btnLogout.hidden = true;
+            btnRegis.innerText = '回管理/新增醫師';
+            emailShow.style.display = 'none';
+            btnRegis.addEventListener('click', function(){
+                localStorage.removeItem('doctorData');
+                localStorage.removeItem('expertise_list');
+                localStorage.removeItem('working_hour_list');
+                localStorage.removeItem('schedulingForm');
+                window.location.href = "/doctor/manage/";
+            });
+            for (let i = 0; i < expExist.length; i++){
+                const optionToEdit = document.querySelector(`#expertiseSelect option[value="${expExist[i]}"]`);
+                optionToEdit.disabled = true;
+                optionToEdit.innerText = expExist[i] + " (已選)";
+            }
+            if(window.localStorage.getItem('readyRegis') == 'yes'){
+                photoInput.hidden = true;
+                photoLabel.hidden = true;
+                console.log('readyRegis');
+            }
+        }
+        console.log("after second fetch");
+        fillFormFromLocalStorage(docForm);
+        fetch_element();
+        // let expertiseList = JSON.parse(localStorage.getItem('expertise_list')) || [];
+        // expExist = expertiseList.map(exp => exp.name);
+        
+        // for (let i = 0; i < expertiseSelect.options.length; i++) {
+        //     const option = expertiseSelect.options[i];
+        //     if (expExist.includes(option.value)) {
+        //         // option.disabled = true;
+        //         option.innerText = option.innerText + " (已選)";
+        //     }
+        // }
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
             const value = localStorage.getItem(key);
             console.log(`${key}: ${value}`); // This loop iterates through all local storage, not just working hours
         }
-})
+    });
+});
+
 
 
 document.getElementById('experForm').addEventListener('submit', async function(event){
@@ -445,3 +441,10 @@ function clickRegis(event){
 //         return false;
 //     }
 // }
+
+// 清空localstorage有關醫生註冊的東西
+        // const doctorData = JSON.parse(localStorage.getItem('doctorData'));
+        // const expertises = JSON.parse(localStorage.getItem('expertise_list'));
+        // const working_hour_list = JSON.parse(localStorage.getItem('working_hour_list'));
+        // const schedulingForm = JSON.parse(localStorage.getItem('schedulingForm'));
+        // const clinicName = JSON.parse(localStorage.getItem('username'));

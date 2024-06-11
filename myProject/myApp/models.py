@@ -126,7 +126,7 @@ class Scheduling(models.Model):
     EndDate = models.DateField()
     
     def WDforFront(self):
-        return self.StartDate.weekday() + 1
+        return self.WorkingHour.day_of_week + 1
     
     # def TimeSlotNumber(self):
     #     duration = self.time_end - self.time_start
