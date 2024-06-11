@@ -316,7 +316,7 @@
                     const tableBody = document.getElementById('clinic_reserve_body');
                     reservations.forEach(reservation => {
                         reservation_id = reservation.id
-                        client = reservation.client
+                        client = reservation.client_id
                         console.log("id in" + reservation_id)
                         const row = document.createElement('tr');
                         const statusCell = document.createElement('td');
@@ -336,7 +336,7 @@
           }
         
         //根據不同狀態改變innerHtml
-        function change_status(status, reservation_id, clinic_id, client_id){
+        function change_status(status, reservation_id, clinic_id, client){
             let result = "";
             if(status == 'reserved'){
                 result = `<button type="button" class="btn btn-outline-dark" 
@@ -412,7 +412,7 @@
                 const clinicId = event.target.dataset.clinicId;
                 const client_Id = event.target.dataset.client_Id;
                 console.log('client_Id:'+client_Id)
-                window.location.href = `/clinic/Nextreserve/${clinicId}/${client}/`;
+                window.location.href = `/clinic/Nextreserve/${clinicId}/${client}/add_Reservation_for_Clin`;
                 
             
             }

@@ -122,7 +122,7 @@
 
                     <br></br>
            
-                    <form id="reservationForm" method="post" action='add_Reservation_for_Clin/' >
+                    <form id="reservationForm" method="post" action="/add_Reservation_for_Clin/">
                         {% csrf_token %}
                         <label for="doctor_id"></label>
                         <input type="hidden" id="doctor_id" name="doctor_id">
@@ -137,7 +137,7 @@
                             <!-- 可用时间选项将由 JavaScript 动态添加 -->
                         </select>
                         </br>
-                        <button type="submit">預約</button>
+                        <button type="submit" class="btn btn-outline-dark" style="font-size: 20px; width: 160px; height: 40px;">預約</button>
                     </form>
 
                         
@@ -234,10 +234,27 @@
 
 
                             document.getElementById('reservationForm').addEventListener('submit', function(event) {
-
-                                setDoctorId(event); // 设置医生 ID
-                                setExpertise(event); // 设置治疗项目名称
-                                this.submit(); // 手动提交表单
+                                fetch('/add_Reservation_for_Clin/', {
+                                    method: 'POST',
+                                    body: new FormData(this)
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.status == 'success') {
+                                                
+                                        setDoctorId(event); // 设置医生 ID
+                                        setExpertise(event); // 设置治疗项目名称
+                                        this.submit(); // 手动提交表单
+                                        alert('reservation success')
+                                        window.location.href = '/clinic/home/'
+                                    } else {
+                                        alert('error');
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    alert('An error occurred. Please try again.');
+                                });
                             });
 
                             function fetchAvailableTimes() {
